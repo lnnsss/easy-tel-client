@@ -1,0 +1,83 @@
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 60px 20px;
+}
+
+.hero {
+    text-align: center;
+    margin-bottom: 80px;
+}
+
+.title {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    color: var(--text);
+}
+
+.title span { color: var(--primary); }
+
+.description {
+    font-size: 1.2rem;
+    color: var(--text-light);
+    max-width: 700px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+}
+
+.mainBtn {
+    background: var(--primary);
+    color: white;
+    padding: 18px 45px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    display: inline-block;
+    transition: background 0.3s ease;
+}
+
+.mainBtn:hover {
+    background: var(--primary-hover);
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.featureCard {
+    background: white;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    border: 1px solid transparent;
+    cursor: default;
+}
+
+/* ЭФФЕКТ ПРИ НАВЕДЕНИИ */
+.featureCard:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(39, 174, 96, 0.15);
+    border-color: var(--primary);
+}
+
+.featureCard h3 {
+    color: var(--primary);
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+    transition: color 0.3s ease;
+}
+
+.featureCard p {
+    color: var(--text-light);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+    .title { font-size: 3rem; }
+    .hero { margin-bottom: 40px; }
+}

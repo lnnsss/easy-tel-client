@@ -1,0 +1,16 @@
+:root {
+    --primary: #27ae60;      /* Основной зеленый */
+    --primary-hover: #219150;
+    --bg: #ffffff;
+    --bg-soft: #f8f9fa;
+    --text: #2c3e50;
+    --text-light: #7f8c8d;
+    --error: #e74c3c;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+body {
+    background-color: var(--bg-soft);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+}
