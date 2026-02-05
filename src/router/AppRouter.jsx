@@ -3,28 +3,13 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '../stores/StoreContext';
 
-// Импорт страниц
 import HomePage from '../pages/HomePage/HomePage';
 import RecognizePage from '../pages/RecognizePage/RecognizePage';
 import LoginPage from '../pages/Auth/LoginPage';
 import RegisterPage from '../pages/Auth/RegisterPage';
 import ProfilePage from '../pages/Profile/ProfilePage';
-
-const AdminDashboard = () => (
-    <div style={{ padding: '40px', textAlign: 'center' }}>
-        <h1>Панель администратора</h1>
-        <p>Управление словами и пользователями системы</p>
-    </div>
-);
-
-const NotFoundPage = () => (
-    <div style={{ padding: '100px 20px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '4rem', color: '#27ae60' }}>404</h1>
-        <h2>Страница не найдена</h2>
-        <p>Запрашиваемый ресурс был перемещен или удален.</p>
-        <a href="/" style={{ color: '#27ae60', textDecoration: 'underline' }}>Вернуться на главную</a>
-    </div>
-);
+import DictionaryPage from '../pages/DictionaryPage/DictionaryPage';
+import AdminDashboard from '../pages/Admin/AdminDashboard';
 
 const AppRouter = observer(() => {
     const { authStore } = useStores();
@@ -33,40 +18,44 @@ const AppRouter = observer(() => {
         return null;
     }
 
+    const isAdmin = authStore.isAuth && authStore.user?.role === 'admin';
+
     return (
         <Routes>
-            {/* --- ПУБЛИЧНЫЕ РОУТЫ --- */}
             <Route path="/" element={<HomePage />} />
-            <Route path="/scanner" element={<RecognizePage />} />
 
-            {/* --- РОУТЫ ДЛЯ ГОСТЕЙ --- */}
+            {/* Доступ к сканеру только для авторизованных НЕ админов */}
+            <Route
+                path="/scanner"
+                element={authStore.isAuth && !isAdmin ? <RecognizePage /> : <Navigate to={isAdmin ? "/admin" : "/login"} />}
+            />
+
             <Route
                 path="/login"
-                element={!authStore.isAuth ? <LoginPage /> : <Navigate to="/profile" />}
+                element={!authStore.isAuth ? <LoginPage /> : <Navigate to="/" />}
             />
             <Route
                 path="/register"
-                element={!authStore.isAuth ? <RegisterPage /> : <Navigate to="/profile" />}
+                element={!authStore.isAuth ? <RegisterPage /> : <Navigate to="/" />}
             />
 
-            {/* --- ПРИВАТНЫЕ РОУТЫ --- */}
             <Route
                 path="/profile"
                 element={authStore.isAuth ? <ProfilePage /> : <Navigate to="/login" />}
             />
 
-            {/* --- АДМИН ПАНЕЛЬ --- */}
             <Route
-                path="/admin/*"
-                element={
-                    authStore.isAuth && authStore.user?.role === 'admin'
-                        ? <AdminDashboard />
-                        : <Navigate to="/" />
-                }
+                path="/dictionary"
+                element={authStore.isAuth && !isAdmin ? <DictionaryPage /> : <Navigate to="/" />}
             />
 
-            {/* --- 404 --- */}
-            <Route path="*" element={<NotFoundPage />} />
+            {/* ПАНЕЛЬ АДМИНИСТРАТОРА */}
+            <Route
+                path="/admin/*"
+                element={isAdmin ? <AdminDashboard /> : <Navigate to="/" />}
+            />
+
+            <Route path="*" element={<Navigate to="/" />} />
         </Routes>
     );
 });

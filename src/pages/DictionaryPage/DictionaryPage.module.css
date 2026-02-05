@@ -1,0 +1,118 @@
+.container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.title {
+    margin-bottom: 30px;
+    color: #2c3e50;
+    text-align: center;
+    /* Адаптивный размер заголовка */
+    font-size: clamp(1.5rem, 5vw, 2.2rem);
+    font-weight: 800;
+}
+
+.grid {
+    display: grid;
+    /* На десктопе карточки в ряд, на мобилках по одной */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.wordCard {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-top: 5px solid #27ae60;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s;
+}
+
+.wordCard:hover {
+    transform: translateY(-5px);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+    gap: 10px;
+}
+
+.tatar {
+    margin: 0;
+    color: #27ae60;
+    /* Адаптивный шрифт для самого слова */
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
+    word-wrap: break-word;
+}
+
+.transcription {
+    color: #95a5a6;
+    font-size: 0.85rem;
+    font-style: italic;
+    white-space: nowrap;
+}
+
+.russian {
+    font-size: 1rem;
+    color: #34495e;
+    line-height: 1.4;
+    margin-bottom: 20px;
+}
+
+.footer {
+    font-size: 0.75rem;
+    color: #bdc3c7;
+    text-align: right;
+    border-top: 1px solid #f8f9fa;
+    padding-top: 10px;
+}
+
+.empty {
+    text-align: center;
+    color: #7f8c8d;
+    margin-top: 60px;
+    background: #fdfdfd;
+    padding: 40px;
+    border-radius: 24px;
+    border: 1px dashed #e0e0e0;
+}
+
+.loader {
+    text-align: center;
+    padding: 100px 20px;
+    color: #27ae60;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* Мобильные правки */
+@media (max-width: 600px) {
+    .container {
+        margin: 20px auto;
+        padding: 0 15px;
+    }
+
+    .grid {
+        /* Принудительно в одну колонку на маленьких экранах */
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .wordCard {
+        padding: 18px;
+    }
+
+    .header {
+        flex-direction: column; /* На очень узких экранах ставим транскрипцию под слово */
+        align-items: flex-start;
+        gap: 4px;
+    }
+}

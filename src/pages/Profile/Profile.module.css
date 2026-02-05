@@ -1,60 +1,133 @@
-.container { max-width: 800px; margin: 40px auto; padding: 20px; }
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
 
 .header {
     background: white;
-    padding: 40px;
+    padding: 30px;
     border-radius: 24px;
     text-align: center;
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     margin-bottom: 20px;
+    box-sizing: border-box;
 }
 
-.username { color: var(--text-light); }
-.rank { margin-top: 10px; font-weight: bold; color: var(--primary); }
+.fullName {
+    font-size: clamp(1.4rem, 6vw, 2.2rem);
+    margin-bottom: 10px;
+    color: #2c3e50;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.2;
+}
+
+.username { color: #95a5a6; margin-bottom: 5px; font-size: 0.95rem; }
+.rank { font-weight: bold; color: #27ae60; font-size: 1.1rem; }
+
+/* Бейдж админа в стиле твоего ранга, но другого цвета (или такого же зеленого) */
+.adminBadge {
+    display: inline-block;
+    font-weight: bold;
+    color: #fff;
+    background: #27ae60;
+    font-size: 0.9rem;
+    padding: 6px 18px;
+    border-radius: 12px;
+    margin-top: 5px;
+}
+
+.adminInfoCard {
+    background: white;
+    padding: 30px;
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.adminInfoCard h3 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+    font-size: 1.3rem;
+}
+
+.adminText {
+    color: #7f8c8d;
+    line-height: 1.6;
+    font-size: 1rem;
+    margin-bottom: 25px;
+}
+
+/* Кнопка на всю ширину */
+.adminLinkBtn {
+    display: block;
+    width: 100%;
+    background: #27ae60;
+    color: white;
+    padding: 16px;
+    border-radius: 16px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.adminLinkBtn:hover {
+    background: #219150;
+    transform: translateY(-2px);
+}
 
 .statsRow {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 15px;
     margin-bottom: 20px;
 }
 
 .statBox {
     background: white;
-    padding: 30px;
+    padding: 25px 15px;
     border-radius: 24px;
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     text-align: center;
 }
 
-.statVal { display: block; font-size: 2.2rem; font-weight: 800; color: var(--primary); }
-.statLabel { color: var(--text-light); font-size: 0.9rem; }
+.statVal { display: block; font-size: 1.8rem; font-weight: 800; color: #27ae60; }
+.statLabel { color: #95a5a6; font-size: 0.85rem; }
 
-/* ШИРОКИЙ БЛОК */
 .achievementsCard {
     background: white;
-    padding: 30px;
+    padding: 25px;
     border-radius: 24px;
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
 
-.achievementsCard h3 { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+.achievementsCard h3 {
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    color: #2c3e50;
+    font-size: 1.2rem;
+}
 
 .achList { display: flex; flex-direction: column; gap: 10px; }
-
 .achItem {
-    background: var(--bg-soft);
-    padding: 15px;
+    background: #f8f9fa;
+    padding: 12px 15px;
     border-radius: 12px;
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
 }
+.bullet { width: 8px; height: 8px; border-radius: 50%; background: #27ae60; flex-shrink: 0; }
 
-.bullet { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); }
-
-.empty { color: var(--text-light); font-style: italic; }
+.loader { text-align: center; padding: 50px; color: #27ae60; }
 
 @media (max-width: 600px) {
     .statsRow { grid-template-columns: 1fr; }
+    .header { padding: 25px 15px; }
+    .container { margin: 20px auto; }
 }
