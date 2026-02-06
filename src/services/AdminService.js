@@ -5,16 +5,20 @@ export default class AdminService {
         return $api.post('/admin/words', wordData);
     }
 
-    static async getWords() {
-        return $api.get('/admin/words');
+    static async getWords(page = 1, search = '', limit = 10) {
+        return $api.get('/admin/words', {
+            params: {
+                page,
+                limit,
+                search
+            }
+        });
     }
 
-    // Метод для обновления (включая смену статуса isActive)
     static async updateWord(id, updateData) {
         return $api.put(`/admin/words/${id}`, updateData);
     }
 
-    // Метод для полного удаления из БД
     static async deleteWord(id) {
         return $api.delete(`/admin/words/${id}`);
     }

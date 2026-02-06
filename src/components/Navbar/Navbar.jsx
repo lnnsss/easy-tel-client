@@ -34,7 +34,6 @@ const Navbar = observer(() => {
                 </button>
 
                 <div className={`${styles.links} ${isMenuOpen ? styles.linksActive : ''}`}>
-                    {/* Функционал Сканнера и Словаря только для авторизованных пользователей, НЕ админов */}
                     {authStore.isAuth && !isAdmin && (
                         <>
                             <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>

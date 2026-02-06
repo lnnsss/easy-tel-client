@@ -36,7 +36,6 @@
     color: #27ae60;
 }
 
-/* Статичный бургер */
 .burger {
     display: none;
     flex-direction: column;
@@ -131,7 +130,6 @@
     font-weight: 800;
 }
 
-/* Мобильное меню — выпадающее СВЕРХУ */
 @media (max-width: 768px) {
     .burger {
         display: flex;
@@ -139,17 +137,17 @@
 
     .links {
         position: fixed;
-        top: 70px; /* Сразу под шапкой */
+        top: 70px;
         left: 0;
         width: 100%;
-        height: auto; /* Высота по контенту */
+        height: auto;
         background: white;
         flex-direction: column;
-        justify-content: flex-start; /* Прижать к верху */
+        justify-content: flex-start;
         align-items: center;
         gap: 15px;
-        padding: 30px 20px; /* Отступы внутри меню */
-        transform: translateY(-120%); /* Спрятано за шапкой */
+        padding: 30px 20px;
+        transform: translateY(-120%);
         transition: transform 0.3s ease-in-out, opacity 0.3s;
         opacity: 0;
         z-index: 999;

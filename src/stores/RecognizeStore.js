@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import $api from "../api/instance";
-import { authStore } from "./AuthStore"; // Импортируем для обновления данных юзера
+import { authStore } from "./AuthStore";
 
 class RecognizeStore {
     result = null;

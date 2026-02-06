@@ -1,103 +1,189 @@
+:root {
+    --primary: #10b981;
+    --primary-hover: #059669;
+    --bg-light: #f9fafb;
+    --white: #ffffff;
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+}
+
 .wrapper {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 30px 20px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
 }
 
 .header {
-    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
 }
+
+.titleArea h1 { font-size: 28px; margin: 0; font-weight: 800; }
+.titleArea h1 span { color: var(--primary); }
+.titleArea p { color: var(--text-muted); margin: 5px 0 0; font-size: 14px; }
+
+.searchBar { width: 350px; }
+.searchInput {
+    width: 100%;
+    padding: 12px 18px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+.searchInput:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
 
 .mainLayout {
     display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 24px;
-    align-items: start;
+    grid-template-columns: 340px 1fr;
+    gap: 30px;
+    align-items: stretch;
 }
 
 .card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-.form {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    height: 100%;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 12px;
 }
 
+.form { display: flex; flex-direction: column; gap: 12px; }
 .form input, .form textarea {
-    padding: 12px;
-    border: 1px solid #ddd;
+    padding: 10px;
+    border: 1px solid var(--border);
     border-radius: 8px;
-    font-size: 14px;
-    width: 100%;
-    box-sizing: border-box;
+    background: var(--bg-light);
+    transition: all 0.3s ease;
 }
-
-/* Запрет растягивания textarea по ширине */
-.textAreaFixed {
-    resize: vertical;
-    min-height: 100px;
-    max-width: 100%;
-}
+.form input:focus, .form textarea:focus { background: #fff; border-color: var(--primary); outline: none; }
+.form textarea { height: 80px; resize: none; }
 
 .addBtn {
-    background: #000;
+    background: var(--primary);
     color: white;
     border: none;
     padding: 12px;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 10px;
+    font-weight: 700;
     cursor: pointer;
+    transition: all 0.3s ease;
 }
+.addBtn:hover { background: var(--primary-hover); transform: translateY(-1px); }
 
-.scrollArea {
-    max-height: 70vh;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.wordGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(5, auto);
+    gap: 12px;
+    flex-grow: 1;
 }
 
 .wordRow {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px;
-    border: 1px solid #f0f0f0;
-    border-radius: 10px;
+    padding: 14px 18px;
+    background: var(--bg-light);
+    border-radius: 12px;
+    transition: all 0.3s ease;
 }
+.wordRow:hover { background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: scale(1.01); }
 
-.rowDisabled { background: #f9fafb; opacity: 0.5; }
-.wordMain { display: flex; flex-direction: column; }
-.tatarText { font-weight: bold; font-size: 1.1rem; }
-.ruText { font-size: 0.9rem; color: #666; }
+.wordInfo { display: flex; flex-direction: column; }
+.tatWord { font-weight: 700; color: var(--text-main); font-size: 16px; }
+.ruWord { font-size: 13px; color: var(--text-muted); }
 
-.actions { display: flex; gap: 8px; }
-.actions button {
-    padding: 8px 12px;
+.rowActions { display: flex; gap: 8px; }
+
+.editBtn, .actionBtnDel {
+    background: #f3f4f6;
     border: none;
-    border-radius: 6px;
-    font-size: 11px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     cursor: pointer;
-    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.editBtn:hover { background: #e5e7eb; color: var(--primary); }
+.actionBtnDel:hover { background: #fee2e2; color: #ef4444; }
+
+.modalOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+.modalCard {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+}
+.modalButtons { display: flex; gap: 12px; margin-top: 20px; }
+.cancelBtn {
+    flex: 1;
+    background: #f3f4f6;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.cancelBtn:hover { background: #e5e7eb; }
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 20px;
+}
+.pageBtn {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.pageBtn:hover { border-color: var(--primary); color: var(--primary); }
+.activePage {
+    padding: 8px 14px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
 }
 
-.btnSuccess { background: #dcfce7; color: #166534; }
-.btnWarn { background: #fef9c3; color: #854d0e; }
-.btnDanger { background: #fee2e2; color: #991b1b; }
+.empty { text-align: center; padding: 40px; color: var(--text-muted); grid-column: span 2; }
 
-/* АДАПТИВНОСТЬ */
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
     .mainLayout { grid-template-columns: 1fr; }
-    .formContainer { order: -1; }
+    .header { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .searchBar { width: 100%; }
 }
-
-@media (max-width: 600px) {
-    .wordRow { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .actions { width: 100%; }
-    .actions button { flex: 1; }
+@media (max-width: 650px) {
+    .wordGrid { grid-template-columns: 1fr; grid-template-rows: auto; }
 }

@@ -24,7 +24,6 @@ const AppRouter = observer(() => {
         <Routes>
             <Route path="/" element={<HomePage />} />
 
-            {/* Доступ к сканеру только для авторизованных НЕ админов */}
             <Route
                 path="/scanner"
                 element={authStore.isAuth && !isAdmin ? <RecognizePage /> : <Navigate to={isAdmin ? "/admin" : "/login"} />}
@@ -49,7 +48,6 @@ const AppRouter = observer(() => {
                 element={authStore.isAuth && !isAdmin ? <DictionaryPage /> : <Navigate to="/" />}
             />
 
-            {/* ПАНЕЛЬ АДМИНИСТРАТОРА */}
             <Route
                 path="/admin/*"
                 element={isAdmin ? <AdminDashboard /> : <Navigate to="/" />}

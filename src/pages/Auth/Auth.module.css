@@ -31,7 +31,6 @@
     gap: 10px;
 }
 
-/* На мобилках сетка в одну колонку */
 @media (max-width: 480px) {
     .grid { grid-template-columns: 1fr; }
     .card { padding: 25px; }
