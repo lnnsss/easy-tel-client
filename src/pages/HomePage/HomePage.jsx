@@ -40,9 +40,43 @@ const HomePage = observer(() => {
         fetchRanking();
     }, []);
 
+    const practiceRoute = !authStore.isAuth ? '/login' : '/scanner';
+    const theoryRoute = !authStore.isAuth ? '/login' : '/courses';
+
     return (
         <div className={styles.container}>
-            {/* РЕЙТИНГ */}
+            <section className={styles.hero}>
+                <h1 className={styles.title}>Easy<span>Tel</span></h1>
+                <p className={styles.description}>
+                    EasyTel — это платформа для изучения татарского языка, где мы объединили
+                    искусственный интеллект, компьютерное зрение и структурированный учебный материал.
+                </p>
+
+                <div className={styles.ctaRow}>
+                    <Link to={practiceRoute} className={`${styles.mainBtn} ${styles.mainBtnPrimary}`}>
+                        Сканер
+                    </Link>
+                    <Link to={theoryRoute} className={`${styles.mainBtn} ${styles.mainBtnSecondary}`}>
+                        Материал
+                    </Link>
+                </div>
+            </section>
+
+            <section className={styles.features}>
+                <div className={styles.featureCard}>
+                    <h3>Интерактивность</h3>
+                    <p>Мгновенная идентификация объектов окружающего мира через камеру.</p>
+                </div>
+                <div className={styles.featureCard}>
+                    <h3>Словарь</h3>
+                    <p>Автоматическое формирование персональной базы слов.</p>
+                </div>
+                <div className={styles.featureCard}>
+                    <h3>Геймификация</h3>
+                    <p>Система рангов и достижений для прогресса.</p>
+                </div>
+            </section>
+
             <section className={styles.rankingWrapper}>
                 <h2 className={styles.rankingHeader}>Рейтинг знатоков</h2>
 
@@ -84,42 +118,6 @@ const HomePage = observer(() => {
                         !loading && <div className={styles.infoText}>В рейтинге пока нет участников</div>
                     )}
                     {loading && <div className={styles.infoText}>Загрузка данных...</div>}
-                </div>
-            </section>
-
-            <section className={styles.hero}>
-                <h1 className={styles.title}>Easy<span>Tel</span></h1>
-                <p className={styles.description}>
-                    EasyTel — это высокотехнологичная платформа для изучения татарского языка.
-                    Мы объединили искусственный интеллект и компьютерное зрение.
-                </p>
-
-                <Link
-                    to={
-                        !authStore.isAuth
-                            ? "/login"
-                            : authStore.user?.role === 'admin'
-                                ? "/admin"
-                                : "/scanner"
-                    }
-                    className={styles.mainBtn}
-                >
-                    {authStore.user?.role === 'admin' ? 'Перейти к управлению' : 'Запустить сканер'}
-                </Link>
-            </section>
-
-            <section className={styles.features}>
-                <div className={styles.featureCard}>
-                    <h3>Интерактивность</h3>
-                    <p>Мгновенная идентификация объектов окружающего мира через камеру.</p>
-                </div>
-                <div className={styles.featureCard}>
-                    <h3>Словарь</h3>
-                    <p>Автоматическое формирование персональной базы слов.</p>
-                </div>
-                <div className={styles.featureCard}>
-                    <h3>Геймификация</h3>
-                    <p>Система рангов и достижений для прогресса.</p>
                 </div>
             </section>
         </div>

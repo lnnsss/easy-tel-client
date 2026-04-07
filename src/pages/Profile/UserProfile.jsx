@@ -9,6 +9,9 @@ const UserProfile = ({ user }) => {
     const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [copiedUsername, setCopiedUsername] = useState(false);
+    const [theme, setTheme] = useState(() => (
+        document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
+    ));
     const [form, setForm] = useState({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
@@ -111,6 +114,13 @@ const UserProfile = ({ user }) => {
         }
     };
 
+    const onToggleTheme = () => {
+        const nextTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(nextTheme);
+        localStorage.setItem('theme', nextTheme);
+        document.documentElement.setAttribute('data-theme', nextTheme);
+    };
+
     return (
         <>
             {!user.emailVerified && (
@@ -134,10 +144,6 @@ const UserProfile = ({ user }) => {
                             <span className={styles.avatarInitials}>{initials}</span>
                         )}
                     </div>
-                    <label className={styles.avatarUploadBtn}>
-                        Сменить фото
-                        <input type="file" accept="image/*" hidden onChange={onAvatarChange} />
-                    </label>
                 </div>
 
                 <h1 className={styles.fullName}>{user.firstName} {user.lastName}</h1>
@@ -147,24 +153,30 @@ const UserProfile = ({ user }) => {
                 </button>
                 <div className={styles.rank}>Ранг: {user.rank}</div>
 
-                <div className={styles.profileActions}>
-                    <button
-                        className={styles.editBtn}
-                        type="button"
-                        onClick={() => {
-                            setIsEditing(!isEditing);
-                            setForm({
-                                firstName: user.firstName || '',
-                                lastName: user.lastName || '',
-                                username: user.username || ''
-                            });
-                        }}
-                    >
-                        {isEditing ? 'Отмена' : 'Редактировать профиль'}
+                <div className={styles.controlsStack}>
+                    <button type="button" className={styles.themeToggleBtn} onClick={onToggleTheme}>
+                        {theme === 'dark' ? 'Светлая тема' : 'Темная тема'}
                     </button>
-                    <button className={styles.logoutBtn} type="button" onClick={onLogout}>
-                        Выйти
-                    </button>
+
+                    <div className={styles.profileActions}>
+                        <button
+                            className={styles.editBtn}
+                            type="button"
+                            onClick={() => {
+                                setIsEditing(!isEditing);
+                                setForm({
+                                    firstName: user.firstName || '',
+                                    lastName: user.lastName || '',
+                                    username: user.username || ''
+                                });
+                            }}
+                        >
+                            {isEditing ? 'Отмена' : 'Редактировать профиль'}
+                        </button>
+                        <button className={styles.logoutBtn} type="button" onClick={onLogout}>
+                            Выйти
+                        </button>
+                    </div>
                 </div>
 
                 {isEditing && (
@@ -183,12 +195,18 @@ const UserProfile = ({ user }) => {
                                 required
                             />
                         </div>
-                        <input
-                            value={form.username}
-                            onChange={(e) => setForm({ ...form, username: e.target.value })}
-                            placeholder="Username"
-                            required
-                        />
+                        <div className={styles.editMetaRow}>
+                            <input
+                                value={form.username}
+                                onChange={(e) => setForm({ ...form, username: e.target.value })}
+                                placeholder="Username"
+                                required
+                            />
+                            <label className={styles.avatarUploadBtn}>
+                                Сменить фото
+                                <input type="file" accept="image/*" hidden onChange={onAvatarChange} />
+                            </label>
+                        </div>
                         <button type="submit" className={styles.saveBtn}>Сохранить</button>
                     </form>
                 )}

@@ -37,7 +37,7 @@ const Navbar = observer(() => {
                         <>
                             <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>
                             <Link to="/dictionary" className={styles.link} onClick={closeMenu}>Словарь</Link>
-                            <Link to="/courses" className={styles.link} onClick={closeMenu}>Курсы</Link>
+                            <Link to="/courses" className={styles.link} onClick={closeMenu}>Материал</Link>
                         </>
                     )}
 

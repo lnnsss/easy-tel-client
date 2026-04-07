@@ -16,7 +16,7 @@ const CoursesPage = () => {
                 const { data } = await CourseService.getCourses();
                 setCategories(data.categories || []);
             } catch (e) {
-                setError(e.response?.data?.message || 'Ошибка загрузки курсов');
+                setError(e.response?.data?.message || 'Ошибка загрузки материала');
             } finally {
                 setLoading(false);
             }
@@ -24,14 +24,14 @@ const CoursesPage = () => {
         loadData();
     }, []);
 
-    if (loading) return <div className={styles.state}>Загрузка курсов...</div>;
+    if (loading) return <div className={styles.state}>Загрузка материала...</div>;
     if (error) return <div className={styles.stateError}>{error}</div>;
 
     return (
         <div className={styles.page}>
-            <h1 className={styles.title}>Учебные курсы</h1>
-            <p className={styles.subtitle}>Выберите курс и проходите темы по порядку.</p>
-            {visibleCategories.length === 0 && <p className={styles.empty}>Пока нет опубликованных курсов</p>}
+            <h1 className={styles.title}>Учебный материал</h1>
+            <p className={styles.subtitle}>Выберите материал и проходите темы по порядку.</p>
+            {visibleCategories.length === 0 && <p className={styles.empty}>Пока нет опубликованных материалов</p>}
 
             {visibleCategories.map((category) => (
                 <section key={category._id} className={styles.category}>

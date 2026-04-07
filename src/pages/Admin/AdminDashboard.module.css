@@ -1,7 +1,7 @@
 .wrapper {
     max-width: var(--container-xl);
     margin: 0 auto;
-    padding: 30px 20px;
+    padding: var(--space-7) var(--space-5);
     font-family: var(--font-family-base);
     color: var(--text-main);
 }
@@ -10,14 +10,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 40px;
-    padding-bottom: 20px;
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-5);
     border-bottom: 1px solid var(--border);
 }
 
 .titleArea h1 { font-size: 28px; margin: 0; font-weight: 800; }
 .titleArea h1 span { color: var(--primary); }
-.titleArea p { color: var(--text-muted); margin: 5px 0 0; font-size: 14px; }
+.titleArea p { color: var(--text-muted); margin: var(--space-1) 0 0; font-size: 14px; }
 
 .searchBar { width: 350px; }
 .searchInput {
@@ -34,14 +34,14 @@
 .mainLayout {
     display: grid;
     grid-template-columns: 340px 1fr;
-    gap: 30px;
+    gap: var(--space-7);
     align-items: stretch;
 }
 
 .card {
     background: var(--white);
     border-radius: 16px;
-    padding: 24px;
+    padding: var(--space-6);
     border: 1px solid var(--border);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     height: 100%;
@@ -50,11 +50,11 @@
     flex-direction: column;
 }
 
-.form { display: flex; flex-direction: column; gap: 12px; }
+.form { display: flex; flex-direction: column; gap: var(--space-3); }
 .form input, .form textarea {
     width: 100%;
     box-sizing: border-box;
-    padding: 10px;
+    padding: var(--space-3);
     border: 1px solid var(--border);
     border-radius: 8px;
     background: var(--bg-light);
@@ -79,7 +79,7 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(5, auto);
-    gap: 12px;
+    gap: var(--space-3);
     flex-grow: 1;
 }
 
@@ -87,7 +87,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 18px;
+    padding: var(--space-3) var(--space-5);
     background: var(--bg-light);
     border-radius: 12px;
     transition: all 0.3s ease;
@@ -98,7 +98,7 @@
 .tatWord { font-weight: 700; color: var(--text-main); font-size: 16px; }
 .ruWord { font-size: 13px; color: var(--text-muted); }
 
-.rowActions { display: flex; gap: 8px; }
+.rowActions { display: flex; gap: var(--space-2); }
 
 .editBtn, .actionBtnDel {
     background: var(--color-surface-secondary);
@@ -127,13 +127,13 @@
 }
 .modalCard {
     background: var(--color-bg);
-    padding: 30px;
+    padding: var(--space-7);
     border-radius: 20px;
     width: 100%;
     max-width: 450px;
     box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
 }
-.modalButtons { display: flex; gap: 12px; margin-top: 20px; }
+.modalButtons { display: flex; gap: var(--space-3); margin-top: var(--space-5); }
 .cancelBtn {
     flex: 1;
     background: var(--color-surface-secondary);
@@ -147,9 +147,9 @@
 .pagination {
     display: flex;
     justify-content: center;
-    gap: 8px;
+    gap: var(--space-2);
     margin-top: auto;
-    padding-top: 20px;
+    padding-top: var(--space-5);
 }
 .pageBtn {
     padding: 8px 14px;
@@ -173,7 +173,7 @@
 
 @media (max-width: 1000px) {
     .mainLayout { grid-template-columns: 1fr; }
-    .header { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .header { flex-direction: column; align-items: flex-start; gap: var(--space-5); }
     .searchBar { width: 100%; }
 }
 @media (max-width: 650px) {

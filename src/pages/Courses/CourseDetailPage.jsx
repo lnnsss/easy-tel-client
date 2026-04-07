@@ -131,7 +131,7 @@ const CourseDetailPage = () => {
 
     return (
         <div className={styles.page}>
-            <Link to="/courses" className={styles.back}>← Назад к курсам</Link>
+            <Link to="/courses" className={styles.back}>← Назад к материалам</Link>
             <h1>{course.title}</h1>
             <p className={styles.description}>{course.description}</p>
 

@@ -15,6 +15,12 @@ const App = observer(() => {
         authStore.checkAuth();
     }, []);
 
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        const initialTheme = savedTheme === 'dark' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', initialTheme);
+    }, []);
+
     // Если приложение проверяет токен в данный момент
     if (authStore.isLoading && !authStore.isAuth && localStorage.getItem('token')) {
         return <div style={{textAlign: 'center', marginTop: '50px'}}>Загрузка сессии...</div>;

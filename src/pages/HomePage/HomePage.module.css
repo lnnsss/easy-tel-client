@@ -6,7 +6,7 @@
 }
 
 .rankingWrapper {
-    margin-bottom: 80px;
+    margin-top: 80px;
     background: var(--white);
     border-radius: 24px;
     padding: 30px;
@@ -104,8 +104,6 @@
 }
 
 .mainBtn {
-    background: var(--primary);
-    color: var(--color-bg);
     padding: 18px 45px;
     border-radius: 14px;
     text-decoration: none;
@@ -117,10 +115,39 @@
     cursor: pointer;
 }
 
-.mainBtn:hover {
+.ctaRow {
+    display: inline-flex;
+    gap: var(--space-3);
+    align-items: center;
+    justify-content: center;
+}
+
+.mainBtnPrimary {
+    background: var(--primary);
+    color: var(--c-black);
+}
+
+.mainBtnPrimary:hover {
     background: var(--primary-hover);
     transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+.mainBtnSecondary {
+    background: var(--color-bg);
+    color: var(--color-text);
+    border: 1px solid var(--color-border-muted);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+.mainBtnSecondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.mainBtnSecondary:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
 .features {
@@ -167,6 +194,14 @@
     .rankingWrapper { padding: 20px; }
     .rankingIdentity { gap: 10px; margin-left: 8px; }
     .rankingAvatar { width: 34px; height: 34px; }
+    .ctaRow {
+        flex-direction: column;
+        width: 100%;
+    }
+    .mainBtn {
+        width: 100%;
+        max-width: 320px;
+    }
 }
 
 @media (max-width: 480px) {

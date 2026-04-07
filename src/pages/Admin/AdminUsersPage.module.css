@@ -1,15 +1,15 @@
 .page {
     max-width: var(--container-xl);
     margin: 0 auto;
-    padding: 30px 20px;
+    padding: var(--space-7) var(--space-5);
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 20px;
-    margin-bottom: 24px;
+    gap: var(--space-5);
+    margin-bottom: var(--space-6);
 }
 
 .header h1 {
@@ -17,7 +17,7 @@
 }
 
 .header p {
-    margin: 6px 0 0;
+    margin: var(--space-2) 0 0;
     color: var(--text-muted);
 }
 
@@ -26,7 +26,7 @@
     max-width: 360px;
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 10px 12px;
+    padding: var(--space-3);
     font: inherit;
 }
 
@@ -41,9 +41,9 @@
 .row {
     display: grid;
     grid-template-columns: 1.4fr 1.4fr 90px 90px 110px 120px;
-    gap: 12px;
+    gap: var(--space-3);
     align-items: center;
-    padding: 14px 18px;
+    padding: var(--space-3) var(--space-5);
 }
 
 .tableHead {
@@ -79,7 +79,7 @@
     background: var(--color-danger-soft-bg);
     color: var(--color-danger-strong);
     border-radius: 8px;
-    padding: 8px 10px;
+    padding: var(--space-2) var(--space-3);
     cursor: pointer;
     font-weight: 700;
 }
@@ -91,19 +91,19 @@
 .empty {
     text-align: center;
     color: var(--text-muted);
-    padding: 28px;
+    padding: var(--space-7);
 }
 
 .error {
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
     color: var(--color-danger-strong);
 }
 
 .pagination {
     display: flex;
     justify-content: center;
-    gap: 8px;
-    padding: 18px;
+    gap: var(--space-2);
+    padding: var(--space-5);
 }
 
 .pageBtn,
