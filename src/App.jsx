@@ -31,10 +31,11 @@ const App = observer(() => {
                 variant={uiStore.modal.variant}
                 primaryLabel={uiStore.modal.primaryLabel || 'В словарь'}
                 secondaryLabel={uiStore.modal.secondaryLabel || 'Закрыть'}
-                onPrimary={uiStore.modal.primaryRoute ? () => {
+                onPrimary={uiStore.modal.onPrimary || (uiStore.modal.primaryRoute ? () => {
                     navigate(uiStore.modal.primaryRoute);
                     uiStore.closeModal();
-                } : null}
+                } : null)}
+                onSecondary={uiStore.modal.onSecondary || null}
                 onClose={() => uiStore.closeModal()}
             />
         </>

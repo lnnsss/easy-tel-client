@@ -7,7 +7,6 @@ const AdminProfile = ({ user }) => {
         <div className={styles.adminContainer}>
             <div className={styles.header}>
                 <h1 className={styles.fullName}>{user.firstName} {user.lastName}</h1>
-                <p className={styles.username}>Логин: {user.username}</p>
                 <div className={styles.adminBadge}>Администратор</div>
             </div>
 

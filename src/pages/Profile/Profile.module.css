@@ -102,18 +102,56 @@
     line-height: 1.2;
 }
 
-.username { color: var(--color-text-muted); margin-bottom: 5px; font-size: 0.95rem; }
+.usernameBtn {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    margin-bottom: 5px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 0;
+}
+
+.copiedHint {
+    font-size: 0.78rem;
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
 .rank { font-weight: bold; color: var(--color-primary); font-size: 1.1rem; }
 
-.editBtn {
+.profileActions {
     margin-top: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    align-items: stretch;
+    width: 100%;
+}
+
+.editBtn {
     border: none;
-    background: var(--color-info-soft-bg);
-    color: var(--color-info-soft);
+    background: var(--color-bg-muted);
+    color: var(--color-text-alt);
     padding: 10px 14px;
     border-radius: 10px;
     font-weight: 700;
     cursor: pointer;
+    width: 100%;
+}
+
+.logoutBtn {
+    border: none;
+    background: var(--color-bg-muted);
+    color: var(--color-error);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
 }
 
 .editForm {

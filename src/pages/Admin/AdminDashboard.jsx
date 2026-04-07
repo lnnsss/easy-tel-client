@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import AdminService from '../../services/AdminService';
+import { useStores } from '../../stores/StoreContext';
 import styles from './AdminDashboard.module.css';
 
 const AdminDashboard = () => {
+    const { uiStore } = useStores();
     const [words, setWords] = useState([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
@@ -51,7 +54,12 @@ const AdminDashboard = () => {
             setPage(1);
             fetchWords();
         } catch (err) {
-            alert(err.response?.data?.message || 'Ошибка');
+            uiStore.showModal({
+                title: 'Ошибка',
+                message: err.response?.data?.message || 'Ошибка',
+                variant: 'error',
+                secondaryLabel: 'Закрыть'
+            });
         }
     };
 
@@ -62,19 +70,37 @@ const AdminDashboard = () => {
             setIsModalOpen(false);
             fetchWords();
         } catch (err) {
-            alert('Ошибка обновления');
+            uiStore.showModal({
+                title: 'Ошибка',
+                message: 'Ошибка обновления',
+                variant: 'error',
+                secondaryLabel: 'Закрыть'
+            });
         }
     };
 
     const handleDeleteFull = async (id) => {
-        if (window.confirm('Удалить слово навсегда?')) {
-            try {
-                await AdminService.deleteWord(id);
-                fetchWords();
-            } catch {
-                alert('Ошибка при удалении');
+        uiStore.showModal({
+            title: 'Удалить слово?',
+            message: 'Слово будет удалено навсегда.',
+            variant: 'error',
+            primaryLabel: 'Удалить',
+            secondaryLabel: 'Отмена',
+            onPrimary: async () => {
+                try {
+                    await AdminService.deleteWord(id);
+                    uiStore.closeModal();
+                    fetchWords();
+                } catch {
+                    uiStore.showModal({
+                        title: 'Ошибка',
+                        message: 'Ошибка при удалении',
+                        variant: 'error',
+                        secondaryLabel: 'Закрыть'
+                    });
+                }
             }
-        }
+        });
     };
 
     const openModal = (word) => {
@@ -106,6 +132,9 @@ const AdminDashboard = () => {
                 <div className={styles.titleArea}>
                     <h1>Admin<span>Panel</span></h1>
                     <p>Управление словарем системы</p>
+                    <p>
+                        <Link to="/admin/learning">Перейти к учебным курсам</Link>
+                    </p>
                 </div>
                 <div className={styles.searchBar}>
                     <input

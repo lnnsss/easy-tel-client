@@ -9,14 +9,13 @@ const Navbar = observer(() => {
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+    const closeMenu = () => setIsMenuOpen(false);
     const handleLogout = () => {
         authStore.logout();
         setIsMenuOpen(false);
         navigate('/login');
     };
-
-    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-    const closeMenu = () => setIsMenuOpen(false);
 
     const isAdmin = authStore.user?.role === 'admin';
 
@@ -38,6 +37,7 @@ const Navbar = observer(() => {
                         <>
                             <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>
                             <Link to="/dictionary" className={styles.link} onClick={closeMenu}>Словарь</Link>
+                            <Link to="/courses" className={styles.link} onClick={closeMenu}>Курсы</Link>
                         </>
                     )}
 
@@ -55,10 +55,13 @@ const Navbar = observer(() => {
                             </Link>
 
                             {isAdmin && (
-                                <Link to="/admin" className={styles.adminBadge} onClick={closeMenu}>Админ-панель</Link>
+                                <>
+                                    <Link to="/admin" className={styles.adminBadge} onClick={closeMenu}>Слова</Link>
+                                    <Link to="/admin/learning" className={styles.adminBadge} onClick={closeMenu}>Обучение</Link>
+                                    <button onClick={handleLogout} className={styles.btnLogout}>Выйти</button>
+                                </>
                             )}
 
-                            <button onClick={handleLogout} className={styles.btnLogout}>Выйти</button>
                         </>
                     ) : (
                         <>

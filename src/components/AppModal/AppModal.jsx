@@ -8,6 +8,7 @@ const AppModal = ({
     variant = 'info',
     onClose,
     onPrimary,
+    onSecondary,
     primaryLabel = 'В словарь',
     secondaryLabel = 'Закрыть'
 }) => {
@@ -20,11 +21,14 @@ const AppModal = ({
                 <p className={styles.message}>{message}</p>
                 <div className={styles.actions}>
                     {onPrimary && (
-                        <button className={styles.primaryBtn} onClick={onPrimary}>
+                        <button
+                            className={`${styles.primaryBtn} ${variant === 'error' ? styles.primaryDanger : ''}`}
+                            onClick={onPrimary}
+                        >
                             {primaryLabel}
                         </button>
                     )}
-                    <button className={styles.closeBtn} onClick={onClose}>
+                    <button className={styles.closeBtn} onClick={onSecondary || onClose}>
                         {secondaryLabel}
                     </button>
                 </div>

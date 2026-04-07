@@ -74,7 +74,7 @@ const HomePage = observer(() => {
                                     </div>
                                     <div className={styles.rankingRight}>
                                         <span className={styles.wordBadge}>
-                                            {user.wordsCount} <span>слов</span>
+                                            {user.totalPoints ?? user.wordsCount} <span>очков</span>
                                         </span>
                                     </div>
                                 </div>

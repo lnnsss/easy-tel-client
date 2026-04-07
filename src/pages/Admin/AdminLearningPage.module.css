@@ -1,0 +1,222 @@
+.page {
+    max-width: 1220px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+}
+
+.card {
+    margin-top: 12px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border, #dce2e8);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.card input,
+.card textarea,
+.card select {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--color-border, #c9d2dc);
+    background: var(--color-bg);
+    color: var(--color-text);
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.card textarea {
+    resize: vertical;
+    min-height: 84px;
+    max-width: 100%;
+}
+
+.card button,
+.linkBtn {
+    width: fit-content;
+    border: 0;
+    border-radius: 8px;
+    background: var(--color-primary);
+    color: var(--color-bg);
+    padding: 8px 12px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.card button:hover,
+.linkBtn:hover {
+    background: var(--color-primary-hover, var(--color-primary));
+    transform: translateY(-1px);
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 8px;
+}
+
+.coursesHead {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.categoryGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 10px;
+}
+
+.categoryChip {
+    border: 1px solid var(--color-border, #dce2e8);
+    border-radius: 10px;
+    padding: 8px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    background: var(--color-bg-soft, #f8fbf8);
+}
+
+.categoryName {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.categoryActions {
+    display: flex;
+    gap: 6px;
+}
+
+.categoryActions button {
+    padding: 4px 7px;
+    border-radius: 6px;
+    font-size: 12px;
+    min-width: 28px;
+}
+
+.row {
+    border: 1px solid var(--color-border, #e0e6ed);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+
+.row {
+    position: relative;
+    padding-right: 52px;
+}
+
+.rowMain {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.rowMain small {
+    color: var(--color-text-muted);
+}
+
+.courseCategoryRow {
+    margin-top: 6px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
+}
+
+.courseCategoryRow button {
+    white-space: nowrap;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.sectionHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.inlineCreate {
+    display: grid;
+    grid-template-columns: minmax(220px, 320px) auto;
+    gap: 8px;
+    align-items: center;
+}
+
+.createCourseForm {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.inlineFields {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 8px;
+}
+
+.error {
+    color: var(--color-error, #b00020);
+}
+
+.empty {
+    margin: 0;
+    color: var(--color-text-muted);
+}
+
+.iconLinkBtn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border, #dce2e8);
+    background: var(--color-bg-muted, #f2f4f4);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.iconLinkBtn:hover {
+    background: var(--color-bg-hover, #e7ece7);
+}
+
+@media (max-width: 900px) {
+    .sectionHead {
+        flex-direction: column;
+    }
+
+    .inlineCreate {
+        grid-template-columns: 1fr;
+        width: 100%;
+    }
+
+    .filters {
+        grid-template-columns: 1fr;
+    }
+
+    .inlineFields {
+        grid-template-columns: 1fr;
+    }
+}

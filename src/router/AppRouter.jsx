@@ -14,6 +14,10 @@ import GoogleAuthCallbackPage from '../pages/Auth/GoogleAuthCallbackPage';
 import ProfilePage from '../pages/Profile/ProfilePage';
 import DictionaryPage from '../pages/DictionaryPage/DictionaryPage';
 import AdminDashboard from '../pages/Admin/AdminDashboard';
+import CoursesPage from '../pages/Courses/CoursesPage';
+import CourseDetailPage from '../pages/Courses/CourseDetailPage';
+import AdminLearningPage from '../pages/Admin/AdminLearningPage';
+import AdminLearningCoursePage from '../pages/Admin/AdminLearningCoursePage';
 
 const AppRouter = observer(() => {
     const { authStore } = useStores();
@@ -66,6 +70,26 @@ const AppRouter = observer(() => {
             <Route
                 path="/dictionary"
                 element={authStore.isAuth && !isAdmin ? <DictionaryPage /> : <Navigate to="/" />}
+            />
+
+            <Route
+                path="/courses"
+                element={authStore.isAuth && !isAdmin ? <CoursesPage /> : <Navigate to="/" />}
+            />
+
+            <Route
+                path="/courses/:courseId"
+                element={authStore.isAuth && !isAdmin ? <CourseDetailPage /> : <Navigate to="/" />}
+            />
+
+            <Route
+                path="/admin/learning"
+                element={isAdmin ? <AdminLearningPage /> : <Navigate to="/" />}
+            />
+
+            <Route
+                path="/admin/learning/courses/:courseId"
+                element={isAdmin ? <AdminLearningCoursePage /> : <Navigate to="/" />}
             />
 
             <Route

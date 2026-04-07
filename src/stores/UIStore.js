@@ -8,7 +8,9 @@ class UIStore {
         variant: 'info',
         primaryLabel: '',
         secondaryLabel: 'Закрыть',
-        primaryRoute: ''
+        primaryRoute: '',
+        onPrimary: null,
+        onSecondary: null
     };
 
     constructor() {
@@ -21,7 +23,9 @@ class UIStore {
         variant = 'info',
         primaryLabel = '',
         secondaryLabel = 'Закрыть',
-        primaryRoute = ''
+        primaryRoute = '',
+        onPrimary = null,
+        onSecondary = null
     }) {
         this.modal = {
             isOpen: true,
@@ -30,7 +34,9 @@ class UIStore {
             variant,
             primaryLabel,
             secondaryLabel,
-            primaryRoute
+            primaryRoute,
+            onPrimary,
+            onSecondary
         };
     }
 

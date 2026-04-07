@@ -1,12 +1,14 @@
 import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Profile.module.css';
 
 const UserProfile = ({ user }) => {
     const { authStore, uiStore } = useStores();
+    const navigate = useNavigate();
     const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [copiedUsername, setCopiedUsername] = useState(false);
     const [form, setForm] = useState({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
@@ -14,6 +16,8 @@ const UserProfile = ({ user }) => {
     });
 
     const wordsTotal = user.dictionary?.length || 0;
+    const totalPoints = Number.isFinite(user.totalPoints) ? user.totalPoints : wordsTotal;
+    const analytics = user.analytics || null;
     const wordsWeek = useMemo(() => {
         const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
         return (user.dictionary || []).filter((entry) => {
@@ -90,6 +94,23 @@ const UserProfile = ({ user }) => {
         }
     };
 
+    const onLogout = () => {
+        authStore.logout();
+        navigate('/login');
+    };
+
+    const onCopyUsername = async () => {
+        const value = `@${user.username || ''}`;
+        if (!value || value === '@') return;
+        try {
+            await navigator.clipboard.writeText(value);
+            setCopiedUsername(true);
+            setTimeout(() => setCopiedUsername(false), 1200);
+        } catch (_) {
+            setCopiedUsername(false);
+        }
+    };
+
     return (
         <>
             {!user.emailVerified && (
@@ -120,23 +141,31 @@ const UserProfile = ({ user }) => {
                 </div>
 
                 <h1 className={styles.fullName}>{user.firstName} {user.lastName}</h1>
-                <p className={styles.username}>Логин: {user.username}</p>
+                <button type="button" className={styles.usernameBtn} onClick={onCopyUsername}>
+                    @{user.username}
+                    {copiedUsername && <span className={styles.copiedHint}>скопировано</span>}
+                </button>
                 <div className={styles.rank}>Ранг: {user.rank}</div>
 
-                <button
-                    className={styles.editBtn}
-                    type="button"
-                    onClick={() => {
-                        setIsEditing(!isEditing);
-                        setForm({
-                            firstName: user.firstName || '',
-                            lastName: user.lastName || '',
-                            username: user.username || ''
-                        });
-                    }}
-                >
-                    {isEditing ? 'Отмена' : 'Редактировать профиль'}
-                </button>
+                <div className={styles.profileActions}>
+                    <button
+                        className={styles.editBtn}
+                        type="button"
+                        onClick={() => {
+                            setIsEditing(!isEditing);
+                            setForm({
+                                firstName: user.firstName || '',
+                                lastName: user.lastName || '',
+                                username: user.username || ''
+                            });
+                        }}
+                    >
+                        {isEditing ? 'Отмена' : 'Редактировать профиль'}
+                    </button>
+                    <button className={styles.logoutBtn} type="button" onClick={onLogout}>
+                        Выйти
+                    </button>
+                </div>
 
                 {isEditing && (
                     <form className={styles.editForm} onSubmit={onSaveProfile}>
@@ -177,6 +206,18 @@ const UserProfile = ({ user }) => {
                 <div className={styles.statBox}>
                     <span className={styles.statVal}>{wordsTotal}</span>
                     <span className={styles.statLabel}>Слов за все время</span>
+                </div>
+                <div className={styles.statBox}>
+                    <span className={styles.statVal}>{totalPoints}</span>
+                    <span className={styles.statLabel}>Всего очков</span>
+                </div>
+                <div className={styles.statBox}>
+                    <span className={styles.statVal}>{analytics?.discipline?.score ?? 0}/100</span>
+                    <span className={styles.statLabel}>Дисциплина</span>
+                </div>
+                <div className={styles.statBox}>
+                    <span className={styles.statVal}>{analytics?.motivation?.score ?? 0}/100</span>
+                    <span className={styles.statLabel}>Мотивация</span>
                 </div>
             </div>
 

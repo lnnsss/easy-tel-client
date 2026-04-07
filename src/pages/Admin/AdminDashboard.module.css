@@ -52,6 +52,8 @@
 
 .form { display: flex; flex-direction: column; gap: 12px; }
 .form input, .form textarea {
+    width: 100%;
+    box-sizing: border-box;
     padding: 10px;
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -59,7 +61,7 @@
     transition: all 0.3s ease;
 }
 .form input:focus, .form textarea:focus { background: var(--color-bg); border-color: var(--primary); outline: none; }
-.form textarea { height: 80px; resize: none; }
+.form textarea { height: 80px; resize: vertical; max-width: 100%; }
 
 .addBtn {
     background: var(--primary);
