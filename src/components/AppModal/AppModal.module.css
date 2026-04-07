@@ -12,7 +12,7 @@
 .modal {
     width: 100%;
     max-width: 420px;
-    background: #fff;
+    background: var(--color-bg);
     border-radius: 16px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
     padding: 20px;
@@ -37,20 +37,20 @@
 
 .message {
     margin: 0 0 18px;
-    color: #4f5b66;
+    color: var(--color-text-neutral-3);
     line-height: 1.45;
 }
 
 .success {
-    color: #1f8b4d;
+    color: var(--color-primary-strong);
 }
 
 .error {
-    color: #d9534f;
+    color: var(--color-danger);
 }
 
 .info {
-    color: #2f80ed;
+    color: var(--color-info-soft);
 }
 
 .actions {
@@ -69,11 +69,11 @@
 }
 
 .primaryBtn {
-    background: #27ae60;
-    color: #fff;
+    background: var(--color-primary);
+    color: var(--color-bg);
 }
 
 .closeBtn {
-    background: #eef2f6;
-    color: #36424f;
+    background: var(--color-info-bg);
+    color: var(--color-text-secondary);
 }

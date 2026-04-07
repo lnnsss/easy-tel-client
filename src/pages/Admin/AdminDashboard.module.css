@@ -1,18 +1,8 @@
-:root {
-    --primary: #10b981;
-    --primary-hover: #059669;
-    --bg-light: #f9fafb;
-    --white: #ffffff;
-    --text-main: #1f2937;
-    --text-muted: #6b7280;
-    --border: #e5e7eb;
-}
-
 .wrapper {
-    max-width: 1200px;
+    max-width: var(--container-xl);
     margin: 0 auto;
     padding: 30px 20px;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-family-base);
     color: var(--text-main);
 }
 
@@ -68,12 +58,12 @@
     background: var(--bg-light);
     transition: all 0.3s ease;
 }
-.form input:focus, .form textarea:focus { background: #fff; border-color: var(--primary); outline: none; }
+.form input:focus, .form textarea:focus { background: var(--color-bg); border-color: var(--primary); outline: none; }
 .form textarea { height: 80px; resize: none; }
 
 .addBtn {
     background: var(--primary);
-    color: white;
+    color: var(--color-bg);
     border: none;
     padding: 12px;
     border-radius: 10px;
@@ -100,7 +90,7 @@
     border-radius: 12px;
     transition: all 0.3s ease;
 }
-.wordRow:hover { background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: scale(1.01); }
+.wordRow:hover { background: var(--color-bg); box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: scale(1.01); }
 
 .wordInfo { display: flex; flex-direction: column; }
 .tatWord { font-weight: 700; color: var(--text-main); font-size: 16px; }
@@ -109,7 +99,7 @@
 .rowActions { display: flex; gap: 8px; }
 
 .editBtn, .actionBtnDel {
-    background: #f3f4f6;
+    background: var(--color-surface-secondary);
     border: none;
     width: 36px;
     height: 36px;
@@ -120,8 +110,8 @@
     align-items: center;
     justify-content: center;
 }
-.editBtn:hover { background: #e5e7eb; color: var(--primary); }
-.actionBtnDel:hover { background: #fee2e2; color: #ef4444; }
+.editBtn:hover { background: var(--color-border); color: var(--primary); }
+.actionBtnDel:hover { background: var(--color-danger-soft-bg); color: var(--color-danger-strong); }
 
 .modalOverlay {
     position: fixed;
@@ -134,7 +124,7 @@
     backdrop-filter: blur(2px);
 }
 .modalCard {
-    background: white;
+    background: var(--color-bg);
     padding: 30px;
     border-radius: 20px;
     width: 100%;
@@ -144,13 +134,13 @@
 .modalButtons { display: flex; gap: 12px; margin-top: 20px; }
 .cancelBtn {
     flex: 1;
-    background: #f3f4f6;
+    background: var(--color-surface-secondary);
     border: none;
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
-.cancelBtn:hover { background: #e5e7eb; }
+.cancelBtn:hover { background: var(--color-border); }
 
 .pagination {
     display: flex;
@@ -162,7 +152,7 @@
 .pageBtn {
     padding: 8px 14px;
     border: 1px solid var(--border);
-    background: #fff;
+    background: var(--color-bg);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -171,7 +161,7 @@
 .activePage {
     padding: 8px 14px;
     background: var(--primary);
-    color: white;
+    color: var(--color-bg);
     border: none;
     border-radius: 8px;
     font-weight: 700;

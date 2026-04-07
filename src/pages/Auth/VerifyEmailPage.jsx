@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Auth.module.css';
 
 const VerifyEmailPage = observer(() => {
     const { authStore } = useStores();
+    const navigate = useNavigate();
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -20,6 +21,7 @@ const VerifyEmailPage = observer(() => {
         const res = await authStore.verifyEmail(code);
         if (res.success) {
             setSuccess(res.message || 'Почта подтверждена');
+            navigate('/profile', { replace: true });
         } else {
             setError(res.message);
         }
@@ -60,4 +62,3 @@ const VerifyEmailPage = observer(() => {
 });
 
 export default VerifyEmailPage;
-

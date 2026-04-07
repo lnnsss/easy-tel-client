@@ -15,9 +15,9 @@
 
 .container {
     width: 100%;
-    max-width: 1200px;
+    max-width: var(--container-xl);
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 var(--space-page-x);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -28,12 +28,12 @@
     font-size: 1.5rem;
     font-weight: 800;
     text-decoration: none;
-    color: #2c3e50;
+    color: var(--color-text);
     z-index: 1001;
 }
 
 .logo span {
-    color: #27ae60;
+    color: var(--color-primary);
 }
 
 .burger {
@@ -52,7 +52,7 @@
 .line {
     width: 100%;
     height: 2px;
-    background: #2c3e50;
+    background: var(--color-text);
     border-radius: 2px;
 }
 
@@ -64,37 +64,37 @@
 
 .link, .profileWrapper {
     text-decoration: none;
-    color: #636e72;
+    color: var(--color-text-dim);
     font-weight: 500;
     transition: color 0.2s;
 }
 
 .link:hover {
-    color: #27ae60;
+    color: var(--color-primary);
 }
 
 .btnRegister {
     text-decoration: none;
-    background: #27ae60;
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-bg);
     padding: 8px 20px;
     border-radius: 10px;
     font-weight: bold;
 }
 
 .btnLogout {
-    background: #f1f2f6;
+    background: var(--color-bg-hover);
     border: none;
     padding: 8px 15px;
     border-radius: 8px;
     cursor: pointer;
-    color: #e74c3c;
+    color: var(--color-error);
     font-weight: 600;
 }
 
 .adminBadge {
-    background: #e67e22;
-    color: white;
+    background: var(--color-accent-warning);
+    color: var(--color-bg);
     text-decoration: none;
     padding: 4px 8px;
     border-radius: 6px;
@@ -103,10 +103,10 @@
 }
 
 .profileLink {
-    background: #f0fdf4;
+    background: var(--color-profile-soft-bg);
     padding: 5px 12px;
     border-radius: 12px;
-    border: 1px solid #dcfce7;
+    border: 1px solid var(--color-profile-soft-border);
     display: flex;
     align-items: center;
 }
@@ -119,13 +119,13 @@
 .userName {
     font-size: 0.85rem;
     font-weight: bold;
-    color: #2d3436;
+    color: var(--color-text-deep);
     white-space: nowrap;
 }
 
 .userRank {
     font-size: 0.65rem;
-    color: #27ae60;
+    color: var(--color-primary);
     text-transform: uppercase;
     font-weight: 800;
 }
@@ -141,7 +141,7 @@
         left: 0;
         width: 100%;
         height: auto;
-        background: white;
+        background: var(--color-bg);
         flex-direction: column;
         justify-content: flex-start;
         align-items: center;

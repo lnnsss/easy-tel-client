@@ -1,5 +1,5 @@
 .container {
-    max-width: 500px;
+    max-width: var(--container-xs);
     margin: 30px auto;
     padding: 0 15px;
     transition: max-width 0.52s ease;
@@ -10,11 +10,11 @@
     margin-bottom: 25px;
 }
 
-.pageTitle { font-size: 1.6rem; color: #2c3e50; margin-bottom: 8px; }
-.pageSubtitle { color: #95a5a6; font-size: 0.95rem; }
+.pageTitle { font-size: 1.6rem; color: var(--color-text); margin-bottom: 8px; }
+.pageSubtitle { color: var(--color-text-muted); font-size: 0.95rem; }
 
 .uploadCard {
-    background: white;
+    background: var(--color-bg);
     border-radius: 24px;
     padding: 15px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.06);
@@ -54,8 +54,8 @@
     display: block;
     width: 100%;
     aspect-ratio: 1 / 1; /* Строгий квадрат */
-    background: #fdfdfd;
-    border: 2px dashed #e0e0e0;
+    background: var(--color-bg-subtle);
+    border: 2px dashed var(--color-border-muted);
     border-radius: 20px;
     overflow: hidden;
     cursor: pointer;
@@ -74,13 +74,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #bdc3c7;
+    color: var(--color-text-disabled);
     text-align: center;
     padding: 20px;
 }
 
-.loader { text-align: center; margin: 15px 0; color: #27ae60; font-weight: 600; }
-.error { color: #e74c3c; text-align: center; margin: 15px 0; font-size: 0.9rem; }
+.loader { text-align: center; margin: 15px 0; color: var(--color-primary); font-weight: 600; }
+.error { color: var(--color-error); text-align: center; margin: 15px 0; font-size: 0.9rem; }
 
 .resultCard {
     margin-top: 0;
@@ -96,11 +96,11 @@
     margin-bottom: 15px;
 }
 
-.tatarWord { color: #27ae60; font-size: 1.8rem; margin: 0; }
-.transcription { color: #95a5a6; font-style: italic; font-size: 0.9rem; }
+.tatarWord { color: var(--color-primary); font-size: 1.8rem; margin: 0; }
+.transcription { color: var(--color-text-muted); font-style: italic; font-size: 0.9rem; }
 
-.details { margin-bottom: 20px; font-size: 1rem; color: #34495e; }
-.descriptionText { margin-top: 8px; line-height: 1.5; color: #7f8c8d; font-size: 0.9rem; }
+.details { margin-bottom: 20px; font-size: 1rem; color: var(--color-text-secondary); }
+.descriptionText { margin-top: 8px; line-height: 1.5; color: var(--color-text-light); font-size: 0.9rem; }
 
 /* Кнопки в столбик на всю ширину */
 .btnGroup {
@@ -121,30 +121,30 @@
 }
 
 .addBtn {
-    background: #27ae60;
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-bg);
 }
 
-.addBtn:hover { background: #219150; }
+.addBtn:hover { background: var(--color-primary-hover); }
 
 .alreadyBtn {
-    background: #ebfaf0;
-    color: #27ae60;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
     cursor: default;
 }
 
 .resetBtn {
-    background: #f8f9fa;
-    color: #636e72;
+    background: var(--color-bg-soft);
+    color: var(--color-text-dim);
 }
 
-.resetBtn:hover { background: #f1f2f6; }
+.resetBtn:hover { background: var(--color-bg-hover); }
 
 .authAlert {
     text-align: center;
     font-size: 0.85rem;
-    color: #e67e22;
-    background: #fff9f4;
+    color: var(--color-accent-warning);
+    background: var(--color-warning-soft-bg);
     padding: 10px;
     border-radius: 10px;
 }

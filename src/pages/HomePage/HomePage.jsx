@@ -48,36 +48,38 @@ const HomePage = observer(() => {
 
                 <div className={styles.rankingList}>
                     {ranking.length > 0 ? (
-                        ranking.map((user, index) => (
-                            <div key={user._id} className={styles.rankingItem}>
-                                <div className={styles.rankingLeft}>
-                                    <span className={styles.orderNum}>{index + 1}</span>
-                                    <div className={styles.rankingIdentity}>
-                                        <div className={styles.rankingAvatar}>
-                                            {user.avatarUrl ? (
-                                                <img
-                                                    src={getAvatarSrc(user.avatarUrl)}
-                                                    alt={`${user.firstName} ${user.lastName}`}
-                                                    className={styles.rankingAvatarImg}
-                                                />
-                                            ) : (
-                                                <span className={styles.rankingAvatarFallback}>
-                                                    {getInitials(user.firstName, user.lastName)}
-                                                </span>
-                                            )}
+                        ranking.map((user, index) => {
+                            return (
+                                <div key={user._id} className={styles.rankingItem}>
+                                    <div className={styles.rankingLeft}>
+                                        <span className={styles.orderNum}>{index + 1}</span>
+                                        <div className={styles.rankingIdentity}>
+                                            <div className={styles.rankingAvatar}>
+                                                {user.avatarUrl ? (
+                                                    <img
+                                                        src={getAvatarSrc(user.avatarUrl)}
+                                                        alt={`${user.firstName} ${user.lastName}`}
+                                                        className={styles.rankingAvatarImg}
+                                                    />
+                                                ) : (
+                                                    <span className={styles.rankingAvatarFallback}>
+                                                        {getInitials(user.firstName, user.lastName)}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <span className={styles.fullName}>
+                                                {user.firstName} {user.lastName}
+                                            </span>
                                         </div>
-                                        <span className={styles.fullName}>
-                                            {user.firstName} {user.lastName}
+                                    </div>
+                                    <div className={styles.rankingRight}>
+                                        <span className={styles.wordBadge}>
+                                            {user.wordsCount} <span>слов</span>
                                         </span>
                                     </div>
                                 </div>
-                                <div className={styles.rankingRight}>
-                                    <span className={styles.wordBadge}>
-                                        {user.wordsCount} <span>слов</span>
-                                    </span>
-                                </div>
-                            </div>
-                        ))
+                            );
+                        })
                     ) : (
                         !loading && <div className={styles.infoText}>В рейтинге пока нет участников</div>
                     )}

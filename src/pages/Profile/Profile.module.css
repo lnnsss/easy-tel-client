@@ -1,13 +1,13 @@
 .container {
-    max-width: 800px;
+    max-width: var(--container-sm);
     margin: 40px auto;
-    padding: 0 20px;
+    padding: 0 var(--space-page-x);
     box-sizing: border-box;
 }
 
 .verifyNotice {
-    background: #fff8e6;
-    border: 1px solid #ffde8a;
+    background: var(--color-warning-bg);
+    border: 1px solid var(--color-warning-border);
     border-radius: 16px;
     padding: 16px 18px;
     margin-bottom: 16px;
@@ -19,15 +19,15 @@
 
 .verifyNotice p {
     margin: 0;
-    color: #7a5500;
+    color: var(--color-warning-text);
     line-height: 1.35;
 }
 
 .verifyLink {
     display: inline-block;
     white-space: nowrap;
-    background: #f5a524;
-    color: #fff;
+    background: var(--color-warning-strong);
+    color: var(--color-bg);
     text-decoration: none;
     font-weight: 700;
     padding: 9px 14px;
@@ -42,7 +42,7 @@
 }
 
 .header {
-    background: white;
+    background: var(--color-bg);
     padding: 30px;
     border-radius: 24px;
     text-align: center;
@@ -63,8 +63,8 @@
     width: 88px;
     height: 88px;
     border-radius: 50%;
-    background: #ebf6ef;
-    border: 2px solid #d3eedd;
+    background: var(--color-primary-tint);
+    border: 2px solid var(--color-border-success-subtle);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -78,7 +78,7 @@
 }
 
 .avatarInitials {
-    color: #1f8c49;
+    color: var(--color-primary-strong);
     font-weight: 800;
     font-size: 1.6rem;
 }
@@ -86,9 +86,9 @@
 .avatarUploadBtn {
     display: inline-block;
     padding: 8px 12px;
-    background: #f5f7f8;
+    background: var(--color-bg-muted);
     border-radius: 10px;
-    color: #3c4a58;
+    color: var(--color-text-alt);
     font-size: 0.88rem;
     cursor: pointer;
 }
@@ -96,20 +96,20 @@
 .fullName {
     font-size: clamp(1.4rem, 6vw, 2.2rem);
     margin-bottom: 10px;
-    color: #2c3e50;
+    color: var(--color-text);
     word-wrap: break-word;
     overflow-wrap: break-word;
     line-height: 1.2;
 }
 
-.username { color: #95a5a6; margin-bottom: 5px; font-size: 0.95rem; }
-.rank { font-weight: bold; color: #27ae60; font-size: 1.1rem; }
+.username { color: var(--color-text-muted); margin-bottom: 5px; font-size: 0.95rem; }
+.rank { font-weight: bold; color: var(--color-primary); font-size: 1.1rem; }
 
 .editBtn {
     margin-top: 14px;
     border: none;
-    background: #edf3ff;
-    color: #2f5fa8;
+    background: var(--color-info-soft-bg);
+    color: var(--color-info-soft);
     padding: 10px 14px;
     border-radius: 10px;
     font-weight: 700;
@@ -131,15 +131,15 @@
 
 .editForm input {
     padding: 12px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     font-size: 0.95rem;
 }
 
 .saveBtn {
     border: none;
-    background: #27ae60;
-    color: #fff;
+    background: var(--color-primary);
+    color: var(--color-bg);
     padding: 12px;
     border-radius: 10px;
     font-weight: 700;
@@ -150,8 +150,8 @@
 .adminBadge {
     display: inline-block;
     font-weight: bold;
-    color: #fff;
-    background: #27ae60;
+    color: var(--color-bg);
+    background: var(--color-primary);
     font-size: 0.9rem;
     padding: 6px 18px;
     border-radius: 12px;
@@ -159,7 +159,7 @@
 }
 
 .adminInfoCard {
-    background: white;
+    background: var(--color-bg);
     padding: 30px;
     border-radius: 24px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
@@ -168,12 +168,12 @@
 
 .adminInfoCard h3 {
     margin-bottom: 15px;
-    color: #2c3e50;
+    color: var(--color-text);
     font-size: 1.3rem;
 }
 
 .adminText {
-    color: #7f8c8d;
+    color: var(--color-text-light);
     line-height: 1.6;
     font-size: 1rem;
     margin-bottom: 25px;
@@ -183,8 +183,8 @@
 .adminLinkBtn {
     display: block;
     width: 100%;
-    background: #27ae60;
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-bg);
     padding: 16px;
     border-radius: 16px;
     text-decoration: none;
@@ -195,7 +195,7 @@
 }
 
 .adminLinkBtn:hover {
-    background: #219150;
+    background: var(--color-primary-hover);
     transform: translateY(-2px);
 }
 
@@ -207,18 +207,18 @@
 }
 
 .statBox {
-    background: white;
+    background: var(--color-bg);
     padding: 25px 15px;
     border-radius: 24px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     text-align: center;
 }
 
-.statVal { display: block; font-size: 1.8rem; font-weight: 800; color: #27ae60; }
-.statLabel { color: #95a5a6; font-size: 0.85rem; }
+.statVal { display: block; font-size: 1.8rem; font-weight: 800; color: var(--color-primary); }
+.statLabel { color: var(--color-text-muted); font-size: 0.85rem; }
 
 .achievementsCard {
-    background: white;
+    background: var(--color-bg);
     padding: 25px;
     border-radius: 24px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
@@ -226,24 +226,24 @@
 
 .achievementsCard h3 {
     margin-bottom: 15px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--color-border-soft);
     padding-bottom: 10px;
-    color: #2c3e50;
+    color: var(--color-text);
     font-size: 1.2rem;
 }
 
 .achList { display: flex; flex-direction: column; gap: 10px; }
 .achItem {
-    background: #f8f9fa;
+    background: var(--color-bg-soft);
     padding: 12px 15px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     gap: 12px;
 }
-.bullet { width: 8px; height: 8px; border-radius: 50%; background: #27ae60; flex-shrink: 0; }
+.bullet { width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); flex-shrink: 0; }
 
-.loader { text-align: center; padding: 50px; color: #27ae60; }
+.loader { text-align: center; padding: 50px; color: var(--color-primary); }
 
 @media (max-width: 600px) {
     .statsRow { grid-template-columns: 1fr; }
