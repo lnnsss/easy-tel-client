@@ -181,6 +181,21 @@ class AuthStore {
         }
     }
 
+    async refreshProfile() {
+        if (!localStorage.getItem('token')) return;
+        try {
+            const { data } = await $api.get('/auth/profile');
+            runInAction(() => {
+                this.user = data;
+                this.isAuth = true;
+            });
+        } catch (e) {
+            if (e?.response?.status === 401) {
+                this.logout();
+            }
+        }
+    }
+
     logout() {
         this.user = null;
         this.isAuth = false;

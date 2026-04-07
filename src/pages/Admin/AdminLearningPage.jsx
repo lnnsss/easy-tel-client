@@ -12,6 +12,22 @@ const STATUS_OPTIONS = [
 
 const statusLabel = (value) => (value === 'published' ? 'Опубликован' : 'Черновик');
 
+const PencilIcon = () => (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 20l4.5-1 9.3-9.3a1.8 1.8 0 0 0 0-2.5l-1-1a1.8 1.8 0 0 0-2.5 0L5 15.5 4 20z" />
+        <path d="M13 7l4 4" />
+    </svg>
+);
+
+const TrashIcon = () => (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7h16" />
+        <path d="M9 7V5h6v2" />
+        <path d="M7 7l1 12h8l1-12" />
+        <path d="M10 11v6M14 11v6" />
+    </svg>
+);
+
 const emptyCourse = {
     title: '',
     description: '',
@@ -196,8 +212,12 @@ const AdminLearningPage = () => {
                                 <>
                                     <span title={category.name} className={styles.categoryName}>{category.name}</span>
                                     <div className={styles.categoryActions}>
-                                        <button type="button" title="Переименовать" onClick={() => startEditCategory(category)}>✎</button>
-                                        <button type="button" title="Удалить" onClick={() => removeCategory(category._id)}>🗑</button>
+                                        <button type="button" title="Переименовать" onClick={() => startEditCategory(category)}>
+                                            <PencilIcon />
+                                        </button>
+                                        <button type="button" title="Удалить" onClick={() => removeCategory(category._id)}>
+                                            <TrashIcon />
+                                        </button>
                                     </div>
                                 </>
                             )}
@@ -267,13 +287,6 @@ const AdminLearningPage = () => {
                 </div>
                 {filteredCourses.map((course) => (
                     <div key={course._id} className={styles.row}>
-                        <Link
-                            className={styles.iconLinkBtn}
-                            to={`/admin/learning/courses/${course._id}`}
-                            title="Открыть страницу курса"
-                        >
-                            ↗
-                        </Link>
                         <div className={styles.rowMain}>
                             <strong>{course.title}</strong>
                             <small>
@@ -281,6 +294,13 @@ const AdminLearningPage = () => {
                             </small>
                         </div>
                         <div className={styles.actions}>
+                            <Link
+                                className={styles.actionLink}
+                                to={`/admin/learning/courses/${course._id}`}
+                                title="Открыть страницу курса"
+                            >
+                                К курсу
+                            </Link>
                             <button type="button" onClick={() => toggleCourseStatus(course)}>
                                 {course.status === 'published' ? 'В черновик' : 'Опубликовать'}
                             </button>

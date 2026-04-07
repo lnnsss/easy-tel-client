@@ -42,16 +42,21 @@ const CoursesPage = () => {
                                 key={course._id}
                                 className={`${styles.courseCard} ${course.progress?.completed ? styles.courseCardCompleted : ''}`}
                             >
-                                <h3 className={styles.courseTitle}>{course.title}</h3>
-                                <p className={styles.courseDescription}>{course.description || 'Описание пока не добавлено'}</p>
-                                <div className={styles.meta}>
-                                    <span>
-                                        Пройдено тем: {course.progress?.completedTopics || 0}/{course.progress?.totalTopics || 0}
-                                    </span>
-                                    <span>{course.progress?.completed ? 'Курс завершен' : 'В процессе'}</span>
+                                <div className={styles.courseMain}>
+                                    <h3 className={styles.courseTitle}>{course.title}</h3>
+                                    <p className={styles.courseDescription}>{course.description || 'Описание пока не добавлено'}</p>
+                                    <div className={styles.meta}>
+                                        <span>
+                                            Пройдено тем: {course.progress?.completedTopics || 0}/{course.progress?.totalTopics || 0}
+                                        </span>
+                                    </div>
                                 </div>
                                 <Link to={`/courses/${course._id}`} className={styles.btn}>
-                                    {course.progress?.completed ? 'Открыть повторно' : 'Продолжить курс'}
+                                    {course.progress?.completed
+                                        ? 'Открыть повторно'
+                                        : (course.progress?.completedTopics || 0) > 0
+                                            ? 'Продолжить курс'
+                                            : 'Начать курс'}
                                 </Link>
                             </article>
                         ))}

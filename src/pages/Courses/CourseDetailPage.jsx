@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import CourseService from '../../services/CourseService';
 import { useStores } from '../../stores/StoreContext';
 import styles from './CourseDetailPage.module.css';
 
 const CourseDetailPage = () => {
-    const { uiStore } = useStores();
+    const { uiStore, authStore } = useStores();
+    const navigate = useNavigate();
     const { courseId } = useParams();
     const [course, setCourse] = useState(null);
     const [topics, setTopics] = useState([]);
@@ -89,6 +90,7 @@ const CourseDetailPage = () => {
 
             setAnswers({});
             setIsQuizMode(false);
+            await authStore.refreshProfile();
 
             if (nextUnlocked) {
                 setSelectedTopicId(nextUnlocked._id);
@@ -107,8 +109,16 @@ const CourseDetailPage = () => {
                     title: 'Курс завершен',
                     message: `Результат теста: ${data.scorePercent}%. Поздравляем, достижение начислено.`,
                     variant: 'success',
-                    secondaryLabel: 'Отлично'
+                    secondaryLabel: 'В профиль',
+                    onSecondary: () => {
+                        uiStore.closeModal();
+                        navigate('/profile');
+                    }
                 });
+                setTimeout(() => {
+                    uiStore.closeModal();
+                    navigate('/profile');
+                }, 1200);
                 return;
             }
 

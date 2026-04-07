@@ -129,7 +129,7 @@ const AdminDashboard = () => {
         <div className={styles.wrapper}>
             <header className={styles.header}>
                 <div className={styles.titleArea}>
-                    <h1>Admin<span>Panel</span></h1>
+                    <h1>Административная панель</h1>
                     <p>Управление словарем системы</p>
                 </div>
                 <div className={styles.searchBar}>

@@ -26,6 +26,7 @@ const createQuestion = () => ({
 });
 
 const statusLabel = (value) => (value === 'published' ? 'Опубликован' : 'Черновик');
+const questionTypeLabel = (value) => (value === 'single_choice' ? 'Один вариант' : 'Текстовый ответ');
 
 const AdminLearningCoursePage = () => {
     const { uiStore } = useStores();
@@ -47,7 +48,7 @@ const AdminLearningCoursePage = () => {
     const [quizTopicId, setQuizTopicId] = useState('');
     const [quizForm, setQuizForm] = useState({
         topicId: '',
-        passingScore: 70,
+        passingScore: 100,
         questions: [createQuestion()]
     });
     const [expandedQuestionIndex, setExpandedQuestionIndex] = useState(0);
@@ -124,7 +125,7 @@ const AdminLearningCoursePage = () => {
                     await CourseService.deleteAdminTopic(topicId);
                     if (quizTopicId === topicId) {
                         setQuizTopicId('');
-                        setQuizForm({ topicId: '', passingScore: 70, questions: [createQuestion()] });
+                        setQuizForm({ topicId: '', passingScore: 100, questions: [createQuestion()] });
                         setExpandedQuestionIndex(0);
                     }
                     uiStore.closeModal();
@@ -155,7 +156,7 @@ const AdminLearningCoursePage = () => {
     const loadTopicQuiz = async (topicId) => {
         if (!topicId) {
             setQuizTopicId('');
-            setQuizForm({ topicId: '', passingScore: 70, questions: [createQuestion()] });
+            setQuizForm({ topicId: '', passingScore: 100, questions: [createQuestion()] });
             setExpandedQuestionIndex(0);
             return;
         }
@@ -165,14 +166,14 @@ const AdminLearningCoursePage = () => {
             if (data?.questions?.length) {
                 setQuizForm({
                     topicId,
-                    passingScore: data.passingScore,
+                    passingScore: Number(data.passingScore) || 100,
                     questions: data.questions
                 });
                 setExpandedQuestionIndex(0);
             } else {
                 setQuizForm({
                     topicId,
-                    passingScore: 70,
+                    passingScore: 100,
                     questions: [createQuestion()]
                 });
                 setExpandedQuestionIndex(0);
@@ -217,7 +218,7 @@ const AdminLearningCoursePage = () => {
         try {
             await CourseService.upsertAdminTopicQuiz(quizForm.topicId, quizForm);
             const currentTopic = quizForm.topicId;
-            setQuizForm({ topicId: currentTopic, passingScore: 70, questions: [createQuestion()] });
+            setQuizForm({ topicId: currentTopic, passingScore: 100, questions: [createQuestion()] });
             setExpandedQuestionIndex(0);
             setQuizTopicId('');
             uiStore.showModal({
@@ -320,12 +321,12 @@ const AdminLearningCoursePage = () => {
                     <h3>Темы курса</h3>
                     <div className={styles.topicsList}>
                         {topics.map((topic) => (
-                            <div key={topic._id} className={styles.row}>
-                                <div className={styles.rowMain}>
-                                    <strong>{topic.title}</strong>
-                                    <small>{statusLabel(topic.status)}</small>
-                                </div>
-                                <div className={styles.actions}>
+                                <div key={topic._id} className={styles.row}>
+                                    <div className={styles.rowMain}>
+                                        <strong className={styles.topicTitle} title={topic.title}>{topic.title}</strong>
+                                        <small>{statusLabel(topic.status)}</small>
+                                    </div>
+                                <div className={styles.topicActions}>
                                     <button type="button" onClick={() => startEditTopic(topic)}>Редактировать</button>
                                     <button type="button" onClick={() => toggleTopicStatus(topic)}>
                                         {topic.status === 'published' ? 'В черновик' : 'Опубликовать'}
@@ -394,8 +395,8 @@ const AdminLearningCoursePage = () => {
                                 min="1"
                                 max="100"
                                 value={quizForm.passingScore}
-                                onChange={(e) => setQuizForm((prev) => ({ ...prev, passingScore: Number(e.target.value) || 70 }))}
-                                placeholder="Например, 70"
+                                onChange={(e) => setQuizForm((prev) => ({ ...prev, passingScore: Number(e.target.value) || 100 }))}
+                                placeholder="Например, 100"
                             />
                             <small>Тест считается пройденным при достижении этого процента.</small>
                         </div>
@@ -432,50 +433,56 @@ const AdminLearningCoursePage = () => {
                                             placeholder="Текст вопроса"
                                             required
                                         />
-                                        <select
-                                            value={question.type}
-                                            onChange={(e) => setQuizForm((prev) => ({
-                                                ...prev,
-                                                questions: prev.questions.map((item, i) => i === questionIndex
-                                                    ? {
-                                                        ...item,
-                                                        type: e.target.value,
-                                                        options: e.target.value === 'single_choice' ? createQuestion().options : [],
-                                                        correctText: e.target.value === 'text_input' ? '' : ''
-                                                    }
-                                                    : item)
-                                            }))}
-                                        >
-                                            <option value="single_choice">single_choice</option>
-                                            <option value="text_input">text_input</option>
-                                        </select>
+                                        <div className={styles.typeBlock}>
+                                            <label className={styles.fieldLabel}>Тип вопроса</label>
+                                            <select
+                                                value={question.type}
+                                                onChange={(e) => setQuizForm((prev) => ({
+                                                    ...prev,
+                                                    questions: prev.questions.map((item, i) => i === questionIndex
+                                                        ? {
+                                                            ...item,
+                                                            type: e.target.value,
+                                                            options: e.target.value === 'single_choice' ? createQuestion().options : [],
+                                                            correctText: ''
+                                                        }
+                                                        : item)
+                                                }))}
+                                            >
+                                                <option value="single_choice">{questionTypeLabel('single_choice')}</option>
+                                                <option value="text_input">{questionTypeLabel('text_input')}</option>
+                                            </select>
+                                        </div>
 
                                         {question.type === 'single_choice' ? (
-                                            <div className={styles.options}>
-                                                {(question.options || []).map((option, optionIndex) => (
-                                                    <div key={`opt-${questionIndex}-${optionIndex}`} className={styles.option}>
-                                                        <input
-                                                            value={option.text}
-                                                            onChange={(e) => setQuizForm((prev) => ({
-                                                                ...prev,
-                                                                questions: prev.questions.map((item, i) => {
-                                                                    if (i !== questionIndex) return item;
-                                                                    return {
-                                                                        ...item,
-                                                                        options: item.options.map((opt, oi) => (
-                                                                            oi === optionIndex ? { ...opt, text: e.target.value } : opt
-                                                                        ))
-                                                                    };
-                                                                })
-                                                            }))}
-                                                            placeholder={`Вариант ${optionIndex + 1}`}
-                                                            required
-                                                        />
-                                                        <label>
+                                            <div className={styles.answerSection}>
+                                                <p className={styles.answerLabel}>Варианты ответа</p>
+                                                <div className={styles.options}>
+                                                    {(question.options || []).map((option, optionIndex) => (
+                                                        <div key={`opt-${questionIndex}-${optionIndex}`} className={styles.option}>
                                                             <input
-                                                                type="radio"
-                                                                checked={option.isCorrect}
-                                                                onChange={() => setQuizForm((prev) => ({
+                                                                value={option.text}
+                                                                onChange={(e) => setQuizForm((prev) => ({
+                                                                    ...prev,
+                                                                    questions: prev.questions.map((item, i) => {
+                                                                        if (i !== questionIndex) return item;
+                                                                        return {
+                                                                            ...item,
+                                                                            options: item.options.map((opt, oi) => (
+                                                                                oi === optionIndex ? { ...opt, text: e.target.value } : opt
+                                                                            ))
+                                                                        };
+                                                                    })
+                                                                }))}
+                                                                placeholder={`Вариант ${optionIndex + 1}`}
+                                                                required
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                className={`${styles.correctMarker} ${option.isCorrect ? styles.correctMarkerActive : ''}`}
+                                                                title="Отметить как правильный"
+                                                                aria-label={`Отметить вариант ${optionIndex + 1} правильным`}
+                                                                onClick={() => setQuizForm((prev) => ({
                                                                     ...prev,
                                                                     questions: prev.questions.map((item, i) => {
                                                                         if (i !== questionIndex) return item;
@@ -486,21 +493,23 @@ const AdminLearningCoursePage = () => {
                                                                     })
                                                                 }))}
                                                             />
-                                                            Правильный
-                                                        </label>
-                                                    </div>
-                                                ))}
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         ) : (
-                                            <input
-                                                value={question.correctText || ''}
-                                                onChange={(e) => setQuizForm((prev) => ({
-                                                    ...prev,
-                                                    questions: prev.questions.map((item, i) => i === questionIndex ? { ...item, correctText: e.target.value } : item)
-                                                }))}
-                                                placeholder="Правильный текстовый ответ"
-                                                required
-                                            />
+                                            <div className={styles.answerSection}>
+                                                <p className={styles.answerLabel}>Правильный ответ</p>
+                                                <input
+                                                    value={question.correctText || ''}
+                                                    onChange={(e) => setQuizForm((prev) => ({
+                                                        ...prev,
+                                                        questions: prev.questions.map((item, i) => i === questionIndex ? { ...item, correctText: e.target.value } : item)
+                                                    }))}
+                                                    placeholder="Правильный текстовый ответ"
+                                                    required
+                                                />
+                                            </div>
                                         )}
                                     </>
                                 )}

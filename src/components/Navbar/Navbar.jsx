@@ -1,21 +1,15 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Navbar.module.css';
 
 const Navbar = observer(() => {
     const { authStore } = useStores();
-    const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
     const closeMenu = () => setIsMenuOpen(false);
-    const handleLogout = () => {
-        authStore.logout();
-        setIsMenuOpen(false);
-        navigate('/login');
-    };
 
     const isAdmin = authStore.user?.role === 'admin';
 
@@ -59,7 +53,6 @@ const Navbar = observer(() => {
                                     <Link to="/words" className={styles.adminNavBtn} onClick={closeMenu}>Слова</Link>
                                     <Link to="/admin/learning" className={styles.adminNavBtn} onClick={closeMenu}>Обучение</Link>
                                     <Link to="/admin/users" className={styles.adminNavBtn} onClick={closeMenu}>Пользователи</Link>
-                                    <button onClick={handleLogout} className={`${styles.adminNavBtn} ${styles.adminNavBtnDanger}`}>Выйти</button>
                                 </>
                             )}
 
