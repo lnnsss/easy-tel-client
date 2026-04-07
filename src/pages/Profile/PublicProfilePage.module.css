@@ -1,0 +1,54 @@
+.username {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+}
+
+.stateWrap {
+    max-width: 700px;
+    margin: 56px auto;
+    padding: 0 16px;
+    text-align: center;
+}
+
+.stateWrap h1 {
+    margin: 0 0 8px;
+}
+
+.stateWrap p {
+    margin: 0;
+    color: var(--color-text-muted);
+}
+
+.stateActions {
+    margin-top: 18px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.primaryBtn,
+.secondaryBtn {
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.primaryBtn {
+    background: var(--color-primary);
+    color: var(--c-black);
+}
+
+.secondaryBtn {
+    background: var(--color-bg-muted, #f2f4f4);
+    color: var(--color-text);
+}
+
+.empty {
+    margin: 0;
+    color: var(--color-text-muted);
+}

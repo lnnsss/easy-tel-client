@@ -103,8 +103,9 @@ const UserProfile = ({ user }) => {
     };
 
     const onCopyUsername = async () => {
-        const value = `@${user.username || ''}`;
-        if (!value || value === '@') return;
+        const normalizedUsername = String(user.username || '').trim().replace(/^@+/, '');
+        const value = normalizedUsername;
+        if (!value) return;
         try {
             await navigator.clipboard.writeText(value);
             setCopiedUsername(true);

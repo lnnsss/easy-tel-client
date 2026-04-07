@@ -175,7 +175,8 @@ const HomePage = observer(() => {
                     {ranking.length > 0 ? (
                         ranking.map((user, index) => {
                             return (
-                                <div key={user._id} className={styles.rankingItem}>
+                                <Link key={user._id} to={`/u/${encodeURIComponent(user.username)}`} className={styles.rankingItemLink}>
+                                    <div className={styles.rankingItem}>
                                     <div className={styles.rankingLeft}>
                                         <span className={styles.orderNum}>{index + 1}</span>
                                         <div className={styles.rankingIdentity}>
@@ -203,6 +204,7 @@ const HomePage = observer(() => {
                                         </span>
                                     </div>
                                 </div>
+                                </Link>
                             );
                         })
                     ) : (

@@ -12,6 +12,7 @@ import ForgotPasswordPage from '../pages/Auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/Auth/ResetPasswordPage';
 import GoogleAuthCallbackPage from '../pages/Auth/GoogleAuthCallbackPage';
 import ProfilePage from '../pages/Profile/ProfilePage';
+import PublicProfilePage from '../pages/Profile/PublicProfilePage';
 import DictionaryPage from '../pages/DictionaryPage/DictionaryPage';
 import AdminDashboard from '../pages/Admin/AdminDashboard';
 import CoursesPage from '../pages/Courses/CoursesPage';
@@ -19,6 +20,7 @@ import CourseDetailPage from '../pages/Courses/CourseDetailPage';
 import AdminLearningPage from '../pages/Admin/AdminLearningPage';
 import AdminLearningCoursePage from '../pages/Admin/AdminLearningCoursePage';
 import AdminUsersPage from '../pages/Admin/AdminUsersPage';
+import NotFoundPage from '../pages/NotFoundPage/NotFoundPage';
 
 const AppRouter = observer(() => {
     const { authStore } = useStores();
@@ -69,6 +71,11 @@ const AppRouter = observer(() => {
             />
 
             <Route
+                path="/u/:username"
+                element={authStore.isAuth ? <PublicProfilePage /> : <Navigate to="/login" />}
+            />
+
+            <Route
                 path="/dictionary"
                 element={authStore.isAuth && !isAdmin ? <DictionaryPage /> : <Navigate to="/" />}
             />
@@ -108,7 +115,7 @@ const AppRouter = observer(() => {
                 element={isAdmin ? <ProfilePage /> : <Navigate to="/" />}
             />
 
-            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="*" element={<NotFoundPage />} />
         </Routes>
     );
 });

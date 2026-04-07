@@ -124,6 +124,17 @@
     gap: 12px;
 }
 
+.rankingItemLink {
+    text-decoration: none;
+    color: inherit;
+    border-radius: 16px;
+}
+
+.rankingItemLink:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
 .rankingItem {
     display: flex;
     justify-content: space-between;
