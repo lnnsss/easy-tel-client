@@ -17,6 +17,29 @@
     font-size: 0.98rem;
 }
 
+.completionFilters {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.filterBtn {
+    border: 1px solid var(--color-border, #dce2e8);
+    background: var(--color-bg);
+    color: var(--color-text);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.filterBtnActive {
+    background: var(--color-primary);
+    color: var(--color-bg);
+    border-color: var(--color-primary);
+}
+
 .category {
     margin-top: 28px;
 }
@@ -107,6 +130,11 @@
 }
 
 @media (max-width: 900px) {
+    .completionFilters {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
     .courseCard {
         grid-template-columns: 1fr;
         gap: 12px;

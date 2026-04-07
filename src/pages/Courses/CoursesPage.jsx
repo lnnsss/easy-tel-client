@@ -7,7 +7,20 @@ const CoursesPage = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const visibleCategories = categories.filter((category) => (category.courses || []).length > 0);
+    const [completionFilter, setCompletionFilter] = useState('all');
+
+    const isVisibleByCompletion = (course) => {
+        if (completionFilter === 'completed') return Boolean(course.progress?.completed);
+        if (completionFilter === 'incomplete') return !course.progress?.completed;
+        return true;
+    };
+
+    const visibleCategories = categories
+        .map((category) => ({
+            ...category,
+            courses: (category.courses || []).filter(isVisibleByCompletion)
+        }))
+        .filter((category) => (category.courses || []).length > 0);
 
     useEffect(() => {
         const loadData = async () => {
@@ -31,6 +44,29 @@ const CoursesPage = () => {
         <div className={styles.page}>
             <h1 className={styles.title}>Учебный материал</h1>
             <p className={styles.subtitle}>Выберите материал и проходите темы по порядку.</p>
+            <div className={styles.completionFilters}>
+                <button
+                    type="button"
+                    className={`${styles.filterBtn} ${completionFilter === 'all' ? styles.filterBtnActive : ''}`}
+                    onClick={() => setCompletionFilter('all')}
+                >
+                    Все
+                </button>
+                <button
+                    type="button"
+                    className={`${styles.filterBtn} ${completionFilter === 'completed' ? styles.filterBtnActive : ''}`}
+                    onClick={() => setCompletionFilter('completed')}
+                >
+                    Пройденные
+                </button>
+                <button
+                    type="button"
+                    className={`${styles.filterBtn} ${completionFilter === 'incomplete' ? styles.filterBtnActive : ''}`}
+                    onClick={() => setCompletionFilter('incomplete')}
+                >
+                    Непройденные
+                </button>
+            </div>
             {visibleCategories.length === 0 && <p className={styles.empty}>Пока нет опубликованных материалов</p>}
 
             {visibleCategories.map((category) => (

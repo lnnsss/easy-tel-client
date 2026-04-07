@@ -7,8 +7,13 @@ import styles from './HomePage.module.css';
 
 const HomePage = observer(() => {
     const { authStore } = useStores();
+    const isAdmin = authStore.user?.role === 'admin';
     const [ranking, setRanking] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [pinnedCourse, setPinnedCourse] = useState(null);
+    const [bannerHidden, setBannerHidden] = useState(false);
+    const [showDismissModal, setShowDismissModal] = useState(false);
+    const [dontShowAgain, setDontShowAgain] = useState(false);
 
     const getAvatarSrc = (avatarUrl) => {
         if (!avatarUrl) return '';
@@ -40,11 +45,97 @@ const HomePage = observer(() => {
         fetchRanking();
     }, []);
 
+    useEffect(() => {
+        const fetchPinnedCourse = async () => {
+            if (!authStore.isAuth || isAdmin) {
+                setPinnedCourse(null);
+                return;
+            }
+
+            try {
+                const { data } = await $api.get('/courses/pinned');
+                const course = data?.course || null;
+                setPinnedCourse(course);
+
+                if (!course) {
+                    setBannerHidden(false);
+                    return;
+                }
+
+                const userId = authStore.user?._id || 'guest';
+                const storageKey = `easytel:pinned:hidden:${userId}:${course._id}`;
+                const isHiddenForever = localStorage.getItem(storageKey) === '1';
+                const mode = course.pinnedHomeMode || 'persistent';
+
+                if (mode === 'persistent') {
+                    setBannerHidden(false);
+                    return;
+                }
+
+                setBannerHidden(isHiddenForever);
+            } catch {
+                setPinnedCourse(null);
+            }
+        };
+
+        fetchPinnedCourse();
+    }, [authStore.isAuth, authStore.user?._id, isAdmin]);
+
+    const hidePinnedBannerForever = () => {
+        if (!pinnedCourse) return;
+        const userId = authStore.user?._id || 'guest';
+        const storageKey = `easytel:pinned:hidden:${userId}:${pinnedCourse._id}`;
+        localStorage.setItem(storageKey, '1');
+        setBannerHidden(true);
+    };
+
+    const onClosePinnedBanner = () => {
+        if (!pinnedCourse) return;
+
+        const mode = pinnedCourse.pinnedHomeMode || 'persistent';
+        if (mode === 'persistent') return;
+
+        if (mode === 'dismiss_once') {
+            hidePinnedBannerForever();
+            return;
+        }
+
+        setDontShowAgain(false);
+        setShowDismissModal(true);
+    };
+
+    const confirmDismissBanner = () => {
+        if (dontShowAgain) {
+            hidePinnedBannerForever();
+        } else {
+            setBannerHidden(true);
+        }
+        setShowDismissModal(false);
+    };
+
     const practiceRoute = !authStore.isAuth ? '/login' : '/scanner';
     const theoryRoute = !authStore.isAuth ? '/login' : '/courses';
 
     return (
         <div className={styles.container}>
+            {authStore.isAuth && !isAdmin && pinnedCourse && !bannerHidden && (
+                <div className={styles.pinnedBanner}>
+                    <Link to={`/courses/${pinnedCourse._id}`} className={styles.pinnedBannerLink}>
+                        {pinnedCourse.pinnedHomeText}
+                    </Link>
+                    {(pinnedCourse.pinnedHomeMode === 'dismiss_once' || pinnedCourse.pinnedHomeMode === 'confirm_hide') && (
+                        <button
+                            type="button"
+                            className={styles.pinnedBannerClose}
+                            onClick={onClosePinnedBanner}
+                            aria-label="Скрыть плашку"
+                        >
+                            ×
+                        </button>
+                    )}
+                </div>
+            )}
+
             <section className={styles.hero}>
                 <h1 className={styles.title}>Easy<span>Tel</span></h1>
                 <p className={styles.description}>
@@ -120,6 +211,30 @@ const HomePage = observer(() => {
                     {loading && <div className={styles.infoText}>Загрузка данных...</div>}
                 </div>
             </section>
+
+            {showDismissModal && (
+                <div className={styles.bannerModalOverlay} onClick={() => setShowDismissModal(false)}>
+                    <div className={styles.bannerModal} onClick={(e) => e.stopPropagation()}>
+                        <h3>Скрыть плашку?</h3>
+                        <label className={styles.bannerModalCheck}>
+                            <input
+                                type="checkbox"
+                                checked={dontShowAgain}
+                                onChange={(e) => setDontShowAgain(e.target.checked)}
+                            />
+                            Больше не показывать
+                        </label>
+                        <div className={styles.bannerModalActions}>
+                            <button type="button" className={styles.bannerModalCancel} onClick={() => setShowDismissModal(false)}>
+                                Отмена
+                            </button>
+                            <button type="button" className={styles.bannerModalConfirm} onClick={confirmDismissBanner}>
+                                Скрыть
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 });

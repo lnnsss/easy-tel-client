@@ -50,8 +50,8 @@ const Navbar = observer(() => {
 
                             {isAdmin && (
                                 <>
-                                    <Link to="/words" className={styles.adminNavBtn} onClick={closeMenu}>Слова</Link>
-                                    <Link to="/admin/learning" className={styles.adminNavBtn} onClick={closeMenu}>Обучение</Link>
+                                    <Link to="/words" className={styles.adminNavBtn} onClick={closeMenu}>Словарь</Link>
+                                    <Link to="/admin/learning" className={styles.adminNavBtn} onClick={closeMenu}>Материал</Link>
                                     <Link to="/admin/users" className={styles.adminNavBtn} onClick={closeMenu}>Пользователи</Link>
                                 </>
                             )}

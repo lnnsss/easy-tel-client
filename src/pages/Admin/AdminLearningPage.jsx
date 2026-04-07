@@ -10,6 +10,12 @@ const STATUS_OPTIONS = [
     { value: 'draft', label: 'Черновик' }
 ];
 
+const PINNED_MODE_OPTIONS = [
+    { value: 'dismiss_once', label: 'Одноразовая (скрыть крестиком навсегда)' },
+    { value: 'persistent', label: 'Постоянная (всегда показывать)' },
+    { value: 'confirm_hide', label: 'С подтверждением скрытия' }
+];
+
 const statusLabel = (value) => (value === 'published' ? 'Опубликован' : 'Черновик');
 
 const PencilIcon = () => (
@@ -33,7 +39,9 @@ const emptyCourse = {
     description: '',
     categoryId: '',
     status: 'published',
-    order: 0
+    order: 0,
+    isPinnedHome: false,
+    pinnedHomeText: ''
 };
 
 const AdminLearningPage = () => {
@@ -46,6 +54,12 @@ const AdminLearningPage = () => {
     const [editingCategoryId, setEditingCategoryId] = useState('');
     const [editingCategoryName, setEditingCategoryName] = useState('');
     const [courseForm, setCourseForm] = useState(emptyCourse);
+    const [pinForm, setPinForm] = useState({
+        courseId: '',
+        enabled: false,
+        text: '',
+        mode: 'persistent'
+    });
 
     const [filterCategoryId, setFilterCategoryId] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
@@ -77,6 +91,21 @@ const AdminLearningPage = () => {
         loadAll();
     }, []);
 
+    useEffect(() => {
+        const pinnedCourse = courses.find((course) => course.isPinnedHome);
+        if (pinnedCourse) {
+            setPinForm({
+                courseId: pinnedCourse._id,
+                enabled: true,
+                text: pinnedCourse.pinnedHomeText || '',
+                mode: pinnedCourse.pinnedHomeMode || 'persistent'
+            });
+            return;
+        }
+
+        setPinForm((prev) => ({ ...prev, enabled: false, text: '', mode: 'persistent' }));
+    }, [courses]);
+
     const createCategory = async (e) => {
         e.preventDefault();
         try {
@@ -96,6 +125,51 @@ const AdminLearningPage = () => {
             await loadAll();
         } catch (err) {
             setError(err.response?.data?.message || 'Ошибка создания курса');
+        }
+    };
+
+    const savePinnedCourse = async (e) => {
+        e.preventDefault();
+        try {
+            if (!pinForm.enabled) {
+                const currentPinned = courses.find((course) => course.isPinnedHome);
+                if (currentPinned) {
+                    await CourseService.updateAdminCourse(currentPinned._id, {
+                        isPinnedHome: false,
+                        pinnedHomeText: ''
+                    });
+                }
+
+                uiStore.showModal({
+                    title: 'Готово',
+                    message: 'Закрепленный курс снят с главной.',
+                    variant: 'success',
+                    secondaryLabel: 'Закрыть'
+                });
+                await loadAll();
+                return;
+            }
+
+            if (!pinForm.courseId) {
+                setError('Выберите курс для закрепления');
+                return;
+            }
+
+            await CourseService.updateAdminCourse(pinForm.courseId, {
+                isPinnedHome: true,
+                pinnedHomeText: pinForm.text.trim(),
+                pinnedHomeMode: pinForm.mode
+            });
+
+            uiStore.showModal({
+                title: 'Готово',
+                message: 'Курс закреплен на главной странице.',
+                variant: 'success',
+                secondaryLabel: 'Закрыть'
+            });
+            await loadAll();
+        } catch (err) {
+            setError(err.response?.data?.message || 'Ошибка сохранения закрепленного курса');
         }
     };
 
@@ -260,6 +334,46 @@ const AdminLearningPage = () => {
                         </select>
                     </div>
                     <button type="submit">Создать курс</button>
+                </form>
+            </section>
+
+            <section className={styles.card}>
+                <h3>Закрепленный курс на главной</h3>
+                <form className={styles.createCourseForm} onSubmit={savePinnedCourse}>
+                    <select
+                        value={pinForm.courseId}
+                        onChange={(e) => setPinForm((prev) => ({ ...prev, courseId: e.target.value }))}
+                        disabled={!pinForm.enabled}
+                    >
+                        <option value="">Выберите курс</option>
+                        {courses.map((course) => (
+                            <option key={course._id} value={course._id}>{course.title}</option>
+                        ))}
+                    </select>
+                    <label className={styles.pinToggle}>
+                        <input
+                            type="checkbox"
+                            checked={pinForm.enabled}
+                            onChange={(e) => setPinForm((prev) => ({ ...prev, enabled: e.target.checked }))}
+                        />
+                        Показать закрепленную плашку на главной
+                    </label>
+                    <input
+                        value={pinForm.text}
+                        onChange={(e) => setPinForm((prev) => ({ ...prev, text: e.target.value }))}
+                        placeholder="Текст плашки на главной"
+                        disabled={!pinForm.enabled}
+                    />
+                    <select
+                        value={pinForm.mode}
+                        onChange={(e) => setPinForm((prev) => ({ ...prev, mode: e.target.value }))}
+                        disabled={!pinForm.enabled}
+                    >
+                        {PINNED_MODE_OPTIONS.map((item) => (
+                            <option key={item.value} value={item.value}>{item.label}</option>
+                        ))}
+                    </select>
+                    <button type="submit">Сохранить закрепление</button>
                 </form>
             </section>
 

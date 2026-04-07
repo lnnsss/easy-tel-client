@@ -293,6 +293,9 @@ select {
     background-color: var(--color-bg);
     color: var(--color-text);
     border: 1px solid var(--color-border);
+    padding: 12px 14px;
+    min-height: 46px;
+    border-radius: 12px;
 }
 
 input::placeholder,

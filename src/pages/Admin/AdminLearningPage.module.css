@@ -189,6 +189,19 @@
     gap: 12px;
 }
 
+.pinToggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.pinToggle input {
+    width: 16px;
+    height: 16px;
+}
+
 .inlineFields {
     display: grid;
     grid-template-columns: 1fr 220px;
