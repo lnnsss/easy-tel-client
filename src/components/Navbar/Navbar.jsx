@@ -43,7 +43,7 @@ const Navbar = observer(() => {
 
                     {authStore.isAuth ? (
                         <>
-                            <Link to="/profile" className={styles.profileWrapper} onClick={closeMenu}>
+                            <Link to={isAdmin ? "/admin" : "/profile"} className={styles.profileWrapper} onClick={closeMenu}>
                                 <div className={styles.profileLink}>
                                     <div className={styles.userInfo}>
                                         <span className={styles.userName}>{authStore.user?.firstName}</span>
@@ -56,9 +56,10 @@ const Navbar = observer(() => {
 
                             {isAdmin && (
                                 <>
-                                    <Link to="/admin" className={styles.adminBadge} onClick={closeMenu}>Слова</Link>
-                                    <Link to="/admin/learning" className={styles.adminBadge} onClick={closeMenu}>Обучение</Link>
-                                    <button onClick={handleLogout} className={styles.btnLogout}>Выйти</button>
+                                    <Link to="/words" className={styles.adminNavBtn} onClick={closeMenu}>Слова</Link>
+                                    <Link to="/admin/learning" className={styles.adminNavBtn} onClick={closeMenu}>Обучение</Link>
+                                    <Link to="/admin/users" className={styles.adminNavBtn} onClick={closeMenu}>Пользователи</Link>
+                                    <button onClick={handleLogout} className={`${styles.adminNavBtn} ${styles.adminNavBtnDanger}`}>Выйти</button>
                                 </>
                             )}
 

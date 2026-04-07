@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import styles from './Profile.module.css';
 
 const AdminProfile = ({ user }) => {
@@ -15,9 +14,6 @@ const AdminProfile = ({ user }) => {
                 <p className={styles.adminText}>
                     Вы вошли как администратор. Вам доступны функции редактирования базы слов и управления контентом.
                 </p>
-                <Link to="/admin" className={styles.adminLinkBtn}>
-                    Перейти в панель управления
-                </Link>
             </div>
         </div>
     );

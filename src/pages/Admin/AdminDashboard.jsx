@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import AdminService from '../../services/AdminService';
 import { useStores } from '../../stores/StoreContext';
 import styles from './AdminDashboard.module.css';
@@ -132,9 +131,6 @@ const AdminDashboard = () => {
                 <div className={styles.titleArea}>
                     <h1>Admin<span>Panel</span></h1>
                     <p>Управление словарем системы</p>
-                    <p>
-                        <Link to="/admin/learning">Перейти к учебным курсам</Link>
-                    </p>
                 </div>
                 <div className={styles.searchBar}>
                     <input

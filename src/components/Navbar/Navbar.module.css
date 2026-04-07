@@ -82,24 +82,25 @@
     font-weight: bold;
 }
 
-.btnLogout {
+.adminNavBtn {
     background: var(--color-bg-hover);
     border: none;
     padding: 8px 15px;
     border-radius: 8px;
     cursor: pointer;
-    color: var(--color-error);
+    text-decoration: none;
+    color: var(--color-text-dim);
     font-weight: 600;
+    transition: background 0.2s, color 0.2s;
 }
 
-.adminBadge {
-    background: var(--color-accent-warning);
-    color: var(--color-bg);
-    text-decoration: none;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 0.7rem;
-    font-weight: bold;
+.adminNavBtn:hover {
+    background: var(--color-border);
+    color: var(--color-text);
+}
+
+.adminNavBtnDanger {
+    color: var(--color-error);
 }
 
 .profileLink {
@@ -161,7 +162,7 @@
     }
 
     .links .link,
-    .links .btnLogout,
+    .links .adminNavBtn,
     .links .btnRegister,
     .links .profileWrapper {
         font-size: 1.1rem;
@@ -169,6 +170,10 @@
         max-width: 350px;
         text-align: center;
         box-sizing: border-box;
+    }
+
+    .links .adminNavBtn {
+        display: block;
     }
 
     .profileLink {

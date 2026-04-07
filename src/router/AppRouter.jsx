@@ -18,6 +18,7 @@ import CoursesPage from '../pages/Courses/CoursesPage';
 import CourseDetailPage from '../pages/Courses/CourseDetailPage';
 import AdminLearningPage from '../pages/Admin/AdminLearningPage';
 import AdminLearningCoursePage from '../pages/Admin/AdminLearningCoursePage';
+import AdminUsersPage from '../pages/Admin/AdminUsersPage';
 
 const AppRouter = observer(() => {
     const { authStore } = useStores();
@@ -30,7 +31,7 @@ const AppRouter = observer(() => {
 
     return (
         <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={isAdmin ? <Navigate to="/admin" /> : <HomePage />} />
 
             <Route
                 path="/scanner"
@@ -64,7 +65,7 @@ const AppRouter = observer(() => {
 
             <Route
                 path="/profile"
-                element={authStore.isAuth ? <ProfilePage /> : <Navigate to="/login" />}
+                element={authStore.isAuth ? (isAdmin ? <Navigate to="/admin" /> : <ProfilePage />) : <Navigate to="/login" />}
             />
 
             <Route
@@ -93,8 +94,18 @@ const AppRouter = observer(() => {
             />
 
             <Route
-                path="/admin/*"
+                path="/admin/users"
+                element={isAdmin ? <AdminUsersPage /> : <Navigate to="/" />}
+            />
+
+            <Route
+                path="/words"
                 element={isAdmin ? <AdminDashboard /> : <Navigate to="/" />}
+            />
+
+            <Route
+                path="/admin"
+                element={isAdmin ? <ProfilePage /> : <Navigate to="/" />}
             />
 
             <Route path="*" element={<Navigate to="/" />} />

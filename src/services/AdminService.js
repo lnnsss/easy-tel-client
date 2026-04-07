@@ -22,4 +22,18 @@ export default class AdminService {
     static async deleteWord(id) {
         return $api.delete(`/admin/words/${id}`);
     }
+
+    static async getUsers(page = 1, search = '', limit = 10) {
+        return $api.get('/admin/users', {
+            params: {
+                page,
+                limit,
+                search
+            }
+        });
+    }
+
+    static async deleteUser(id) {
+        return $api.delete(`/admin/users/${id}`);
+    }
 }
