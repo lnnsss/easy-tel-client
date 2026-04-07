@@ -2,6 +2,7 @@
     max-width: 500px;
     margin: 30px auto;
     padding: 0 15px;
+    transition: max-width 0.52s ease;
 }
 
 .instructionBlock {
@@ -17,6 +18,36 @@
     border-radius: 24px;
     padding: 15px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+    transition: all 0.52s ease;
+}
+
+.contentLayout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    align-items: start;
+}
+
+.previewPane,
+.resultPane {
+    transition: transform 0.52s ease, opacity 0.52s ease;
+}
+
+.resultPane {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: resultRevealMobile 0.45s ease forwards;
+}
+
+@keyframes resultRevealMobile {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dropzone {
@@ -52,9 +83,10 @@
 .error { color: #e74c3c; text-align: center; margin: 15px 0; font-size: 0.9rem; }
 
 .resultCard {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #f1f1f1;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    height: 100%;
 }
 
 .resultMain {
@@ -115,4 +147,29 @@
     background: #fff9f4;
     padding: 10px;
     border-radius: 10px;
+}
+
+@media (min-width: 992px) {
+    .containerExpanded {
+        max-width: 980px;
+    }
+
+    .uploadCardExpanded {
+        padding: 20px;
+    }
+
+    .contentLayoutExpanded {
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+
+    .previewPaneShifted {
+        transform: translateX(-6px);
+    }
+
+    .resultPaneVisible {
+        opacity: 1;
+        transform: translateX(6px);
+        animation: none;
+    }
 }

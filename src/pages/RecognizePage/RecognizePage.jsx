@@ -25,8 +25,10 @@ const RecognizePage = observer(() => {
         return wordIdInDict === recognizeStore.result?.id;
     });
 
+    const hasResult = Boolean(recognizeStore.result);
+
     return (
-        <div className={styles.container}>
+        <div className={`${styles.container} ${hasResult ? styles.containerExpanded : ''}`}>
             <div className={styles.instructionBlock}>
                 <h2 className={styles.pageTitle}>Интеллектуальный сканер</h2>
                 <p className={styles.pageSubtitle}>
@@ -34,59 +36,66 @@ const RecognizePage = observer(() => {
                 </p>
             </div>
 
-            <div className={styles.uploadCard}>
-                <label className={styles.dropzone}>
-                    <input type="file" onChange={handleFileChange} hidden accept="image/*" />
-                    {recognizeStore.preview ? (
-                        <img src={recognizeStore.preview} alt="Preview" className={styles.imagePreview} />
-                    ) : (
-                        <div className={styles.placeholder}>
-                            <span className={styles.placeholderText}>Нажмите, чтобы выбрать фото</span>
+            <div className={`${styles.uploadCard} ${hasResult ? styles.uploadCardExpanded : ''}`}>
+                <div className={`${styles.contentLayout} ${hasResult ? styles.contentLayoutExpanded : ''}`}>
+                    <div className={`${styles.previewPane} ${hasResult ? styles.previewPaneShifted : ''}`}>
+                        <label className={styles.dropzone}>
+                            <input type="file" onChange={handleFileChange} hidden accept="image/*" />
+                            {recognizeStore.preview ? (
+                                <img src={recognizeStore.preview} alt="Preview" className={styles.imagePreview} />
+                            ) : (
+                                <div className={styles.placeholder}>
+                                    <span className={styles.placeholderText}>Нажмите, чтобы выбрать фото</span>
+                                </div>
+                            )}
+                        </label>
+                    </div>
+
+                    {recognizeStore.result && (
+                        <div className={`${styles.resultPane} ${hasResult ? styles.resultPaneVisible : ''}`}>
+                            <div className={styles.resultCard}>
+                                <div className={styles.resultMain}>
+                                    <h2 className={styles.tatarWord}>{recognizeStore.result.nameTatar}</h2>
+                                    <span className={styles.transcription}>[{recognizeStore.result.transcription}]</span>
+                                </div>
+
+                                <div className={styles.details}>
+                                    <p><strong>Русский:</strong> {recognizeStore.result.nameRu}</p>
+                                    <p className={styles.descriptionText}>{recognizeStore.result.description}</p>
+                                </div>
+
+                                <div className={styles.btnGroup}>
+                                    {authStore.isAuth ? (
+                                        isAlreadyInDictionary ? (
+                                            <button className={styles.alreadyBtn} disabled>
+                                                Уже в словаре
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => recognizeStore.addToDictionary()}
+                                                className={styles.addBtn}
+                                                disabled={recognizeStore.isSaving}
+                                            >
+                                                {recognizeStore.isSaving ? "Сохранение..." : "Добавить в словарь"}
+                                            </button>
+                                        )
+                                    ) : (
+                                        <p className={styles.authAlert}>Войдите, чтобы сохранить слово</p>
+                                    )}
+
+                                    <button onClick={() => recognizeStore.reset()} className={styles.resetBtn}>
+                                        Заново
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     )}
-                </label>
+                </div>
 
                 {recognizeStore.loading && <div className={styles.loader}>Анализ изображения...</div>}
                 {recognizeStore.error && <div className={styles.error}>{recognizeStore.error}</div>}
-
-                {recognizeStore.result && (
-                    <div className={styles.resultCard}>
-                        <div className={styles.resultMain}>
-                            <h2 className={styles.tatarWord}>{recognizeStore.result.nameTatar}</h2>
-                            <span className={styles.transcription}>[{recognizeStore.result.transcription}]</span>
-                        </div>
-
-                        <div className={styles.details}>
-                            <p><strong>Русский:</strong> {recognizeStore.result.nameRu}</p>
-                            <p className={styles.descriptionText}>{recognizeStore.result.description}</p>
-                        </div>
-
-                        <div className={styles.btnGroup}>
-                            {authStore.isAuth ? (
-                                isAlreadyInDictionary ? (
-                                    <button className={styles.alreadyBtn} disabled>
-                                        Уже в словаре
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => recognizeStore.addToDictionary()}
-                                        className={styles.addBtn}
-                                        disabled={recognizeStore.isSaving}
-                                    >
-                                        {recognizeStore.isSaving ? "Сохранение..." : "Добавить в словарь"}
-                                    </button>
-                                )
-                            ) : (
-                                <p className={styles.authAlert}>Войдите, чтобы сохранить слово</p>
-                            )}
-
-                            <button onClick={() => recognizeStore.reset()} className={styles.resetBtn}>
-                                Заново
-                            </button>
-                        </div>
-                    </div>
-                )}
             </div>
+
         </div>
     );
 });

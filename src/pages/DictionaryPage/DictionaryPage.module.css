@@ -5,35 +5,87 @@
     box-sizing: border-box;
 }
 
+.headerBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
 .title {
-    margin-bottom: 30px;
+    margin: 0;
     color: #2c3e50;
-    text-align: center;
-    /* Адаптивный размер заголовка */
     font-size: clamp(1.5rem, 5vw, 2.2rem);
     font-weight: 800;
+}
+
+.viewSwitch {
+    display: flex;
+    gap: 8px;
+    background: #f5f7f8;
+    padding: 6px;
+    border-radius: 12px;
+}
+
+.switchBtn {
+    border: none;
+    background: transparent;
+    color: #667085;
+    border-radius: 10px;
+    padding: 8px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.switchBtn svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+}
+
+.switchBtnActive {
+    background: #fff;
+    color: #1f2937;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
+    align-items: start;
 }
 
 .wordCard {
+    width: 100%;
+    text-align: left;
     background: white;
     border-radius: 20px;
     padding: 20px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: none;
     border-top: 5px solid #27ae60;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    transition: transform 0.2s;
+    justify-content: flex-start;
+    align-self: start;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .wordCard:hover {
     transform: translateY(-5px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.09);
+}
+
+.wordCardOpen {
+    box-shadow: 0 10px 24px rgba(0,0,0,0.09);
 }
 
 .header {
@@ -62,7 +114,41 @@
     font-size: 1rem;
     color: #34495e;
     line-height: 1.4;
-    margin-bottom: 20px;
+    margin: 0 0 10px;
+}
+
+.descriptionWrap {
+    background: #f8fafb;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    animation: reveal 0.25s ease;
+}
+
+@keyframes reveal {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.descriptionLabel {
+    margin: 0 0 4px;
+    font-size: 0.76rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.description {
+    margin: 0;
+    font-size: 0.92rem;
+    color: #475467;
+    line-height: 1.45;
 }
 
 .footer {
@@ -71,6 +157,79 @@
     text-align: right;
     border-top: 1px solid #f8f9fa;
     padding-top: 10px;
+    margin-top: auto;
+}
+
+.tableWrap {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    overflow: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 640px;
+}
+
+.table th,
+.table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f1f5f8;
+    text-align: left;
+}
+
+.table th {
+    color: #5f6b76;
+    font-size: 0.84rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: #f8fbfc;
+}
+
+.table td {
+    color: #334155;
+    font-size: 0.95rem;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.table tbody tr {
+    transition: background-color 0.25s ease;
+}
+
+.tableMainRow {
+    cursor: pointer;
+}
+
+.table tbody tr:hover td {
+    background: #f7fff9;
+    animation: rowBlink 1.15s ease-in-out infinite;
+}
+
+.tableDescriptionRow td {
+    background: #fbfcfd;
+    animation: none !important;
+}
+
+.tableDescriptionInner {
+    padding: 2px 2px 4px;
+}
+
+@keyframes rowBlink {
+    0% {
+        background: #f7fff9;
+    }
+    50% {
+        background: #ecfff3;
+    }
+    100% {
+        background: #f7fff9;
+    }
+}
+
+.table tr:last-child td {
+    border-bottom: none;
 }
 
 .empty {
@@ -91,10 +250,16 @@
     font-weight: 600;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 760px) {
     .container {
         margin: 20px auto;
         padding: 0 15px;
+    }
+
+    .headerBar {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 18px;
     }
 
     .grid {
@@ -110,5 +275,14 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 4px;
+    }
+
+    .viewSwitch {
+        width: 100%;
+    }
+
+    .switchBtn {
+        flex: 1;
+        justify-content: center;
     }
 }

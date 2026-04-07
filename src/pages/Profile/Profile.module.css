@@ -5,6 +5,42 @@
     box-sizing: border-box;
 }
 
+.verifyNotice {
+    background: #fff8e6;
+    border: 1px solid #ffde8a;
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.verifyNotice p {
+    margin: 0;
+    color: #7a5500;
+    line-height: 1.35;
+}
+
+.verifyLink {
+    display: inline-block;
+    white-space: nowrap;
+    background: #f5a524;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 9px 14px;
+    border-radius: 10px;
+}
+
+@media (max-width: 680px) {
+    .verifyNotice {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
 .header {
     background: white;
     padding: 30px;
@@ -13,6 +49,48 @@
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     margin-bottom: 20px;
     box-sizing: border-box;
+}
+
+.avatarRow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.avatarCircle {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: #ebf6ef;
+    border: 2px solid #d3eedd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.avatarImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatarInitials {
+    color: #1f8c49;
+    font-weight: 800;
+    font-size: 1.6rem;
+}
+
+.avatarUploadBtn {
+    display: inline-block;
+    padding: 8px 12px;
+    background: #f5f7f8;
+    border-radius: 10px;
+    color: #3c4a58;
+    font-size: 0.88rem;
+    cursor: pointer;
 }
 
 .fullName {
@@ -26,6 +104,47 @@
 
 .username { color: #95a5a6; margin-bottom: 5px; font-size: 0.95rem; }
 .rank { font-weight: bold; color: #27ae60; font-size: 1.1rem; }
+
+.editBtn {
+    margin-top: 14px;
+    border: none;
+    background: #edf3ff;
+    color: #2f5fa8;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.editForm {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.editGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.editForm input {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.95rem;
+}
+
+.saveBtn {
+    border: none;
+    background: #27ae60;
+    color: #fff;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
 
 /* Бейдж админа в стиле твоего ранга, но другого цвета (или такого же зеленого) */
 .adminBadge {
@@ -82,7 +201,7 @@
 
 .statsRow {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 15px;
     margin-bottom: 20px;
 }
@@ -130,4 +249,5 @@
     .statsRow { grid-template-columns: 1fr; }
     .header { padding: 25px 15px; }
     .container { margin: 20px auto; }
+    .editGrid { grid-template-columns: 1fr; }
 }

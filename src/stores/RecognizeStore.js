@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import $api from "../api/instance";
 import { authStore } from "./AuthStore";
+import { uiStore } from "./UIStore";
 
 class RecognizeStore {
     result = null;
@@ -53,12 +54,23 @@ class RecognizeStore {
             // После успешного добавления вызываем обновление профиля
             await authStore.checkAuth();
             runInAction(() => {
-                alert("Слово добавлено в ваш словарь!");
+                uiStore.showModal({
+                    title: "Готово",
+                    message: "Слово добавлено в ваш словарь!",
+                    variant: "success",
+                    primaryLabel: "В словарь",
+                    secondaryLabel: "Закрыть",
+                    primaryRoute: "/dictionary"
+                });
                 this.reset();
             });
         } catch (err) {
             runInAction(() => {
-                alert(err.response?.data?.message || "Ошибка при добавлении");
+                uiStore.showModal({
+                    title: "Ошибка",
+                    message: err.response?.data?.message || "Ошибка при добавлении",
+                    variant: "error"
+                });
             });
         } finally {
             runInAction(() => this.isSaving = false);

@@ -51,6 +51,36 @@
     outline: none;
 }
 
+.passwordField {
+    position: relative;
+    width: 100%;
+}
+
+.passwordInput {
+    width: 100%;
+    box-sizing: border-box;
+    padding-right: 48px !important;
+}
+
+.togglePasswordBtn {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    line-height: 1;
+    font-size: 1.1rem;
+    padding: 4px;
+}
+
+.eyeIcon {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
 .mainBtn {
     background: var(--primary);
     color: white;
@@ -73,8 +103,59 @@
     font-size: 0.9rem;
 }
 
+.success {
+    color: #146c2e;
+    background: #ecfdf3;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.info {
+    color: #1d4f91;
+    background: #eef6ff;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
 .footerText {
     text-align: center;
     color: var(--text-light);
     font-size: 0.9rem;
+    margin: 0;
+}
+
+.linkBtn {
+    width: 100%;
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.googleBtn {
+    width: 100%;
+    background: #ffffff;
+    color: #202124;
+    border: 1px solid #d9d9d9;
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.googleBtn:hover {
+    background: #f8f9fa;
+}
+
+.buttonRow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
 }

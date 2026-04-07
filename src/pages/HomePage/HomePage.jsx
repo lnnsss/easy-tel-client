@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import axios from 'axios';
+import $api from '../../api/instance';
 import { useStores } from '../../stores/StoreContext';
 import styles from './HomePage.module.css';
 
@@ -10,10 +10,24 @@ const HomePage = observer(() => {
     const [ranking, setRanking] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const getAvatarSrc = (avatarUrl) => {
+        if (!avatarUrl) return '';
+        if (avatarUrl.startsWith('http')) return avatarUrl;
+        const apiBase = import.meta.env.VITE_API_URL || '';
+        const serverBase = apiBase.replace(/\/api\/?$/, '');
+        return `${serverBase}${avatarUrl}`;
+    };
+
+    const getInitials = (firstName, lastName) => {
+        const first = (firstName || '').trim().charAt(0);
+        const last = (lastName || '').trim().charAt(0);
+        return `${first}${last}`.toUpperCase() || 'U';
+    };
+
     useEffect(() => {
         const fetchRanking = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/ranking');
+                const response = await $api.get('/ranking');
                 if (response.data && Array.isArray(response.data)) {
                     setRanking(response.data);
                 }
@@ -38,9 +52,24 @@ const HomePage = observer(() => {
                             <div key={user._id} className={styles.rankingItem}>
                                 <div className={styles.rankingLeft}>
                                     <span className={styles.orderNum}>{index + 1}</span>
-                                    <span className={styles.fullName}>
-                                        {user.firstName} {user.lastName}
-                                    </span>
+                                    <div className={styles.rankingIdentity}>
+                                        <div className={styles.rankingAvatar}>
+                                            {user.avatarUrl ? (
+                                                <img
+                                                    src={getAvatarSrc(user.avatarUrl)}
+                                                    alt={`${user.firstName} ${user.lastName}`}
+                                                    className={styles.rankingAvatarImg}
+                                                />
+                                            ) : (
+                                                <span className={styles.rankingAvatarFallback}>
+                                                    {getInitials(user.firstName, user.lastName)}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span className={styles.fullName}>
+                                            {user.firstName} {user.lastName}
+                                        </span>
+                                    </div>
                                 </div>
                                 <div className={styles.rankingRight}>
                                     <span className={styles.wordBadge}>

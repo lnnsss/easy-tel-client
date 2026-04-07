@@ -7,6 +7,10 @@ import HomePage from '../pages/HomePage/HomePage';
 import RecognizePage from '../pages/RecognizePage/RecognizePage';
 import LoginPage from '../pages/Auth/LoginPage';
 import RegisterPage from '../pages/Auth/RegisterPage';
+import VerifyEmailPage from '../pages/Auth/VerifyEmailPage';
+import ForgotPasswordPage from '../pages/Auth/ForgotPasswordPage';
+import ResetPasswordPage from '../pages/Auth/ResetPasswordPage';
+import GoogleAuthCallbackPage from '../pages/Auth/GoogleAuthCallbackPage';
 import ProfilePage from '../pages/Profile/ProfilePage';
 import DictionaryPage from '../pages/DictionaryPage/DictionaryPage';
 import AdminDashboard from '../pages/Admin/AdminDashboard';
@@ -36,6 +40,22 @@ const AppRouter = observer(() => {
             <Route
                 path="/register"
                 element={!authStore.isAuth ? <RegisterPage /> : <Navigate to="/" />}
+            />
+            <Route
+                path="/forgot-password"
+                element={!authStore.isAuth ? <ForgotPasswordPage /> : <Navigate to="/" />}
+            />
+            <Route
+                path="/reset-password"
+                element={!authStore.isAuth ? <ResetPasswordPage /> : <Navigate to="/" />}
+            />
+            <Route
+                path="/google-auth-callback"
+                element={<GoogleAuthCallbackPage />}
+            />
+            <Route
+                path="/verify-email"
+                element={authStore.isAuth ? <VerifyEmailPage /> : <Navigate to="/login" />}
             />
 
             <Route
