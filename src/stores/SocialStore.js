@@ -167,40 +167,85 @@ class SocialStore {
         await this.loadCompanionRequests(this.companionPagination.page, this.companionPagination.limit);
     }
 
-    async refreshCurrentSlices() {
-        await Promise.all([
-            this.searchUsers(this.searchQuery, this.searchPagination.page, this.searchPagination.limit),
-            this.loadFriends(this.friendsPagination.page, this.friendsPagination.limit),
-            this.loadIncomingRequests(this.incomingPagination.page, this.incomingPagination.limit),
-            this.loadOutgoingRequests(this.outgoingPagination.page, this.outgoingPagination.limit),
-            this.loadFriendRanking(this.rankingPagination.page, this.rankingPagination.limit),
-            this.loadCompanionRequests(this.companionPagination.page, this.companionPagination.limit)
-        ]);
+    async refreshCurrentSlices(options = {}) {
+        const {
+            search = true,
+            friends = true,
+            incoming = true,
+            outgoing = true,
+            ranking = true,
+            companion = false
+        } = options;
+
+        const tasks = [];
+        if (search) tasks.push(this.searchUsers(this.searchQuery, this.searchPagination.page, this.searchPagination.limit));
+        if (friends) tasks.push(this.loadFriends(this.friendsPagination.page, this.friendsPagination.limit));
+        if (incoming) tasks.push(this.loadIncomingRequests(this.incomingPagination.page, this.incomingPagination.limit));
+        if (outgoing) tasks.push(this.loadOutgoingRequests(this.outgoingPagination.page, this.outgoingPagination.limit));
+        if (ranking) tasks.push(this.loadFriendRanking(this.rankingPagination.page, this.rankingPagination.limit));
+        if (companion) tasks.push(this.loadCompanionRequests(this.companionPagination.page, this.companionPagination.limit));
+
+        await Promise.allSettled(tasks);
     }
 
     async sendFriendRequest(toUserId) {
         await $api.post('/friends/requests', { toUserId });
-        await this.refreshCurrentSlices();
+        await this.refreshCurrentSlices({
+            search: true,
+            friends: false,
+            incoming: false,
+            outgoing: true,
+            ranking: false,
+            companion: true
+        });
     }
 
     async acceptRequest(requestId) {
         await $api.post(`/friends/requests/${requestId}/accept`);
-        await this.refreshCurrentSlices();
+        await this.refreshCurrentSlices({
+            search: true,
+            friends: true,
+            incoming: true,
+            outgoing: true,
+            ranking: true,
+            companion: true
+        });
     }
 
     async declineRequest(requestId) {
         await $api.post(`/friends/requests/${requestId}/decline`);
-        await this.refreshCurrentSlices();
+        await this.refreshCurrentSlices({
+            search: true,
+            friends: false,
+            incoming: true,
+            outgoing: false,
+            ranking: false,
+            companion: true
+        });
     }
 
     async cancelRequest(requestId) {
         await $api.post(`/friends/requests/${requestId}/cancel`);
-        await this.refreshCurrentSlices();
+        await this.refreshCurrentSlices({
+            search: true,
+            friends: false,
+            incoming: false,
+            outgoing: true,
+            ranking: false,
+            companion: true
+        });
     }
 
     async removeFriend(friendUserId) {
         await $api.delete(`/friends/${friendUserId}`);
-        await this.refreshCurrentSlices();
+        await this.refreshCurrentSlices({
+            search: true,
+            friends: true,
+            incoming: false,
+            outgoing: false,
+            ranking: true,
+            companion: true
+        });
     }
 }
 

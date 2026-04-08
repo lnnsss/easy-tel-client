@@ -29,6 +29,20 @@ const App = observer(() => {
     return (
         <>
             <Navbar />
+            {authStore.authRecovering && localStorage.getItem('token') && (
+                <div
+                    style={{
+                        textAlign: 'center',
+                        padding: '8px 12px',
+                        fontSize: '0.9rem',
+                        color: '#7a5a00',
+                        background: '#fff7d6',
+                        borderBottom: '1px solid #f0e1a6'
+                    }}
+                >
+                    Восстанавливаем соединение с сервером...
+                </div>
+            )}
             <AppRouter />
             <AppModal
                 isOpen={uiStore.modal.isOpen}

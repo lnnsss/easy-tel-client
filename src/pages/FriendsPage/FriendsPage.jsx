@@ -42,7 +42,10 @@ const FriendsPage = observer(() => {
     }, [socialStore, companionPage, isCompanionModalOpen]);
 
     useEffect(() => {
-        socialStore.searchUsers(query, searchPage, 20);
+        const timer = setTimeout(() => {
+            socialStore.searchUsers(query, searchPage, 20);
+        }, 350);
+        return () => clearTimeout(timer);
     }, [query, searchPage, socialStore]);
 
     const getAvatarSrc = (avatarUrl) => {
