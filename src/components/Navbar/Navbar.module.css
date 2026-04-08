@@ -69,8 +69,54 @@
     transition: color 0.2s;
 }
 
-.link:hover {
+.link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding-bottom: 4px;
+}
+
+.link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.24s ease;
+}
+
+.link:hover::after {
+    transform: scaleX(1);
+}
+
+.link:hover,
+.link:focus-visible {
     color: var(--color-primary);
+}
+
+.chatLink {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chatBadge {
+    min-width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: var(--c-black);
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+    padding: 0 5px;
 }
 
 .btnRegister {

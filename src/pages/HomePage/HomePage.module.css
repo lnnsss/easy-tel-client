@@ -15,6 +15,50 @@
     border-radius: 14px;
     padding: 12px 16px;
     margin-bottom: 18px;
+    overflow: hidden;
+}
+
+.pinnedBanner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+        115deg,
+        rgba(255, 255, 255, 0.07) 0%,
+        rgba(180, 255, 194, 0.2) 22%,
+        rgba(255, 255, 255, 0.05) 42%,
+        rgba(150, 245, 170, 0.24) 60%,
+        rgba(255, 255, 255, 0.06) 78%,
+        rgba(180, 255, 194, 0.18) 100%
+    );
+    background-size: 220% 220%;
+    animation: pinnedBannerGradientFlow 5.8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.pinnedBanner > * {
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes pinnedBannerGradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pinnedBanner::before {
+        animation: none;
+    }
 }
 
 .pinnedBannerLink {
@@ -111,11 +155,42 @@
 }
 
 .rankingHeader {
-    text-align: center;
     font-size: 1.6rem;
     font-weight: 800;
     color: var(--text);
-    margin-bottom: 30px;
+    margin: 0;
+}
+
+.rankingHeadRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+}
+
+.rankingTabs {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rankingTab,
+.rankingTabActive {
+    border: 1px solid var(--color-border-soft);
+    border-radius: 999px;
+    padding: 7px 12px;
+    background: var(--color-bg-soft);
+    color: var(--color-text);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.rankingTabActive {
+    background: var(--color-primary);
+    color: var(--c-black);
+    border-color: var(--color-primary);
 }
 
 .rankingList {

@@ -52,3 +52,24 @@
     margin: 0;
     color: var(--color-text-muted);
 }
+
+.friendActionBtn {
+    margin-top: 10px;
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--color-primary);
+    color: var(--c-black);
+}
+
+.friendActionDanger {
+    background: var(--color-bg-muted, #f2f4f4);
+    color: var(--color-text);
+}
+
+.friendActionBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}

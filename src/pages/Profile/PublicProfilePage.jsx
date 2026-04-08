@@ -13,6 +13,8 @@ const PublicProfilePage = () => {
     const [error, setError] = useState('');
     const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
     const [copiedUsername, setCopiedUsername] = useState(false);
+    const [activeStat, setActiveStat] = useState(null);
+    const [isFriendActionLoading, setIsFriendActionLoading] = useState(false);
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -59,8 +61,34 @@ const PublicProfilePage = () => {
             await navigator.clipboard.writeText(value);
             setCopiedUsername(true);
             setTimeout(() => setCopiedUsername(false), 1200);
-        } catch (_) {
+        } catch {
             setCopiedUsername(false);
+        }
+    };
+
+    const reloadProfile = async () => {
+        const { data } = await $api.get(`/users/${encodeURIComponent(username || '')}/profile`);
+        setProfile(data?.profile || null);
+    };
+
+    const onFriendAction = async () => {
+        if (!profile || isFriendActionLoading) return;
+
+        setIsFriendActionLoading(true);
+        try {
+            if (profile.relationStatus === 'none') {
+                await $api.post('/friends/requests', { toUserId: profile._id });
+            } else if (profile.relationStatus === 'pending_outgoing' && profile.requestId) {
+                await $api.post(`/friends/requests/${profile.requestId}/cancel`);
+            } else if (profile.relationStatus === 'pending_incoming' && profile.requestId) {
+                await $api.post(`/friends/requests/${profile.requestId}/accept`);
+            } else if (profile.relationStatus === 'friend') {
+                await $api.delete(`/friends/${profile._id}`);
+            }
+
+            await reloadProfile();
+        } finally {
+            setIsFriendActionLoading(false);
         }
     };
 
@@ -105,6 +133,33 @@ const PublicProfilePage = () => {
         );
     }
 
+    const stats = [
+        {
+            key: 'streak',
+            displayValue: String(profile.streak || 0),
+            label: 'Дней в ударе',
+            description: 'Количество дней подряд, когда пользователь добавлял хотя бы одно новое слово. Если пропустить день, серия обнуляется.'
+        },
+        {
+            key: 'wordsWeek',
+            displayValue: String(profile.wordsWeek || 0),
+            label: 'Слов за неделю',
+            description: 'Сколько новых слов добавлено в словарь за последние 7 дней.'
+        },
+        {
+            key: 'wordsTotal',
+            displayValue: String(profile.wordsTotal || 0),
+            label: 'Слов за все время',
+            description: 'Общее количество уникальных слов, добавленных в словарь.'
+        },
+        {
+            key: 'totalPoints',
+            displayValue: String(profile.totalPoints || 0),
+            label: 'Всего очков',
+            description: 'Сумма очков, которые пользователь получил за учебную активность.'
+        }
+    ];
+
     return (
         <div className={profileStyles.container}>
             <div className={profileStyles.header}>
@@ -129,25 +184,34 @@ const PublicProfilePage = () => {
                     {copiedUsername && <span className={profileStyles.copiedHint}>скопировано</span>}
                 </button>
                 <div className={profileStyles.rank}>Ранг: {profile.rank}</div>
+                {profile.relationStatus !== 'self' && (
+                    <button
+                        type="button"
+                        className={`${styles.friendActionBtn} ${profile.relationStatus === 'friend' ? styles.friendActionDanger : ''}`}
+                        onClick={onFriendAction}
+                        disabled={isFriendActionLoading}
+                    >
+                        {isFriendActionLoading && '...'}
+                        {!isFriendActionLoading && profile.relationStatus === 'none' && 'Добавить в друзья'}
+                        {!isFriendActionLoading && profile.relationStatus === 'pending_outgoing' && 'Отменить заявку'}
+                        {!isFriendActionLoading && profile.relationStatus === 'pending_incoming' && 'Принять заявку'}
+                        {!isFriendActionLoading && profile.relationStatus === 'friend' && 'Удалить из друзей'}
+                    </button>
+                )}
             </div>
 
             <div className={profileStyles.statsRow}>
-                <div className={profileStyles.statBox}>
-                    <span className={profileStyles.statVal}>{profile.streak || 0}</span>
-                    <span className={profileStyles.statLabel}>Дней в ударе</span>
-                </div>
-                <div className={profileStyles.statBox}>
-                    <span className={profileStyles.statVal}>{profile.wordsWeek || 0}</span>
-                    <span className={profileStyles.statLabel}>Слов за неделю</span>
-                </div>
-                <div className={profileStyles.statBox}>
-                    <span className={profileStyles.statVal}>{profile.wordsTotal || 0}</span>
-                    <span className={profileStyles.statLabel}>Слов за все время</span>
-                </div>
-                <div className={profileStyles.statBox}>
-                    <span className={profileStyles.statVal}>{profile.totalPoints || 0}</span>
-                    <span className={profileStyles.statLabel}>Всего очков</span>
-                </div>
+                {stats.map((stat) => (
+                    <button
+                        key={stat.key}
+                        type="button"
+                        className={`${profileStyles.statBox} ${profileStyles.statBoxBtn}`}
+                        onClick={() => setActiveStat(stat)}
+                    >
+                        <span className={profileStyles.statVal}>{stat.displayValue}</span>
+                        <span className={profileStyles.statLabel}>{stat.label}</span>
+                    </button>
+                ))}
             </div>
 
             <div className={profileStyles.achievementsCard}>
@@ -165,6 +229,30 @@ const PublicProfilePage = () => {
                     )}
                 </div>
             </div>
+
+            {activeStat && (
+                <div className={profileStyles.statModalOverlay} onClick={() => setActiveStat(null)}>
+                    <div
+                        className={profileStyles.statModal}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="public-stat-modal-title"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            type="button"
+                            className={profileStyles.statModalClose}
+                            onClick={() => setActiveStat(null)}
+                            aria-label="Закрыть"
+                        >
+                            ×
+                        </button>
+                        <div className={profileStyles.statModalValue}>{activeStat.displayValue}</div>
+                        <h3 id="public-stat-modal-title" className={profileStyles.statModalTitle}>{activeStat.label}</h3>
+                        <p className={profileStyles.statModalDescription}>{activeStat.description}</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

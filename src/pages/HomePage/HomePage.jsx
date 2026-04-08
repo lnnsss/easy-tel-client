@@ -9,6 +9,7 @@ const HomePage = observer(() => {
     const { authStore } = useStores();
     const isAdmin = authStore.user?.role === 'admin';
     const [ranking, setRanking] = useState([]);
+    const [rankingMode, setRankingMode] = useState('global');
     const [loading, setLoading] = useState(true);
     const [pinnedCourse, setPinnedCourse] = useState(null);
     const [bannerHidden, setBannerHidden] = useState(false);
@@ -32,9 +33,13 @@ const HomePage = observer(() => {
     useEffect(() => {
         const fetchRanking = async () => {
             try {
-                const response = await $api.get('/ranking');
-                if (response.data && Array.isArray(response.data)) {
-                    setRanking(response.data);
+                const isFriendsMode = rankingMode === 'friends' && authStore.isAuth && !isAdmin;
+                const response = await $api.get(isFriendsMode ? '/ranking/friends' : '/ranking');
+                const items = Array.isArray(response.data)
+                    ? response.data
+                    : (response.data?.items || []);
+                if (Array.isArray(items)) {
+                    setRanking(items);
                 }
             } catch (e) {
                 console.error("Ошибка загрузки рейтинга:", e);
@@ -43,7 +48,7 @@ const HomePage = observer(() => {
             }
         };
         fetchRanking();
-    }, []);
+    }, [rankingMode, authStore.isAuth, isAdmin]);
 
     useEffect(() => {
         const fetchPinnedCourse = async () => {
@@ -169,7 +174,29 @@ const HomePage = observer(() => {
             </section>
 
             <section className={styles.rankingWrapper}>
-                <h2 className={styles.rankingHeader}>Рейтинг знатоков</h2>
+                <div className={styles.rankingHeadRow}>
+                    <h2 className={styles.rankingHeader}>
+                        {rankingMode === 'friends' ? 'Рейтинг среди друзей' : 'Рейтинг знатоков'}
+                    </h2>
+                    {authStore.isAuth && !isAdmin && (
+                        <div className={styles.rankingTabs}>
+                            <button
+                                type="button"
+                                className={rankingMode === 'global' ? styles.rankingTabActive : styles.rankingTab}
+                                onClick={() => setRankingMode('global')}
+                            >
+                                Общий
+                            </button>
+                            <button
+                                type="button"
+                                className={rankingMode === 'friends' ? styles.rankingTabActive : styles.rankingTab}
+                                onClick={() => setRankingMode('friends')}
+                            >
+                                Друзья
+                            </button>
+                        </div>
+                    )}
+                </div>
 
                 <div className={styles.rankingList}>
                     {ranking.length > 0 ? (

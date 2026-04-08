@@ -1,17 +1,26 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Link } from 'react-router-dom';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Navbar.module.css';
 
 const Navbar = observer(() => {
-    const { authStore } = useStores();
+    const { authStore, chatStore } = useStores();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
     const closeMenu = () => setIsMenuOpen(false);
 
     const isAdmin = authStore.user?.role === 'admin';
+
+    useEffect(() => {
+        if (authStore.isAuth && !isAdmin) {
+            chatStore.connectSocket();
+            chatStore.loadChats();
+        } else {
+            chatStore.disconnectSocket();
+        }
+    }, [authStore.isAuth, isAdmin, chatStore]);
 
     return (
         <nav className={styles.navbar}>
@@ -32,6 +41,11 @@ const Navbar = observer(() => {
                             <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>
                             <Link to="/dictionary" className={styles.link} onClick={closeMenu}>Словарь</Link>
                             <Link to="/courses" className={styles.link} onClick={closeMenu}>Материал</Link>
+                            <Link to="/friends" className={styles.link} onClick={closeMenu}>Друзья</Link>
+                            <Link to="/chats" className={`${styles.link} ${styles.chatLink}`} onClick={closeMenu}>
+                                Чаты
+                                {chatStore.unreadTotal > 0 && <span className={styles.chatBadge}>{chatStore.unreadTotal}</span>}
+                            </Link>
                         </>
                     )}
 

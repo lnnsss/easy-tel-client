@@ -1,0 +1,336 @@
+.container {
+    max-width: var(--container-xl);
+    margin: 0 auto;
+    padding: 24px 20px 32px;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 16px;
+    min-height: calc(100vh - 120px);
+}
+
+.sidebar,
+.chatPanel {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-soft);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.sidebarHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 14px 10px;
+    border-bottom: 1px solid var(--color-border-soft);
+}
+
+.sidebarHead h2 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.sidebarHead span {
+    min-width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: var(--c-black);
+    display: grid;
+    place-items: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.chatList {
+    padding: 10px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chatItem {
+    text-align: left;
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: var(--color-bg-soft);
+    padding: 10px;
+    cursor: pointer;
+    color: var(--color-text);
+    position: relative;
+}
+
+.chatItemActive {
+    border-color: var(--color-primary);
+}
+
+.chatTitle {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.chatPreview {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 92%;
+}
+
+.unread {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: var(--c-black);
+    display: grid;
+    place-items: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.pagination {
+    padding: 8px 10px 12px;
+    border-top: 1px solid var(--color-border-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.pagination button {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+    border-radius: 8px;
+    padding: 5px 9px;
+    cursor: pointer;
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination span {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.chatPanel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.panelHead {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-border-soft);
+}
+
+.panelHead h3 {
+    margin: 0;
+}
+
+.chatUserLink {
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+.chatUserLink:hover {
+    color: var(--color-primary);
+}
+
+.messages {
+    flex: 1;
+    min-height: 260px;
+    overflow: auto;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--color-bg-soft);
+}
+
+.dayDivider {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0 4px;
+}
+
+.dayDivider span {
+    font-size: 0.76rem;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-soft);
+    border-radius: 999px;
+    padding: 4px 10px;
+}
+
+.message {
+    max-width: min(70%, 560px);
+    border-radius: 14px;
+    padding: 10px 12px;
+    line-height: 1.4;
+}
+
+.message p {
+    margin: 0;
+}
+
+.messageTime {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.72rem;
+    opacity: 0.75;
+}
+
+.messageMine {
+    align-self: flex-end;
+    background: var(--color-primary);
+    color: var(--c-black);
+}
+
+.messageOther {
+    align-self: flex-start;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-soft);
+}
+
+.inputArea {
+    border-top: 1px solid var(--color-border-soft);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.symbolBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.symbolButtons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.symbolBar button {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    background: var(--color-bg);
+    color: var(--color-text);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.topicBtn {
+    white-space: nowrap;
+}
+
+.composeRow {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+}
+
+.composeRow input {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+.composeRow button {
+    border: 0;
+    border-radius: 10px;
+    background: var(--color-primary);
+    color: var(--c-black);
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.placeholder,
+.empty {
+    margin: 16px;
+    color: var(--color-text-muted);
+}
+
+.topicModalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.38);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+    padding: 16px;
+}
+
+.topicModal {
+    width: min(460px, 100%);
+    background: var(--color-bg);
+    border-radius: 14px;
+    border: 1px solid var(--color-border-soft);
+    box-shadow: var(--shadow-xl);
+    padding: 16px;
+}
+
+.topicModal h4 {
+    margin: 0 0 10px;
+}
+
+.topicModal p {
+    margin: 0;
+    color: var(--color-text);
+    line-height: 1.5;
+}
+
+.topicModalActions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.topicPrimary,
+.topicSecondary {
+    border: 0;
+    border-radius: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.topicPrimary {
+    background: var(--color-primary);
+    color: var(--c-black);
+}
+
+.topicSecondary {
+    background: var(--color-bg-muted);
+    color: var(--color-text);
+}
+
+@media (max-width: 960px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+}

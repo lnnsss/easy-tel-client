@@ -9,6 +9,7 @@ const UserProfile = ({ user }) => {
     const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [copiedUsername, setCopiedUsername] = useState(false);
+    const [activeStat, setActiveStat] = useState(null);
     const [theme, setTheme] = useState(() => (
         document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
     ));
@@ -110,7 +111,7 @@ const UserProfile = ({ user }) => {
             await navigator.clipboard.writeText(value);
             setCopiedUsername(true);
             setTimeout(() => setCopiedUsername(false), 1200);
-        } catch (_) {
+        } catch {
             setCopiedUsername(false);
         }
     };
@@ -121,6 +122,45 @@ const UserProfile = ({ user }) => {
         localStorage.setItem('theme', nextTheme);
         document.documentElement.setAttribute('data-theme', nextTheme);
     };
+
+    const stats = [
+        {
+            key: 'streak',
+            displayValue: String(user.streak || 0),
+            label: 'Дней в ударе',
+            description: 'Количество дней подряд, когда вы добавляли хотя бы одно новое слово. Если пропустить день, серия обнуляется.'
+        },
+        {
+            key: 'wordsWeek',
+            displayValue: String(wordsWeek),
+            label: 'Слов за неделю',
+            description: 'Сколько новых слов добавлено в словарь за последние 7 дней.'
+        },
+        {
+            key: 'wordsTotal',
+            displayValue: String(wordsTotal),
+            label: 'Слов за все время',
+            description: 'Общее количество уникальных слов, которые вы добавили в личный словарь.'
+        },
+        {
+            key: 'totalPoints',
+            displayValue: String(totalPoints),
+            label: 'Всего очков',
+            description: 'Сумма очков за активность: сканирование слов и обучение в курсах.'
+        },
+        {
+            key: 'discipline',
+            displayValue: `${analytics?.discipline?.score ?? 0}/100`,
+            label: 'Дисциплина',
+            description: 'Оценка регулярности занятий и стабильности учебной активности.'
+        },
+        {
+            key: 'motivation',
+            displayValue: `${analytics?.motivation?.score ?? 0}/100`,
+            label: 'Мотивация',
+            description: 'Оценка вовлеченности в учебу: насколько активно вы продолжаете прогресс.'
+        }
+    ];
 
     return (
         <>
@@ -214,30 +254,17 @@ const UserProfile = ({ user }) => {
             </div>
 
             <div className={styles.statsRow}>
-                <div className={styles.statBox}>
-                    <span className={styles.statVal}>{user.streak || 0}</span>
-                    <span className={styles.statLabel}>Дней в ударе</span>
-                </div>
-                <div className={styles.statBox}>
-                    <span className={styles.statVal}>{wordsWeek}</span>
-                    <span className={styles.statLabel}>Слов за неделю</span>
-                </div>
-                <div className={styles.statBox}>
-                    <span className={styles.statVal}>{wordsTotal}</span>
-                    <span className={styles.statLabel}>Слов за все время</span>
-                </div>
-                <div className={styles.statBox}>
-                    <span className={styles.statVal}>{totalPoints}</span>
-                    <span className={styles.statLabel}>Всего очков</span>
-                </div>
-                <div className={styles.statBox}>
-                    <span className={styles.statVal}>{analytics?.discipline?.score ?? 0}/100</span>
-                    <span className={styles.statLabel}>Дисциплина</span>
-                </div>
-                <div className={styles.statBox}>
-                    <span className={styles.statVal}>{analytics?.motivation?.score ?? 0}/100</span>
-                    <span className={styles.statLabel}>Мотивация</span>
-                </div>
+                {stats.map((stat) => (
+                    <button
+                        key={stat.key}
+                        type="button"
+                        className={`${styles.statBox} ${styles.statBoxBtn}`}
+                        onClick={() => setActiveStat(stat)}
+                    >
+                        <span className={styles.statVal}>{stat.displayValue}</span>
+                        <span className={styles.statLabel}>{stat.label}</span>
+                    </button>
+                ))}
             </div>
 
             <div className={styles.achievementsCard}>
@@ -255,6 +282,30 @@ const UserProfile = ({ user }) => {
                     )}
                 </div>
             </div>
+
+            {activeStat && (
+                <div className={styles.statModalOverlay} onClick={() => setActiveStat(null)}>
+                    <div
+                        className={styles.statModal}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="stat-modal-title"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            type="button"
+                            className={styles.statModalClose}
+                            onClick={() => setActiveStat(null)}
+                            aria-label="Закрыть"
+                        >
+                            ×
+                        </button>
+                        <div className={styles.statModalValue}>{activeStat.displayValue}</div>
+                        <h3 id="stat-modal-title" className={styles.statModalTitle}>{activeStat.label}</h3>
+                        <p className={styles.statModalDescription}>{activeStat.description}</p>
+                    </div>
+                </div>
+            )}
         </>
     );
 };
