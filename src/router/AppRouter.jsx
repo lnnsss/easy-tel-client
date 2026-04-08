@@ -16,6 +16,7 @@ import PublicProfilePage from '../pages/Profile/PublicProfilePage';
 import DictionaryPage from '../pages/DictionaryPage/DictionaryPage';
 import FriendsPage from '../pages/FriendsPage/FriendsPage';
 import ChatsPage from '../pages/ChatsPage/ChatsPage';
+import TranslatePage from '../pages/TranslatePage/TranslatePage';
 import AdminDashboard from '../pages/Admin/AdminDashboard';
 import CoursesPage from '../pages/Courses/CoursesPage';
 import CourseDetailPage from '../pages/Courses/CourseDetailPage';
@@ -36,6 +37,7 @@ const AppRouter = observer(() => {
     return (
         <Routes>
             <Route path="/" element={isAdmin ? <Navigate to="/admin" /> : <HomePage />} />
+            <Route path="/translate" element={<TranslatePage />} />
 
             <Route
                 path="/scanner"

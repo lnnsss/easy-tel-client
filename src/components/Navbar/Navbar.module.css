@@ -218,6 +218,10 @@
         box-sizing: border-box;
     }
 
+    .links .link {
+        justify-content: center;
+    }
+
     .links .adminNavBtn {
         display: block;
     }

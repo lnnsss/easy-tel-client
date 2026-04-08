@@ -9,6 +9,10 @@ const DictionaryPage = observer(() => {
     const [viewMode, setViewMode] = useState('cards');
     const [openedWordId, setOpenedWordId] = useState(null);
     const [openedTableWordId, setOpenedTableWordId] = useState(null);
+    const [ttsLoadingWordId, setTtsLoadingWordId] = useState(null);
+    const [ttsPlayingWordId, setTtsPlayingWordId] = useState(null);
+    const [ttsError, setTtsError] = useState('');
+    const [audioObj, setAudioObj] = useState(null);
 
     useEffect(() => {
         $api.get('/dictionary')
@@ -16,6 +20,77 @@ const DictionaryPage = observer(() => {
             .catch(err => console.error(err))
             .finally(() => setLoading(false));
     }, []);
+
+    useEffect(() => {
+        return () => {
+            if (audioObj) {
+                audioObj.pause();
+                if (typeof audioObj.src === 'string' && audioObj.src.startsWith('blob:')) {
+                    URL.revokeObjectURL(audioObj.src);
+                }
+            }
+        };
+    }, [audioObj]);
+
+    const speakWord = async (wordId, text) => {
+        setTtsError('');
+        const cleanText = String(text || '').trim();
+        if (!cleanText) return;
+
+        if (ttsPlayingWordId === wordId && audioObj) {
+            audioObj.pause();
+            audioObj.currentTime = 0;
+            setTtsPlayingWordId(null);
+            return;
+        }
+
+        setTtsLoadingWordId(wordId);
+        try {
+            const { data } = await $api.post('/translate/tts', {
+                speaker: 'almaz',
+                text: cleanText
+            });
+            const wavBase64 = String(data?.wavBase64 || '');
+            if (!wavBase64) throw new Error('invalid_tts_payload');
+
+            const binary = atob(wavBase64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i += 1) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+
+            if (audioObj) {
+                audioObj.pause();
+                if (typeof audioObj.src === 'string' && audioObj.src.startsWith('blob:')) {
+                    URL.revokeObjectURL(audioObj.src);
+                }
+            }
+
+            const nextUrl = URL.createObjectURL(new Blob([bytes], { type: 'audio/wav' }));
+            const nextAudio = new Audio(nextUrl);
+            nextAudio.onended = () => {
+                setTtsPlayingWordId(null);
+                URL.revokeObjectURL(nextUrl);
+            };
+            nextAudio.onerror = () => {
+                setTtsPlayingWordId(null);
+                setTtsError('Не удалось воспроизвести озвучку');
+                URL.revokeObjectURL(nextUrl);
+            };
+
+            setAudioObj(nextAudio);
+
+            await nextAudio.play();
+            setTtsPlayingWordId(wordId);
+        } catch (err) {
+            const browserBlocked = err?.name === 'NotAllowedError';
+            if (!browserBlocked) {
+                setTtsError(err?.response?.data?.message || 'Не удалось озвучить слово');
+            }
+        } finally {
+            setTtsLoadingWordId(null);
+        }
+    };
 
     if (loading) return <div className={styles.loader}>Загрузка словаря...</div>;
 
@@ -52,6 +127,7 @@ const DictionaryPage = observer(() => {
                     </button>
                 </div>
             </div>
+            {ttsError && <p className={styles.ttsError}>{ttsError}</p>}
 
             {items.length === 0 ? (
                 <div className={styles.empty}>
@@ -82,7 +158,20 @@ const DictionaryPage = observer(() => {
                                     </div>
                                 )}
                                 <div className={styles.footer}>
-                                    Добавлено: {new Date(item.learnedAt).toLocaleDateString()}
+                                    <button
+                                        type="button"
+                                        className={styles.ttsIconBtn}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            speakWord(item._id, item.word.nameTatar);
+                                        }}
+                                        title={ttsPlayingWordId === item._id ? 'Остановить озвучку' : 'Озвучить слово'}
+                                        aria-label="Озвучить слово"
+                                        disabled={ttsLoadingWordId === item._id}
+                                    >
+                                        {ttsLoadingWordId === item._id ? '…' : ttsPlayingWordId === item._id ? '■' : '🔊'}
+                                    </button>
+                                    <span>Добавлено: {new Date(item.learnedAt).toLocaleDateString()}</span>
                                 </div>
                             </button>
                         );
@@ -111,7 +200,24 @@ const DictionaryPage = observer(() => {
                                             <td>{item.word.nameTatar}</td>
                                             <td>[{item.word.transcription}]</td>
                                             <td>{item.word.nameRu}</td>
-                                            <td>{new Date(item.learnedAt).toLocaleDateString()}</td>
+                                            <td>
+                                                <div className={styles.tableWordCell}>
+                                                    <button
+                                                        type="button"
+                                                        className={styles.ttsIconBtn}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            speakWord(item._id, item.word.nameTatar);
+                                                        }}
+                                                        title={ttsPlayingWordId === item._id ? 'Остановить озвучку' : 'Озвучить слово'}
+                                                        aria-label="Озвучить слово"
+                                                        disabled={ttsLoadingWordId === item._id}
+                                                    >
+                                                        {ttsLoadingWordId === item._id ? '…' : ttsPlayingWordId === item._id ? '■' : '🔊'}
+                                                    </button>
+                                                    <span>{new Date(item.learnedAt).toLocaleDateString()}</span>
+                                                </div>
+                                            </td>
                                         </tr>
                                         {isOpen && (
                                             <tr className={styles.tableDescriptionRow}>

@@ -103,6 +103,26 @@
     word-wrap: break-word;
 }
 
+.ttsIconBtn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--color-border-muted);
+    border-radius: 8px;
+    background: var(--color-bg);
+    color: var(--color-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.ttsIconBtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
 .transcription {
     color: var(--color-text-muted);
     font-size: 0.85rem;
@@ -152,9 +172,12 @@
 }
 
 .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
     font-size: 0.75rem;
     color: var(--color-text-disabled);
-    text-align: right;
     border-top: 1px solid var(--color-bg-soft);
     padding-top: 10px;
     margin-top: auto;
@@ -178,6 +201,12 @@
     padding: 12px 14px;
     border-bottom: 1px solid var(--color-table-row-border);
     text-align: left;
+}
+
+.tableWordCell {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .table th {
@@ -240,6 +269,12 @@
     padding: 40px;
     border-radius: 24px;
     border: 1px dashed var(--color-border-muted);
+}
+
+.ttsError {
+    margin: 0 0 10px;
+    color: var(--color-error);
+    font-size: 0.9rem;
 }
 
 .loader {

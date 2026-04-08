@@ -36,6 +36,8 @@ const Navbar = observer(() => {
                 </button>
 
                 <div className={`${styles.links} ${isMenuOpen ? styles.linksActive : ''}`}>
+                    <Link to="/translate" className={styles.link} onClick={closeMenu}>Переводчик</Link>
+
                     {authStore.isAuth && !isAdmin && (
                         <>
                             <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>

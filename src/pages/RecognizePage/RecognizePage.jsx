@@ -1,10 +1,27 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '../../stores/StoreContext';
+import $api from '../../api/instance';
 import styles from './RecognizePage.module.css';
 
 const RecognizePage = observer(() => {
     const { recognizeStore, authStore } = useStores();
+    const [ttsLoading, setTtsLoading] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [ttsError, setTtsError] = useState('');
+    const audioRef = useRef(null);
+
+    useEffect(() => {
+        return () => {
+            if (audioRef.current) {
+                if (typeof audioRef.current.src === 'string' && audioRef.current.src.startsWith('blob:')) {
+                    URL.revokeObjectURL(audioRef.current.src);
+                }
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+        };
+    }, []);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -26,6 +43,81 @@ const RecognizePage = observer(() => {
     });
 
     const hasResult = Boolean(recognizeStore.result);
+    const stopAudio = () => {
+        if (audioRef.current) {
+            if (typeof audioRef.current.src === 'string' && audioRef.current.src.startsWith('blob:')) {
+                URL.revokeObjectURL(audioRef.current.src);
+            }
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+        }
+        setIsPlaying(false);
+    };
+
+    const onSpeakWord = async () => {
+        setTtsError('');
+        const textToSpeak = String(recognizeStore.result?.nameTatar || '').trim();
+
+        if (!textToSpeak) {
+            return;
+        }
+
+        if (isPlaying) {
+            stopAudio();
+            return;
+        }
+
+        setTtsLoading(true);
+        try {
+            const { data } = await $api.post('/translate/tts', {
+                speaker: 'almaz',
+                text: textToSpeak
+            });
+
+            const wavBase64 = String(data?.wavBase64 || '');
+            if (!wavBase64) {
+                throw new Error('invalid_tts_payload');
+            }
+
+            const binary = atob(wavBase64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i += 1) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+
+            if (audioRef.current) {
+                if (typeof audioRef.current.src === 'string' && audioRef.current.src.startsWith('blob:')) {
+                    URL.revokeObjectURL(audioRef.current.src);
+                }
+                audioRef.current.pause();
+            }
+
+            const audioUrl = URL.createObjectURL(new Blob([bytes], { type: 'audio/wav' }));
+            const audio = new Audio(audioUrl);
+            audioRef.current = audio;
+            audio.onended = () => {
+                setIsPlaying(false);
+                URL.revokeObjectURL(audioUrl);
+            };
+            audio.onerror = () => {
+                setIsPlaying(false);
+                URL.revokeObjectURL(audioUrl);
+                setTtsError('Не удалось воспроизвести озвучку');
+            };
+            audio.play()
+                .then(() => setIsPlaying(true))
+                .catch((err) => {
+                    if (err?.name === 'NotAllowedError') {
+                        return;
+                    }
+                    setTtsError('Не удалось воспроизвести озвучку');
+                });
+        } catch (e) {
+            setTtsError(e?.response?.data?.message || 'Не удалось озвучить слово');
+        } finally {
+            setTtsLoading(false);
+        }
+    };
 
     return (
         <div className={`${styles.container} ${hasResult ? styles.containerExpanded : ''}`}>
@@ -62,6 +154,7 @@ const RecognizePage = observer(() => {
                                 <div className={styles.details}>
                                     <p><strong>Русский:</strong> {recognizeStore.result.nameRu}</p>
                                     <p className={styles.descriptionText}>{recognizeStore.result.description}</p>
+                                    {ttsError && <p className={styles.ttsError}>{ttsError}</p>}
                                 </div>
 
                                 <div className={styles.btnGroup}>
@@ -82,6 +175,15 @@ const RecognizePage = observer(() => {
                                     ) : (
                                         <p className={styles.authAlert}>Войдите, чтобы сохранить слово</p>
                                     )}
+
+                                    <button
+                                        onClick={onSpeakWord}
+                                        className={styles.speakBtn}
+                                        disabled={ttsLoading}
+                                        type="button"
+                                    >
+                                        {ttsLoading ? 'Подготовка озвучки...' : isPlaying ? 'Остановить озвучку' : 'Озвучить'}
+                                    </button>
 
                                     <button onClick={() => recognizeStore.reset()} className={styles.resetBtn}>
                                         Заново

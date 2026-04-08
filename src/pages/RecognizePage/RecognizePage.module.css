@@ -101,6 +101,7 @@
 
 .details { margin-bottom: 20px; font-size: 1rem; color: var(--color-text-secondary); }
 .descriptionText { margin-top: 8px; line-height: 1.5; color: var(--color-text-light); font-size: 0.9rem; }
+.ttsError { margin-top: 8px; color: var(--color-error); font-size: 0.86rem; }
 
 /* Кнопки в столбик на всю ширину */
 .btnGroup {
@@ -109,7 +110,7 @@
     gap: 10px;
 }
 
-.addBtn, .resetBtn, .alreadyBtn {
+.addBtn, .resetBtn, .alreadyBtn, .speakBtn {
     width: 100%; /* На всю ширину */
     padding: 16px;
     border-radius: 14px;
@@ -139,6 +140,13 @@
 }
 
 .resetBtn:hover { background: var(--color-bg-hover); }
+
+.speakBtn {
+    background: var(--color-bg-soft);
+    color: var(--color-text-dim);
+}
+
+.speakBtn:hover { background: var(--color-bg-hover); }
 
 .authAlert {
     text-align: center;
