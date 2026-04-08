@@ -1,10 +1,16 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import $api from "../api/instance";
 
+const AUTH_RETRY_DELAYS_MS = [1000, 2500, 5000];
+
 class AuthStore {
     user = null;
     isAuth = false;
     isLoading = Boolean(localStorage.getItem('token'));
+    authRecovering = false;
+    authTransientError = '';
+    authRetryAttempt = 0;
+    authRetryTimer = null;
 
     constructor() {
         makeAutoObservable(this);
@@ -14,6 +20,28 @@ class AuthStore {
         const message = e.response?.data?.message || fallbackMessage;
         const details = e.response?.data?.details;
         return details ? `${message}. ${details}` : message;
+    }
+
+    clearAuthRetry() {
+        if (this.authRetryTimer) {
+            clearTimeout(this.authRetryTimer);
+            this.authRetryTimer = null;
+        }
+    }
+
+    scheduleAuthRetry() {
+        if (this.authRetryTimer) return;
+        if (this.authRetryAttempt >= AUTH_RETRY_DELAYS_MS.length) return;
+
+        const delay = AUTH_RETRY_DELAYS_MS[this.authRetryAttempt];
+        this.authRetryAttempt += 1;
+
+        this.authRetryTimer = setTimeout(async () => {
+            runInAction(() => {
+                this.authRetryTimer = null;
+            });
+            await this.checkAuth();
+        }, delay);
     }
 
     async register(fields) {
@@ -171,9 +199,25 @@ class AuthStore {
             runInAction(() => {
                 this.user = data;
                 this.isAuth = true;
+                this.authRecovering = false;
+                this.authTransientError = '';
+                this.authRetryAttempt = 0;
             });
+            this.clearAuthRetry();
         } catch (e) {
-            this.logout();
+            const status = Number(e?.response?.status) || 0;
+            const isHardAuthFailure = status === 401 || status === 403;
+
+            if (isHardAuthFailure) {
+                this.clearAuthRetry();
+                this.logout();
+            } else {
+                runInAction(() => {
+                    this.authRecovering = true;
+                    this.authTransientError = this.formatError(e, 'Временная ошибка проверки сессии');
+                });
+                this.scheduleAuthRetry();
+            }
         } finally {
             runInAction(() => {
                 this.isLoading = false;
@@ -197,8 +241,12 @@ class AuthStore {
     }
 
     logout() {
+        this.clearAuthRetry();
         this.user = null;
         this.isAuth = false;
+        this.authRecovering = false;
+        this.authTransientError = '';
+        this.authRetryAttempt = 0;
         localStorage.removeItem('token');
     }
 }
