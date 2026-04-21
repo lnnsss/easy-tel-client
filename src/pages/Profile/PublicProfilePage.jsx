@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import $api from '../../api/instance';
+import { useStores } from '../../stores/StoreContext';
 import profileStyles from './Profile.module.css';
 import styles from './PublicProfilePage.module.css';
 
 const PublicProfilePage = () => {
+    const { chatStore, uiStore } = useStores();
     const { username } = useParams();
     const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
@@ -15,6 +17,7 @@ const PublicProfilePage = () => {
     const [copiedUsername, setCopiedUsername] = useState(false);
     const [activeStat, setActiveStat] = useState(null);
     const [isFriendActionLoading, setIsFriendActionLoading] = useState(false);
+    const [isChatActionLoading, setIsChatActionLoading] = useState(false);
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -71,7 +74,7 @@ const PublicProfilePage = () => {
         setProfile(data?.profile || null);
     };
 
-    const onFriendAction = async () => {
+    const performFriendAction = async () => {
         if (!profile || isFriendActionLoading) return;
 
         setIsFriendActionLoading(true);
@@ -87,8 +90,95 @@ const PublicProfilePage = () => {
             }
 
             await reloadProfile();
+        } catch (e) {
+            uiStore.showModal({
+                title: 'Ошибка',
+                message: e?.response?.data?.message || 'Не удалось выполнить действие',
+                variant: 'error',
+                secondaryLabel: 'Закрыть'
+            });
         } finally {
             setIsFriendActionLoading(false);
+        }
+    };
+
+    const showConfirmModal = (title, message, onConfirm) => {
+        uiStore.showModal({
+            title,
+            message,
+            variant: 'info',
+            primaryLabel: 'Да',
+            secondaryLabel: 'Нет',
+            onPrimary: async () => {
+                uiStore.closeModal();
+                await onConfirm();
+            },
+            onSecondary: () => uiStore.closeModal()
+        });
+    };
+
+    const onFriendAction = async () => {
+        if (!profile || isFriendActionLoading) return;
+
+        if (profile.relationStatus === 'none') {
+            showConfirmModal('Отправить заявку?', 'Отправить запрос в друзья этому пользователю?', performFriendAction);
+            return;
+        }
+
+        if (profile.relationStatus === 'pending_incoming') {
+            showConfirmModal('Принять заявку?', 'Подтвердить дружбу с этим пользователем?', performFriendAction);
+            return;
+        }
+
+        if (profile.relationStatus === 'pending_outgoing') {
+            showConfirmModal('Отменить заявку?', 'Отменить отправленную заявку в друзья?', performFriendAction);
+            return;
+        }
+
+        if (profile.relationStatus === 'friend') {
+            showConfirmModal('Удалить из друзей?', 'Пользователь будет удален из списка друзей.', performFriendAction);
+            return;
+        }
+
+        await performFriendAction();
+    };
+
+    const onStartChat = async () => {
+        if (!profile?._id || isChatActionLoading) return;
+
+        if (profile.relationStatus !== 'friend') {
+            uiStore.showModal({
+                title: 'Чат недоступен',
+                message: 'Чат можно открыть только после добавления в друзья.',
+                variant: 'info',
+                secondaryLabel: 'Закрыть'
+            });
+            return;
+        }
+
+        setIsChatActionLoading(true);
+        try {
+            let conversation = await chatStore.openOrCreateChat(profile._id);
+
+            if (!conversation?._id) {
+                const { data } = await $api.get('/chats', { params: { page: 1, limit: 50 } });
+                conversation = (data?.items || []).find((item) => String(item?.otherUser?._id) === String(profile._id)) || null;
+            }
+
+            if (!conversation?._id) {
+                throw new Error('chat_not_found');
+            }
+
+            navigate(`/chats?conversationId=${encodeURIComponent(String(conversation._id))}`);
+        } catch (e) {
+            uiStore.showModal({
+                title: 'Ошибка',
+                message: e?.response?.data?.message || 'Не удалось открыть чат',
+                variant: 'error',
+                secondaryLabel: 'Закрыть'
+            });
+        } finally {
+            setIsChatActionLoading(false);
         }
     };
 
@@ -185,18 +275,28 @@ const PublicProfilePage = () => {
                 </button>
                 <div className={profileStyles.rank}>Ранг: {profile.rank}</div>
                 {profile.relationStatus !== 'self' && (
-                    <button
-                        type="button"
-                        className={`${styles.friendActionBtn} ${profile.relationStatus === 'friend' ? styles.friendActionDanger : ''}`}
-                        onClick={onFriendAction}
-                        disabled={isFriendActionLoading}
-                    >
-                        {isFriendActionLoading && '...'}
-                        {!isFriendActionLoading && profile.relationStatus === 'none' && 'Добавить в друзья'}
-                        {!isFriendActionLoading && profile.relationStatus === 'pending_outgoing' && 'Отменить заявку'}
-                        {!isFriendActionLoading && profile.relationStatus === 'pending_incoming' && 'Принять заявку'}
-                        {!isFriendActionLoading && profile.relationStatus === 'friend' && 'Удалить из друзей'}
-                    </button>
+                    <div className={styles.friendActionsRow}>
+                        <button
+                            type="button"
+                            className={styles.chatActionBtn}
+                            onClick={onStartChat}
+                            disabled={isChatActionLoading}
+                        >
+                            {isChatActionLoading ? '...' : 'Чат'}
+                        </button>
+                        <button
+                            type="button"
+                            className={`${styles.friendActionBtn} ${profile.relationStatus === 'friend' ? styles.friendActionDanger : ''}`}
+                            onClick={onFriendAction}
+                            disabled={isFriendActionLoading}
+                        >
+                            {isFriendActionLoading && '...'}
+                            {!isFriendActionLoading && profile.relationStatus === 'none' && 'Добавить в друзья'}
+                            {!isFriendActionLoading && profile.relationStatus === 'pending_outgoing' && 'Отменить заявку'}
+                            {!isFriendActionLoading && profile.relationStatus === 'pending_incoming' && 'Принять заявку'}
+                            {!isFriendActionLoading && profile.relationStatus === 'friend' && 'Удалить из друзей'}
+                        </button>
+                    </div>
                 )}
             </div>
 

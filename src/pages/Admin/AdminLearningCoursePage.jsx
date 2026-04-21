@@ -52,7 +52,7 @@ const AdminLearningCoursePage = () => {
         questions: [createQuestion()]
     });
     const [expandedQuestionIndex, setExpandedQuestionIndex] = useState(0);
-    const [courseCategoryId, setCourseCategoryId] = useState('');
+    const [courseCategoryIds, setCourseCategoryIds] = useState([]);
 
     const selectedTopic = useMemo(
         () => topics.find((topic) => topic._id === quizTopicId) || null,
@@ -70,7 +70,10 @@ const AdminLearningCoursePage = () => {
             setCourse(currentCourse);
             setCategories(categoriesRes.data || []);
             setTopics(topicsRes.data || []);
-            setCourseCategoryId(String(currentCourse?.categoryId?._id || currentCourse?.categoryId || ''));
+            const loadedCategoryIds = Array.isArray(currentCourse?.categoryIds) && currentCourse.categoryIds.length > 0
+                ? currentCourse.categoryIds.map((entry) => String(entry?._id || entry || '')).filter(Boolean)
+                : [String(currentCourse?.categoryId?._id || currentCourse?.categoryId || '')].filter(Boolean);
+            setCourseCategoryIds(loadedCategoryIds);
         } catch (e) {
             setError(e.response?.data?.message || 'Ошибка загрузки курса');
         }
@@ -239,12 +242,15 @@ const AdminLearningCoursePage = () => {
     };
 
     const saveCourseCategory = async () => {
-        if (!courseCategoryId) return;
+        if (!Array.isArray(courseCategoryIds) || courseCategoryIds.length === 0) {
+            setError('Выберите хотя бы одну категорию');
+            return;
+        }
         try {
-            await CourseService.updateAdminCourse(courseId, { categoryId: courseCategoryId });
+            await CourseService.updateAdminCourse(courseId, { categoryIds: courseCategoryIds });
             uiStore.showModal({
                 title: 'Готово',
-                message: 'Категория курса обновлена.',
+                message: 'Категории курса обновлены.',
                 variant: 'success',
                 secondaryLabel: 'Закрыть'
             });
@@ -259,6 +265,16 @@ const AdminLearningCoursePage = () => {
         }
     };
 
+    const toggleCourseCategory = (categoryId, checked) => {
+        setCourseCategoryIds((prev) => {
+            if (checked) {
+                if (prev.includes(categoryId)) return prev;
+                return [...prev, categoryId];
+            }
+            return prev.filter((id) => id !== categoryId);
+        });
+    };
+
     return (
         <div className={styles.page}>
             <Link to="/admin/learning" className={styles.back}>← К курсам</Link>
@@ -268,18 +284,21 @@ const AdminLearningCoursePage = () => {
 
             <section className={styles.card}>
                 <h3>Редактирование курса</h3>
-                <div className={styles.inlineFields}>
-                    <select
-                        value={courseCategoryId}
-                        onChange={(e) => setCourseCategoryId(e.target.value)}
-                    >
-                        <option value="">Выберите категорию</option>
+                <div className={styles.courseCategoryRow}>
+                    <div className={styles.categoryChecks} role="group" aria-label="Категории курса">
                         {categories.map((category) => (
-                            <option key={category._id} value={category._id}>{category.name}</option>
+                            <label key={category._id} className={styles.categoryCheck}>
+                                <input
+                                    type="checkbox"
+                                    checked={courseCategoryIds.includes(category._id)}
+                                    onChange={(e) => toggleCourseCategory(category._id, e.target.checked)}
+                                />
+                                <span>{category.name}</span>
+                            </label>
                         ))}
-                    </select>
+                    </div>
                     <button type="button" onClick={saveCourseCategory}>
-                        Сменить категорию
+                        Сохранить категории
                     </button>
                 </div>
             </section>

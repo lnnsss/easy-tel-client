@@ -179,12 +179,19 @@
 .rankingTab,
 .rankingTabActive {
     border: 1px solid var(--color-border-soft);
-    border-radius: 999px;
-    padding: 7px 12px;
-    background: var(--color-bg-soft);
+    border-radius: 10px;
+    padding: 9px 14px;
+    background: var(--color-bg);
     color: var(--color-text);
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 700;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.rankingTab:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
 }
 
 .rankingTabActive {
@@ -218,6 +225,23 @@
     background: var(--bg-light);
     border-radius: 16px;
     transition: all 0.3s ease;
+}
+
+.rankingItemAnimated {
+    opacity: 0;
+    transform: translateY(-8px);
+    animation: rankingItemIn 0.28s ease forwards;
+}
+
+@keyframes rankingItemIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .rankingItem:hover {
@@ -388,4 +412,13 @@
 
 @media (max-width: 480px) {
     .fullName { max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rankingItemAnimated {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+
 }

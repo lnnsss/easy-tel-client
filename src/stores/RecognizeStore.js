@@ -6,6 +6,9 @@ import { uiStore } from "./UIStore";
 class RecognizeStore {
     result = null;
     loading = false;
+    examplesLoading = false;
+    examplesRequested = false;
+    examplesError = null;
     isSaving = false;
     error = null;
     preview = null;
@@ -17,6 +20,9 @@ class RecognizeStore {
     setPreview(file) {
         this.result = null;
         this.error = null;
+        this.examplesLoading = false;
+        this.examplesRequested = false;
+        this.examplesError = null;
         if (this.preview) URL.revokeObjectURL(this.preview);
         this.preview = URL.createObjectURL(file);
     }
@@ -25,6 +31,9 @@ class RecognizeStore {
         this.loading = true;
         this.error = null;
         this.result = null;
+        this.examplesLoading = false;
+        this.examplesRequested = false;
+        this.examplesError = null;
         const formData = new FormData();
         formData.append("image", file);
 
@@ -32,7 +41,10 @@ class RecognizeStore {
             const { data } = await $api.post("/recognize", formData);
             runInAction(() => {
                 if (data.success) {
-                    this.result = data.data;
+                    this.result = {
+                        ...data.data,
+                        usageExamples: []
+                    };
                 } else {
                     this.error = data.message;
                 }
@@ -43,6 +55,42 @@ class RecognizeStore {
             });
         } finally {
             runInAction(() => this.loading = false);
+        }
+    }
+
+    async generateUsageExamples() {
+        if (!this.result?.id || this.examplesLoading) return;
+
+        this.examplesRequested = true;
+        this.examplesError = null;
+        this.examplesLoading = true;
+        try {
+            const excludeExamples = Array.isArray(this.result?.usageExamples)
+                ? this.result.usageExamples.map((item) => item?.textRu).filter(Boolean)
+                : [];
+
+            const { data } = await $api.post("/recognize/examples", {
+                wordId: this.result.id,
+                excludeExamples
+            });
+
+            runInAction(() => {
+                const usageExamples = Array.isArray(data?.data?.usageExamples)
+                    ? data.data.usageExamples
+                    : [];
+                this.result = {
+                    ...this.result,
+                    usageExamples
+                };
+            });
+        } catch (err) {
+            runInAction(() => {
+                this.examplesError = err.response?.data?.message || "Не удалось загрузить примеры";
+            });
+        } finally {
+            runInAction(() => {
+                this.examplesLoading = false;
+            });
         }
     }
 
@@ -81,6 +129,9 @@ class RecognizeStore {
         this.result = null;
         this.preview = null;
         this.error = null;
+        this.examplesLoading = false;
+        this.examplesRequested = false;
+        this.examplesError = null;
     }
 }
 

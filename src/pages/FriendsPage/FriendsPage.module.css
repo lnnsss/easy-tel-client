@@ -133,7 +133,8 @@
 }
 
 .badge {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 600;
     color: var(--color-text-muted);
 }
 
@@ -151,6 +152,15 @@
     padding: 10px;
     border-radius: 12px;
     background: var(--color-bg-soft);
+    transition: transform 0.16s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.rankRow:hover {
+    transform: translateY(-1px);
+    border-color: var(--color-primary);
+    background: var(--color-bg);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
 .empty {
@@ -256,8 +266,24 @@
     width: fit-content;
 }
 
+.publishRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 10px;
+}
+
+.publishField {
+    width: 100%;
+}
+
 .modalList h4 {
     margin: 0 0 10px;
+}
+
+.sectionTitle {
+    margin: 0 0 10px;
+    font-size: 1rem;
 }
 
 .notice {
@@ -317,5 +343,14 @@
 
     .rowActions {
         justify-content: flex-start;
+    }
+
+    .publishRow {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    .primaryAction {
+        width: 100%;
     }
 }

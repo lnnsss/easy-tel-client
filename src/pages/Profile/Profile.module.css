@@ -98,6 +98,15 @@
     font-weight: 700;
     cursor: pointer;
     box-sizing: border-box;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.avatarUploadBtn:hover,
+.avatarUploadBtn:focus-visible {
+    background: var(--color-bg-soft);
+    border-color: var(--color-primary);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
 }
 
 .fullName {
@@ -145,21 +154,6 @@
     width: 100%;
 }
 
-.themeToggleBtn {
-    width: 100%;
-    border: none;
-    background: var(--color-bg-muted);
-    color: var(--color-text-alt);
-    padding: var(--space-3) var(--space-4);
-    border-radius: 10px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.themeToggleBtn:hover {
-    filter: brightness(0.98);
-}
-
 .editBtn {
     border: none;
     background: var(--color-bg-muted);
@@ -197,16 +191,26 @@
 
 .editMetaRow {
     display: grid;
-    grid-template-columns: 1fr 180px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-3);
     align-items: stretch;
 }
 
 .editForm input {
+    width: 100%;
     padding: var(--space-3);
     border: 1px solid var(--color-border);
     border-radius: 10px;
     font-size: 0.95rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.editForm input:hover,
+.editForm input:focus-visible {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(74, 201, 126, 0.18);
+    outline: none;
 }
 
 .saveBtn {
@@ -217,6 +221,13 @@
     border-radius: 10px;
     font-weight: 700;
     cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.saveBtn:hover,
+.saveBtn:focus-visible {
+    transform: translateY(-1px);
+    filter: brightness(0.98);
 }
 
 /* Бейдж админа в стиле твоего ранга, но другого цвета (или такого же зеленого) */

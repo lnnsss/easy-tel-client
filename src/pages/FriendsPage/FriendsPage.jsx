@@ -67,6 +67,62 @@ const FriendsPage = observer(() => {
         [socialStore.searchResults]
     );
 
+    const showActionConfirm = (title, message, onConfirm) => {
+        uiStore.showModal({
+            title,
+            message,
+            variant: 'info',
+            primaryLabel: 'Да',
+            secondaryLabel: 'Нет',
+            onPrimary: async () => {
+                try {
+                    await onConfirm();
+                    uiStore.closeModal();
+                } catch (e) {
+                    uiStore.showModal({
+                        title: 'Ошибка',
+                        message: e?.response?.data?.message || 'Не удалось выполнить действие',
+                        variant: 'error',
+                        secondaryLabel: 'Закрыть'
+                    });
+                }
+            },
+            onSecondary: () => uiStore.closeModal()
+        });
+    };
+
+    const onSendFriendRequest = (userId) => {
+        showActionConfirm(
+            'Отправить заявку?',
+            'Отправить пользователю запрос в друзья?',
+            () => socialStore.sendFriendRequest(userId)
+        );
+    };
+
+    const onAcceptRequest = (requestId) => {
+        showActionConfirm(
+            'Принять заявку?',
+            'Подтвердить дружбу с этим пользователем?',
+            () => socialStore.acceptRequest(requestId)
+        );
+    };
+
+    const onRemoveFriend = (friendUserId) => {
+        showActionConfirm(
+            'Удалить из друзей?',
+            'Пользователь будет удален из списка друзей.',
+            () => socialStore.removeFriend(friendUserId)
+        );
+    };
+
+    const onCancelRequest = (requestId) => {
+        showActionConfirm(
+            'Отменить заявку?',
+            'Заявка в друзья будет отменена.',
+            () => socialStore.cancelRequest(requestId)
+        );
+    };
+
     const onStartChat = async (friendId) => {
         const conversation = await chatStore.openOrCreateChat(friendId);
         if (conversation?._id) {
@@ -158,18 +214,18 @@ const FriendsPage = observer(() => {
                                 </div>
                             </Link>
                             <div className={styles.rowActions}>
-                                {user.relationStatus === 'friend' && <span className={styles.badge}>Уже друг</span>}
+                                {user.relationStatus === 'friend' && <span className={styles.badge}>Друзья</span>}
                                 {user.relationStatus === 'pending_outgoing' && (
-                                    <button type="button" onClick={() => socialStore.cancelRequest(user.requestId)}>Отменить</button>
+                                    <button type="button" onClick={() => onCancelRequest(user.requestId)}>Отменить</button>
                                 )}
                                 {user.relationStatus === 'pending_incoming' && (
                                     <>
-                                        <button type="button" onClick={() => socialStore.acceptRequest(user.requestId)}>Принять</button>
+                                        <button type="button" onClick={() => onAcceptRequest(user.requestId)}>Принять</button>
                                         <button type="button" className={styles.ghost} onClick={() => socialStore.declineRequest(user.requestId)}>Отклонить</button>
                                     </>
                                 )}
                                 {user.relationStatus === 'none' && (
-                                    <button type="button" onClick={() => socialStore.sendFriendRequest(user._id)}>Добавить</button>
+                                    <button type="button" onClick={() => onSendFriendRequest(user._id)}>Добавить</button>
                                 )}
                             </div>
                         </div>
@@ -202,7 +258,7 @@ const FriendsPage = observer(() => {
                                 </Link>
                                 <div className={styles.rowActions}>
                                     <button type="button" onClick={() => onStartChat(friend._id)}>Чат</button>
-                                    <button type="button" className={styles.ghost} onClick={() => socialStore.removeFriend(friend._id)}>Удалить</button>
+                                    <button type="button" className={styles.ghost} onClick={() => onRemoveFriend(friend._id)}>Удалить</button>
                                 </div>
                             </div>
                         ))}
@@ -232,7 +288,7 @@ const FriendsPage = observer(() => {
                                     </div>
                                 </div>
                                 <div className={styles.rowActions}>
-                                    <button type="button" onClick={() => socialStore.acceptRequest(item._id)}>Принять</button>
+                                    <button type="button" onClick={() => onAcceptRequest(item._id)}>Принять</button>
                                     <button type="button" className={styles.ghost} onClick={() => socialStore.declineRequest(item._id)}>Отклонить</button>
                                 </div>
                             </div>
@@ -251,7 +307,7 @@ const FriendsPage = observer(() => {
                     <div className={styles.list}>
                         {(socialStore.outgoingRequests || []).map((item) => (
                             <div key={item._id} className={styles.userRow}>
-                                <div className={styles.userLeft}>
+                                <Link to={`/u/${encodeURIComponent(item.to.username)}`} className={styles.userLeft}>
                                     <div className={styles.avatar}>
                                         {item.to.avatarUrl ? (
                                             <img src={getAvatarSrc(item.to.avatarUrl)} alt={item.to.username} />
@@ -263,9 +319,9 @@ const FriendsPage = observer(() => {
                                         <strong>{item.to.firstName} {item.to.lastName}</strong>
                                         <span>@{item.to.username}</span>
                                     </div>
-                                </div>
+                                </Link>
                                 <div className={styles.rowActions}>
-                                    <button type="button" className={styles.ghost} onClick={() => socialStore.cancelRequest(item._id)}>Отменить</button>
+                                    <button type="button" className={styles.ghost} onClick={() => onCancelRequest(item._id)}>Отменить</button>
                                 </div>
                             </div>
                         ))}
@@ -300,19 +356,22 @@ const FriendsPage = observer(() => {
                     <h3>Поиск собеседника</h3>
                     {companionNotice && <div className={styles.notice}>{companionNotice}</div>}
                     <form className={styles.modalForm} onSubmit={onPublishCompanionRequest}>
-                        <label>
-                            <span className={styles.fieldLabel}>Зачем ищете собеседника?</span>
-                            <select
-                                value={companionPurpose}
-                                onChange={(e) => setCompanionPurpose(e.target.value)}
-                            >
-                                <option value="speech_practice">Для тренировки татарской речи</option>
-                                <option value="competition">Для соревнования между собой</option>
-                                <option value="course_together">Для совместного прохождения курса</option>
-                                <option value="motivation">Для взаимной мотивации</option>
-                                <option value="other">Другое</option>
-                            </select>
-                        </label>
+                        <div className={styles.publishRow}>
+                            <label className={styles.publishField}>
+                                <span className={styles.fieldLabel}>Зачем ищете собеседника?</span>
+                                <select
+                                    value={companionPurpose}
+                                    onChange={(e) => setCompanionPurpose(e.target.value)}
+                                >
+                                    <option value="speech_practice">Для тренировки татарской речи</option>
+                                    <option value="competition">Для соревнования между собой</option>
+                                    <option value="course_together">Для совместного прохождения курса</option>
+                                    <option value="motivation">Для взаимной мотивации</option>
+                                    <option value="other">Другое</option>
+                                </select>
+                            </label>
+                            <button type="submit" className={styles.primaryAction}>Опубликовать заявку</button>
+                        </div>
                         {companionPurpose === 'other' && (
                             <label>
                                 <span className={styles.fieldLabel}>Своя причина</span>
@@ -323,23 +382,24 @@ const FriendsPage = observer(() => {
                                 />
                             </label>
                         )}
-                        <button type="submit" className={styles.primaryAction}>Опубликовать заявку</button>
                     </form>
 
                     {socialStore.myCompanionRequest?.isActive && (
-                        <div className={styles.myRequestCard}>
-                            <div className={styles.myRequestContent}>
-                                <h4>Моя заявка</h4>
-                                <p>{socialStore.myCompanionRequest.purposeLabel}</p>
+                        <>
+                            <h4 className={styles.sectionTitle}>Мои заявки</h4>
+                            <div className={styles.myRequestCard}>
+                                <div className={styles.myRequestContent}>
+                                    <p>{socialStore.myCompanionRequest.purposeLabel}</p>
+                                </div>
+                                <button type="button" className={styles.ghostAction} onClick={onWithdrawCompanionRequest}>
+                                    Отозвать заявку
+                                </button>
                             </div>
-                            <button type="button" className={styles.ghostAction} onClick={onWithdrawCompanionRequest}>
-                                Отозвать заявку
-                            </button>
-                        </div>
+                        </>
                     )}
 
                     <div className={styles.modalList}>
-                        <h4>Кто ищет собеседника</h4>
+                        <h4 className={styles.sectionTitle}>Прочие заявки</h4>
                         {(socialStore.companionRequests || []).map((item) => (
                             <div key={item._id} className={styles.userRow}>
                                 <Link to={`/u/${encodeURIComponent(item.user.username)}`} className={styles.userLeft}>
@@ -356,18 +416,18 @@ const FriendsPage = observer(() => {
                                     </div>
                                 </Link>
                                 <div className={styles.rowActions}>
-                                    {item.relationStatus === 'friend' && <span className={styles.badge}>Уже друг</span>}
+                                    {item.relationStatus === 'friend' && <span className={styles.badge}>Друзья</span>}
                                     {item.relationStatus === 'pending_outgoing' && (
-                                        <button type="button" onClick={() => socialStore.cancelRequest(item.requestId)}>Отменить</button>
+                                        <button type="button" onClick={() => onCancelRequest(item.requestId)}>Отменить</button>
                                     )}
                                     {item.relationStatus === 'pending_incoming' && (
                                         <>
-                                            <button type="button" onClick={() => socialStore.acceptRequest(item.requestId)}>Принять</button>
+                                            <button type="button" onClick={() => onAcceptRequest(item.requestId)}>Принять</button>
                                             <button type="button" className={styles.ghost} onClick={() => socialStore.declineRequest(item.requestId)}>Отклонить</button>
                                         </>
                                     )}
                                     {item.relationStatus === 'none' && (
-                                        <button type="button" onClick={() => socialStore.sendFriendRequest(item.user._id)}>Добавить</button>
+                                        <button type="button" onClick={() => onSendFriendRequest(item.user._id)}>Добавить</button>
                                     )}
                                 </div>
                             </div>

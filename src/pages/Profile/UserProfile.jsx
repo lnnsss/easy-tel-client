@@ -10,9 +10,6 @@ const UserProfile = ({ user }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [copiedUsername, setCopiedUsername] = useState(false);
     const [activeStat, setActiveStat] = useState(null);
-    const [theme, setTheme] = useState(() => (
-        document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
-    ));
     const [form, setForm] = useState({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
@@ -116,13 +113,6 @@ const UserProfile = ({ user }) => {
         }
     };
 
-    const onToggleTheme = () => {
-        const nextTheme = theme === 'light' ? 'dark' : 'light';
-        setTheme(nextTheme);
-        localStorage.setItem('theme', nextTheme);
-        document.documentElement.setAttribute('data-theme', nextTheme);
-    };
-
     const stats = [
         {
             key: 'streak',
@@ -195,10 +185,6 @@ const UserProfile = ({ user }) => {
                 <div className={styles.rank}>Ранг: {user.rank}</div>
 
                 <div className={styles.controlsStack}>
-                    <button type="button" className={styles.themeToggleBtn} onClick={onToggleTheme}>
-                        {theme === 'dark' ? 'Светлая тема' : 'Темная тема'}
-                    </button>
-
                     <div className={styles.profileActions}>
                         <button
                             className={styles.editBtn}
@@ -244,7 +230,7 @@ const UserProfile = ({ user }) => {
                                 required
                             />
                             <label className={styles.avatarUploadBtn}>
-                                Сменить фото
+                                Сменить аватар
                                 <input type="file" accept="image/*" hidden onChange={onAvatarChange} />
                             </label>
                         </div>

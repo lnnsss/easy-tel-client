@@ -62,7 +62,7 @@
     gap: var(--space-5);
 }
 
-.link, .profileWrapper {
+.link {
     text-decoration: none;
     color: var(--color-text-dim);
     font-weight: 500;
@@ -128,53 +128,223 @@
     font-weight: bold;
 }
 
-.adminNavBtn {
-    background: var(--color-bg-hover);
-    border: none;
-    padding: var(--space-2) var(--space-4);
-    border-radius: 8px;
-    cursor: pointer;
-    text-decoration: none;
-    color: var(--color-text-dim);
-    font-weight: 600;
-    transition: background 0.2s, color 0.2s;
+.navUserControls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 18px;
 }
 
-.adminNavBtn:hover {
-    background: var(--color-border);
+.profileAvatarBtn,
+.settingsBtn {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.profileAvatarBtn {
+    text-decoration: none;
+    overflow: hidden;
+}
+
+.profileAvatarImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profileAvatarFallback {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    letter-spacing: 0.02em;
+}
+
+.settingsBtn {
+    padding: 0;
+    color: var(--color-text-alt);
+}
+
+.settingsBtn svg {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.2s ease;
+}
+
+.profileAvatarBtn:hover,
+.profileAvatarBtn:focus-visible,
+.settingsBtn:hover,
+.settingsBtn:focus-visible {
+    border-color: var(--color-primary);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+}
+
+.settingsBtn:hover svg,
+.settingsBtn:focus-visible svg {
+    transform: rotate(14deg);
+}
+
+.settingsOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1300;
+    background: rgba(0, 0, 0, 0.08);
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding: 82px var(--space-page-x) var(--space-4);
+    box-sizing: border-box;
+}
+
+.settingsModal {
+    width: min(320px, calc(100vw - 2 * var(--space-page-x)));
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-soft);
+    border-radius: 16px;
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.16);
+    padding: var(--space-4);
+}
+
+.settingsHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
+}
+
+.settingsTitle {
+    margin: 0;
+    font-size: 1rem;
     color: var(--color-text);
 }
 
-.adminNavBtnDanger {
-    color: var(--color-error);
+.settingsCloseBtn {
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.3rem;
+    line-height: 1;
+    transition: background 0.2s ease, color 0.2s ease;
 }
 
-.profileLink {
-    background: var(--color-profile-soft-bg);
-    padding: 5px 12px;
-    border-radius: 12px;
-    border: 1px solid var(--color-profile-soft-border);
-    display: flex;
-    align-items: center;
+.settingsCloseBtn:hover,
+.settingsCloseBtn:focus-visible {
+    background: var(--color-bg-muted);
+    color: var(--color-text);
 }
 
-.userInfo {
+.settingsList {
     display: flex;
     flex-direction: column;
+    gap: 8px;
 }
 
-.userName {
-    font-size: 0.85rem;
-    font-weight: bold;
-    color: var(--color-text-deep);
-    white-space: nowrap;
+.settingsItem {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-muted);
+    color: var(--color-text-alt);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
-.userRank {
-    font-size: 0.65rem;
-    color: var(--color-primary);
+.settingsItem:hover,
+.settingsItem:focus-visible {
+    transform: translateY(-1px);
+    border-color: var(--color-primary);
+    background: var(--color-bg-soft);
+}
+
+.settingsControlRow {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-muted);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    box-sizing: border-box;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.settingsControlRow:hover,
+.settingsControlRow:focus-within {
+    transform: translateY(-1px);
+    border-color: var(--color-primary);
+    background: var(--color-bg-soft);
+}
+
+.settingsControlLabel {
+    color: var(--color-text-alt);
+    font-weight: 600;
+    text-align: left;
+}
+
+.segmentedControl {
+    display: inline-flex;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--color-bg);
+}
+
+.segmentedBtn {
+    border: 0;
+    border-right: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-alt);
+    min-width: 44px;
+    padding: 6px 8px;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.segmentedBtn:last-child {
+    border-right: 0;
+}
+
+.segmentedBtn:hover,
+.segmentedBtn:focus-visible {
+    background: var(--color-bg-soft);
+}
+
+.segmentedBtnActive,
+.segmentedBtnActive:hover,
+.segmentedBtnActive:focus-visible {
+    background: var(--color-primary);
+    color: var(--color-bg);
+}
+
+.settingsValue {
+    color: var(--color-primary);
+    font-weight: 700;
 }
 
 @media (max-width: 768px) {
@@ -208,9 +378,8 @@
     }
 
     .links .link,
-    .links .adminNavBtn,
     .links .btnRegister,
-    .links .profileWrapper {
+    .links .navUserControls {
         font-size: 1.1rem;
         width: 100%;
         max-width: 350px;
@@ -222,12 +391,23 @@
         justify-content: center;
     }
 
-    .links .adminNavBtn {
-        display: block;
+    .links .navUserControls {
+        justify-content: center;
+        margin-left: 0;
     }
 
-    .profileLink {
-        justify-content: center;
-        padding: 12px;
+    .links .profileAvatarBtn,
+    .links .settingsBtn {
+        width: 46px;
+        height: 46px;
     }
+
+    .settingsOverlay {
+        padding-top: 86px;
+    }
+
+    .settingsModal {
+        width: min(320px, calc(100vw - 24px));
+    }
+
 }

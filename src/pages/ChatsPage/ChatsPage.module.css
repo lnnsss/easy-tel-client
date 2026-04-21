@@ -174,8 +174,8 @@
     color: var(--color-text-muted);
     background: var(--color-bg);
     border: 1px solid var(--color-border-soft);
-    border-radius: 999px;
-    padding: 4px 10px;
+    border-radius: 10px;
+    padding: 5px 11px;
 }
 
 .message {

@@ -87,6 +87,8 @@
     padding-top: 0;
     border-top: none;
     height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .resultMain {
@@ -99,15 +101,166 @@
 .tatarWord { color: var(--color-primary); font-size: 1.8rem; margin: 0; }
 .transcription { color: var(--color-text-muted); font-style: italic; font-size: 0.9rem; }
 
-.details { margin-bottom: 20px; font-size: 1rem; color: var(--color-text-secondary); }
-.descriptionText { margin-top: 8px; line-height: 1.5; color: var(--color-text-light); font-size: 0.9rem; }
+.details {
+    margin-bottom: 0;
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+
+.descriptionWrap {
+    background: var(--color-block-muted-bg);
+    border-radius: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+}
+
+.descriptionWrapExpanded {
+    border: 1px solid var(--color-border-muted);
+}
+
+.descriptionHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.descriptionLabel {
+    margin: 0;
+    font-size: 0.76rem;
+    color: var(--color-text-neutral-5);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.descriptionToggle {
+    font-size: 0.74rem;
+    color: var(--color-text-muted);
+}
+
+.descriptionBody {
+    position: relative;
+}
+
+.descriptionBodyCollapsed .descriptionText {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.descriptionFade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1.8em;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0), var(--color-block-muted-bg));
+    pointer-events: none;
+}
+
+.descriptionText {
+    margin: 6px 0 0;
+    line-height: 1.5;
+    color: var(--color-text-light);
+    font-size: 0.9rem;
+}
+
 .ttsError { margin-top: 8px; color: var(--color-error); font-size: 0.86rem; }
+.examplesError { margin-top: 8px; color: var(--color-error); font-size: 0.86rem; }
+
+.usageExamples {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--color-bg-subtle);
+    border: 1px solid var(--color-border-muted);
+}
+
+.usageTitle {
+    margin: 0 0 10px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.usageItem + .usageItem {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--color-border-muted);
+}
+
+.usageTatRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.usageTat {
+    margin: 0;
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.usageRu {
+    margin: 4px 0 0;
+    color: var(--color-text-light);
+    font-size: 0.92rem;
+}
+
+.usageSpeakBtn {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-bg-muted);
+    color: var(--color-text-alt);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+    transition: transform 0.16s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.usageSpeakBtn:hover,
+.usageSpeakBtn:focus-visible {
+    border-color: var(--color-primary);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+    outline: none;
+}
+
+.usageSpeakIcon {
+    width: 18px;
+    height: 18px;
+    color: currentColor;
+}
+
+.usageDots {
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.usageSpeakBtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
 
 /* Кнопки в столбик на всю ширину */
 .btnGroup {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    margin-top: auto;
+    padding-top: 12px;
 }
 
 .addBtn, .resetBtn, .alreadyBtn, .speakBtn {
@@ -132,6 +285,15 @@
     background: var(--color-primary-soft);
     color: var(--color-primary);
     cursor: default;
+}
+
+.mainActionRow {
+    display: flex;
+    gap: 10px;
+}
+
+.halfBtn {
+    width: 50%;
 }
 
 .resetBtn {
@@ -169,6 +331,7 @@
     .contentLayoutExpanded {
         grid-template-columns: 1fr 1fr;
         gap: 24px;
+        align-items: stretch;
     }
 
     .previewPaneShifted {

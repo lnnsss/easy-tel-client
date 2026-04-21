@@ -17,8 +17,15 @@
     font-size: 0.98rem;
 }
 
-.completionFilters {
+.filtersRow {
     margin-top: 12px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.completionFilters {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -32,12 +39,47 @@
     padding: 8px 12px;
     font-weight: 600;
     cursor: pointer;
+    transition: transform 0.18s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .filterBtnActive {
     background: var(--color-primary);
     color: var(--color-bg);
     border-color: var(--color-primary);
+}
+
+.filterBtn:hover,
+.filterBtn:focus-visible {
+    transform: translateY(-1px);
+    border-color: var(--color-primary);
+    box-shadow: 0 7px 16px rgba(0, 0, 0, 0.1);
+    outline: none;
+}
+
+.filterBtnActive:hover,
+.filterBtnActive:focus-visible {
+    background: var(--color-primary-hover, var(--color-primary));
+}
+
+.authorBtn {
+    border: 1px solid var(--color-border, #dce2e8);
+    background: var(--color-bg);
+    color: var(--color-text);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.18s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.authorBtn:hover,
+.authorBtn:focus-visible {
+    transform: translateY(-1px);
+    border-color: var(--color-primary);
+    background: var(--color-bg-soft);
+    box-shadow: 0 7px 16px rgba(0, 0, 0, 0.1);
+    outline: none;
 }
 
 .category {
@@ -61,10 +103,26 @@
     border: 1px solid var(--color-border, #dce2e8);
     border-radius: 14px;
     padding: 16px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.courseCardAnimated {
+    opacity: 0;
+    transform: translateY(-8px);
+    animation: courseCardIn 0.28s ease forwards;
+}
+
+@keyframes courseCardIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .courseCardCompleted {
@@ -73,9 +131,15 @@
 }
 
 .courseMain {
-    min-width: 0;
+    width: 100%;
     display: flex;
     flex-direction: column;
+    gap: 12px;
+}
+
+.courseFooter {
+    display: flex;
+    align-items: center;
     gap: 10px;
 }
 
@@ -92,12 +156,36 @@
     line-height: 1.45;
 }
 
-.meta {
+.progressWrap {
+    position: relative;
+    flex: 1 1 auto;
+    width: auto;
+    min-height: 36px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--color-border, #dce2e8);
+    background: var(--color-bg);
+}
+
+.progressFill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--color-primary) 72%, #fff 28%), var(--color-primary));
+    transition: width 0.3s ease;
+}
+
+.progressText {
+    position: relative;
+    z-index: 1;
+    min-height: 36px;
     display: flex;
+    align-items: center;
     justify-content: flex-start;
-    gap: 10px;
+    padding: 0 12px;
     font-size: 0.84rem;
-    color: var(--color-text-muted);
+    font-weight: 700;
+    color: var(--c-black);
 }
 
 .btn {
@@ -105,11 +193,17 @@
     background: var(--color-primary);
     color: var(--color-bg);
     border-radius: 8px;
-    padding: 8px 12px;
-    width: fit-content;
+    padding: 9px 12px;
+    width: 170px;
+    flex: 0 0 170px;
+    text-align: center;
     transition: transform 0.2s ease, background 0.2s ease;
     white-space: nowrap;
     font-weight: 600;
+    align-self: stretch;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn:hover {
@@ -130,18 +224,27 @@
 }
 
 @media (max-width: 900px) {
+    .filtersRow {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
     .completionFilters {
         display: grid;
         grid-template-columns: 1fr;
     }
 
-    .courseCard {
-        grid-template-columns: 1fr;
-        gap: 12px;
+    .authorBtn {
+        width: 100%;
+    }
+
+    .courseFooter {
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .btn {
         width: 100%;
-        text-align: center;
+        flex-basis: auto;
     }
 }

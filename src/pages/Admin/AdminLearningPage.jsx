@@ -37,7 +37,7 @@ const TrashIcon = () => (
 const emptyCourse = {
     title: '',
     description: '',
-    categoryId: '',
+    categoryIds: [],
     status: 'published',
     order: 0,
     isPinnedHome: false,
@@ -65,9 +65,37 @@ const AdminLearningPage = () => {
     const [filterStatus, setFilterStatus] = useState('');
     const [search, setSearch] = useState('');
 
+    const getCourseCategoryIds = (course) => {
+        const fromArray = Array.isArray(course?.categoryIds) ? course.categoryIds : [];
+        const normalizedArray = fromArray
+            .map((entry) => String(entry?._id || entry || '').trim())
+            .filter(Boolean);
+
+        if (normalizedArray.length > 0) {
+            return normalizedArray;
+        }
+
+        const fallback = String(course?.categoryId?._id || course?.categoryId || '').trim();
+        return fallback ? [fallback] : [];
+    };
+
+    const getCourseCategoryNames = (course) => {
+        const fromArray = Array.isArray(course?.categoryIds) ? course.categoryIds : [];
+        const normalizedNames = fromArray
+            .map((entry) => String(entry?.name || '').trim())
+            .filter(Boolean);
+
+        if (normalizedNames.length > 0) {
+            return normalizedNames;
+        }
+
+        const fallback = String(course?.categoryId?.name || '').trim();
+        return fallback ? [fallback] : [];
+    };
+
     const filteredCourses = useMemo(() => {
         return courses.filter((course) => {
-            const byCategory = !filterCategoryId || String(course.categoryId?._id || course.categoryId) === String(filterCategoryId);
+            const byCategory = !filterCategoryId || getCourseCategoryIds(course).includes(String(filterCategoryId));
             const byStatus = !filterStatus || course.status === filterStatus;
             const bySearch = !search.trim() || `${course.title} ${course.description || ''}`.toLowerCase().includes(search.trim().toLowerCase());
             return byCategory && byStatus && bySearch;
@@ -119,6 +147,10 @@ const AdminLearningPage = () => {
 
     const createCourse = async (e) => {
         e.preventDefault();
+        if (!Array.isArray(courseForm.categoryIds) || courseForm.categoryIds.length === 0) {
+            setError('Выберите хотя бы одну категорию');
+            return;
+        }
         try {
             await CourseService.createAdminCourse(courseForm);
             setCourseForm(emptyCourse);
@@ -126,6 +158,17 @@ const AdminLearningPage = () => {
         } catch (err) {
             setError(err.response?.data?.message || 'Ошибка создания курса');
         }
+    };
+
+    const toggleCourseFormCategory = (categoryId, checked) => {
+        setCourseForm((prev) => {
+            const current = Array.isArray(prev.categoryIds) ? prev.categoryIds : [];
+            if (checked) {
+                if (current.includes(categoryId)) return prev;
+                return { ...prev, categoryIds: [...current, categoryId] };
+            }
+            return { ...prev, categoryIds: current.filter((id) => id !== categoryId) };
+        });
     };
 
     const savePinnedCourse = async (e) => {
@@ -315,16 +358,19 @@ const AdminLearningPage = () => {
                         placeholder="Описание курса"
                     />
                     <div className={styles.inlineFields}>
-                        <select
-                            value={courseForm.categoryId}
-                            onChange={(e) => setCourseForm((prev) => ({ ...prev, categoryId: e.target.value }))}
-                            required
-                        >
-                            <option value="">Выберите категорию</option>
+                        <div className={styles.categoryChecks} role="group" aria-label="Категории курса">
                             {categories.map((category) => (
-                                <option key={category._id} value={category._id}>{category.name}</option>
+                                <label key={category._id} className={styles.categoryCheck}>
+                                    <input
+                                        type="checkbox"
+                                        checked={courseForm.categoryIds.includes(category._id)}
+                                        onChange={(e) => toggleCourseFormCategory(category._id, e.target.checked)}
+                                    />
+                                    <span>{category.name}</span>
+                                </label>
                             ))}
-                        </select>
+                            {categories.length === 0 && <p className={styles.empty}>Сначала создайте категорию</p>}
+                        </div>
                         <select
                             value={courseForm.status}
                             onChange={(e) => setCourseForm((prev) => ({ ...prev, status: e.target.value }))}
@@ -404,7 +450,7 @@ const AdminLearningPage = () => {
                         <div className={styles.rowMain}>
                             <strong>{course.title}</strong>
                             <small>
-                                {course.categoryId?.name || 'Без категории'} · {statusLabel(course.status)}
+                                {(getCourseCategoryNames(course).join(', ') || 'Без категории')} · {statusLabel(course.status)}
                             </small>
                         </div>
                         <div className={styles.actions}>

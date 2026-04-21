@@ -54,9 +54,10 @@
 }
 
 .actions {
-    display: flex;
-    justify-content: flex-end;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
+    width: 100%;
 }
 
 .primaryBtn,
@@ -66,7 +67,7 @@
     padding: 12px;
     font-weight: 700;
     cursor: pointer;
-    min-width: 130px;
+    width: 100%;
 }
 
 .primaryBtn {

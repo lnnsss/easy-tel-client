@@ -4,11 +4,26 @@ import { useStores } from '../../stores/StoreContext';
 import $api from '../../api/instance';
 import styles from './RecognizePage.module.css';
 
+const SpeakerIcon = ({ className }) => (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+        <path d="M4 10v4h4l5 4V6l-5 4H4z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M16 9c1.5 1.3 1.5 4.7 0 6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+        <path d="M18.8 7c2.9 2.8 2.9 7.2 0 10" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+);
+
+const StopIcon = ({ className }) => (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+        <rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" />
+    </svg>
+);
+
 const RecognizePage = observer(() => {
     const { recognizeStore, authStore } = useStores();
-    const [ttsLoading, setTtsLoading] = useState(false);
-    const [isPlaying, setIsPlaying] = useState(false);
+    const [ttsLoadingKey, setTtsLoadingKey] = useState(null);
+    const [ttsPlayingKey, setTtsPlayingKey] = useState(null);
     const [ttsError, setTtsError] = useState('');
+    const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
     const audioRef = useRef(null);
 
     useEffect(() => {
@@ -22,6 +37,10 @@ const RecognizePage = observer(() => {
             }
         };
     }, []);
+
+    useEffect(() => {
+        setIsDescriptionExpanded(false);
+    }, [recognizeStore.result?.id]);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -43,6 +62,14 @@ const RecognizePage = observer(() => {
     });
 
     const hasResult = Boolean(recognizeStore.result);
+    const examplesRequested = recognizeStore.examplesRequested;
+    const examplesLoading = recognizeStore.examplesLoading;
+    const examplesError = recognizeStore.examplesError;
+    const usageExamples = Array.isArray(recognizeStore.result?.usageExamples)
+        ? recognizeStore.result.usageExamples
+            .filter((item) => item?.textTatar && item?.textRu)
+            .slice(0, 2)
+        : [];
     const stopAudio = () => {
         if (audioRef.current) {
             if (typeof audioRef.current.src === 'string' && audioRef.current.src.startsWith('blob:')) {
@@ -51,23 +78,23 @@ const RecognizePage = observer(() => {
             audioRef.current.pause();
             audioRef.current.currentTime = 0;
         }
-        setIsPlaying(false);
+        setTtsPlayingKey(null);
     };
 
-    const onSpeakWord = async () => {
+    const onSpeakText = async (targetKey, rawText) => {
         setTtsError('');
-        const textToSpeak = String(recognizeStore.result?.nameTatar || '').trim();
+        const textToSpeak = String(rawText || '').trim();
 
         if (!textToSpeak) {
             return;
         }
 
-        if (isPlaying) {
+        if (ttsPlayingKey === targetKey) {
             stopAudio();
             return;
         }
 
-        setTtsLoading(true);
+        setTtsLoadingKey(targetKey);
         try {
             const { data } = await $api.post('/translate/tts', {
                 speaker: 'almaz',
@@ -96,16 +123,16 @@ const RecognizePage = observer(() => {
             const audio = new Audio(audioUrl);
             audioRef.current = audio;
             audio.onended = () => {
-                setIsPlaying(false);
+                setTtsPlayingKey(null);
                 URL.revokeObjectURL(audioUrl);
             };
             audio.onerror = () => {
-                setIsPlaying(false);
+                setTtsPlayingKey(null);
                 URL.revokeObjectURL(audioUrl);
                 setTtsError('Не удалось воспроизвести озвучку');
             };
             audio.play()
-                .then(() => setIsPlaying(true))
+                .then(() => setTtsPlayingKey(targetKey))
                 .catch((err) => {
                     if (err?.name === 'NotAllowedError') {
                         return;
@@ -115,7 +142,7 @@ const RecognizePage = observer(() => {
         } catch (e) {
             setTtsError(e?.response?.data?.message || 'Не удалось озвучить слово');
         } finally {
-            setTtsLoading(false);
+            setTtsLoadingKey(null);
         }
     };
 
@@ -153,41 +180,118 @@ const RecognizePage = observer(() => {
 
                                 <div className={styles.details}>
                                     <p><strong>Русский:</strong> {recognizeStore.result.nameRu}</p>
-                                    <p className={styles.descriptionText}>{recognizeStore.result.description}</p>
+                                    <div
+                                        className={`${styles.descriptionWrap} ${isDescriptionExpanded ? styles.descriptionWrapExpanded : ''}`}
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() => setIsDescriptionExpanded((prev) => !prev)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                e.preventDefault();
+                                                setIsDescriptionExpanded((prev) => !prev);
+                                            }
+                                        }}
+                                    >
+                                        <div className={styles.descriptionHead}>
+                                            <p className={styles.descriptionLabel}>Описание</p>
+                                            <span className={styles.descriptionToggle}>
+                                                {isDescriptionExpanded ? 'Скрыть' : 'Показать'}
+                                            </span>
+                                        </div>
+                                        <div className={`${styles.descriptionBody} ${!isDescriptionExpanded ? styles.descriptionBodyCollapsed : ''}`}>
+                                            <p className={styles.descriptionText}>
+                                                {recognizeStore.result.description || 'Описание отсутствует'}
+                                            </p>
+                                            {!isDescriptionExpanded && <div className={styles.descriptionFade} />}
+                                        </div>
+                                    </div>
+                                    {examplesError && <p className={styles.examplesError}>{examplesError}</p>}
+                                    {examplesRequested && usageExamples.length > 0 && (
+                                        <div className={styles.usageExamples}>
+                                            <p className={styles.usageTitle}>2 примера предложений:</p>
+                                            {usageExamples.map((item, idx) => (
+                                                <div key={`${item.textTatar}_${idx}`} className={styles.usageItem}>
+                                                    <div className={styles.usageTatRow}>
+                                                        <p className={styles.usageTat}>{item.textTatar}</p>
+                                                        <button
+                                                            type="button"
+                                                            className={styles.usageSpeakBtn}
+                                                            onClick={() => onSpeakText(`example_${idx}`, item.textTatar)}
+                                                            title={ttsPlayingKey === `example_${idx}` ? 'Остановить озвучку' : 'Озвучить пример'}
+                                                            aria-label="Озвучить пример"
+                                                            disabled={ttsLoadingKey === `example_${idx}`}
+                                                        >
+                                                            {ttsLoadingKey === `example_${idx}` ? (
+                                                                <span className={styles.usageDots}>...</span>
+                                                            ) : ttsPlayingKey === `example_${idx}` ? (
+                                                                <StopIcon className={styles.usageSpeakIcon} />
+                                                            ) : (
+                                                                <SpeakerIcon className={styles.usageSpeakIcon} />
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                    <p className={styles.usageRu}>{item.textRu}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                     {ttsError && <p className={styles.ttsError}>{ttsError}</p>}
                                 </div>
 
                                 <div className={styles.btnGroup}>
-                                    {authStore.isAuth ? (
-                                        isAlreadyInDictionary ? (
-                                            <button className={styles.alreadyBtn} disabled>
-                                                Уже в словаре
-                                            </button>
-                                        ) : (
-                                            <button
-                                                onClick={() => recognizeStore.addToDictionary()}
-                                                className={styles.addBtn}
-                                                disabled={recognizeStore.isSaving}
-                                            >
-                                                {recognizeStore.isSaving ? "Сохранение..." : "Добавить в словарь"}
-                                            </button>
-                                        )
-                                    ) : (
-                                        <p className={styles.authAlert}>Войдите, чтобы сохранить слово</p>
-                                    )}
+                                    <button
+                                        type="button"
+                                        className={styles.speakBtn}
+                                        onClick={() => recognizeStore.generateUsageExamples()}
+                                        disabled={examplesLoading}
+                                    >
+                                        {examplesLoading
+                                            ? 'Генерация примеров...'
+                                            : usageExamples.length > 0
+                                                ? 'Другие примеры предложений'
+                                                : 'Примеры предложений'}
+                                    </button>
 
                                     <button
-                                        onClick={onSpeakWord}
+                                        onClick={() => onSpeakText('word', recognizeStore.result?.nameTatar)}
                                         className={styles.speakBtn}
-                                        disabled={ttsLoading}
+                                        disabled={ttsLoadingKey === 'word'}
                                         type="button"
                                     >
-                                        {ttsLoading ? 'Подготовка озвучки...' : isPlaying ? 'Остановить озвучку' : 'Озвучить'}
+                                        {ttsLoadingKey === 'word'
+                                            ? 'Подготовка озвучки...'
+                                            : ttsPlayingKey === 'word'
+                                                ? 'Остановить озвучку'
+                                                : 'Озвучить'}
                                     </button>
 
-                                    <button onClick={() => recognizeStore.reset()} className={styles.resetBtn}>
-                                        Заново
-                                    </button>
+                                    {authStore.isAuth ? (
+                                        <div className={styles.mainActionRow}>
+                                            {isAlreadyInDictionary ? (
+                                                <button className={`${styles.alreadyBtn} ${styles.halfBtn}`} disabled>
+                                                    Уже в словаре
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => recognizeStore.addToDictionary()}
+                                                    className={`${styles.addBtn} ${styles.halfBtn}`}
+                                                    disabled={recognizeStore.isSaving}
+                                                >
+                                                    {recognizeStore.isSaving ? "Сохранение..." : "Добавить в словарь"}
+                                                </button>
+                                            )}
+                                            <button onClick={() => recognizeStore.reset()} className={`${styles.resetBtn} ${styles.halfBtn}`}>
+                                                Заново
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <p className={styles.authAlert}>Войдите, чтобы сохранить слово</p>
+                                            <button onClick={() => recognizeStore.reset()} className={styles.resetBtn}>
+                                                Заново
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>

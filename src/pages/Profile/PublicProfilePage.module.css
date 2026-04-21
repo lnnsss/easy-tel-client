@@ -53,8 +53,16 @@
     color: var(--color-text-muted);
 }
 
-.friendActionBtn {
+.friendActionsRow {
     margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.friendActionBtn {
     border: 0;
     border-radius: 10px;
     padding: 10px 14px;
@@ -64,12 +72,23 @@
     color: var(--c-black);
 }
 
+.chatActionBtn {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--color-bg-muted);
+    color: var(--color-text);
+}
+
 .friendActionDanger {
     background: var(--color-bg-muted, #f2f4f4);
     color: var(--color-text);
 }
 
-.friendActionBtn:disabled {
+.friendActionBtn:disabled,
+.chatActionBtn:disabled {
     opacity: 0.7;
     cursor: not-allowed;
 }

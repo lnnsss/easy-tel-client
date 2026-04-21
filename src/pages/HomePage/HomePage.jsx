@@ -176,7 +176,7 @@ const HomePage = observer(() => {
             <section className={styles.rankingWrapper}>
                 <div className={styles.rankingHeadRow}>
                     <h2 className={styles.rankingHeader}>
-                        {rankingMode === 'friends' ? 'Рейтинг среди друзей' : 'Рейтинг знатоков'}
+                        {rankingMode === 'friends' ? 'Рейтинг среди друзей' : 'Глобальный рейтинг'}
                     </h2>
                     {authStore.isAuth && !isAdmin && (
                         <div className={styles.rankingTabs}>
@@ -198,39 +198,42 @@ const HomePage = observer(() => {
                     )}
                 </div>
 
-                <div className={styles.rankingList}>
+                <div key={rankingMode} className={styles.rankingList}>
                     {ranking.length > 0 ? (
                         ranking.map((user, index) => {
                             return (
                                 <Link key={user._id} to={`/u/${encodeURIComponent(user.username)}`} className={styles.rankingItemLink}>
-                                    <div className={styles.rankingItem}>
-                                    <div className={styles.rankingLeft}>
-                                        <span className={styles.orderNum}>{index + 1}</span>
-                                        <div className={styles.rankingIdentity}>
-                                            <div className={styles.rankingAvatar}>
-                                                {user.avatarUrl ? (
-                                                    <img
-                                                        src={getAvatarSrc(user.avatarUrl)}
-                                                        alt={`${user.firstName} ${user.lastName}`}
-                                                        className={styles.rankingAvatarImg}
-                                                    />
-                                                ) : (
-                                                    <span className={styles.rankingAvatarFallback}>
-                                                        {getInitials(user.firstName, user.lastName)}
-                                                    </span>
-                                                )}
+                                    <div
+                                        className={`${styles.rankingItem} ${styles.rankingItemAnimated}`}
+                                        style={{ animationDelay: `${Math.min(index, 14) * 0.045}s` }}
+                                    >
+                                        <div className={styles.rankingLeft}>
+                                            <span className={styles.orderNum}>{index + 1}</span>
+                                            <div className={styles.rankingIdentity}>
+                                                <div className={styles.rankingAvatar}>
+                                                    {user.avatarUrl ? (
+                                                        <img
+                                                            src={getAvatarSrc(user.avatarUrl)}
+                                                            alt={`${user.firstName} ${user.lastName}`}
+                                                            className={styles.rankingAvatarImg}
+                                                        />
+                                                    ) : (
+                                                        <span className={styles.rankingAvatarFallback}>
+                                                            {getInitials(user.firstName, user.lastName)}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <span className={styles.fullName}>
+                                                    {user.firstName} {user.lastName}
+                                                </span>
                                             </div>
-                                            <span className={styles.fullName}>
-                                                {user.firstName} {user.lastName}
+                                        </div>
+                                        <div className={styles.rankingRight}>
+                                            <span className={styles.wordBadge}>
+                                                {user.totalPoints ?? user.wordsCount} <span>очков</span>
                                             </span>
                                         </div>
                                     </div>
-                                    <div className={styles.rankingRight}>
-                                        <span className={styles.wordBadge}>
-                                            {user.totalPoints ?? user.wordsCount} <span>очков</span>
-                                        </span>
-                                    </div>
-                                </div>
                                 </Link>
                             );
                         })

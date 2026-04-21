@@ -14,6 +14,27 @@ const SPEAKERS = [
     { value: 'alsu', label: 'Алсу' }
 ];
 
+const SpeakerIcon = ({ className }) => (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+        <path d="M4 10v4h4l5 4V6l-5 4H4z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M16 9c1.5 1.3 1.5 4.7 0 6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+        <path d="M18.8 7c2.9 2.8 2.9 7.2 0 10" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+);
+
+const StopIcon = ({ className }) => (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+        <rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" />
+    </svg>
+);
+
+const CopyIcon = ({ className }) => (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+        <rect x="9" y="9" width="10" height="10" rx="2.2" fill="none" stroke="currentColor" strokeWidth="1.7" />
+        <rect x="5" y="5" width="10" height="10" rx="2.2" fill="none" stroke="currentColor" strokeWidth="1.7" />
+    </svg>
+);
+
 const readHistory = () => {
     try {
         const raw = localStorage.getItem(HISTORY_KEY);
@@ -168,6 +189,7 @@ const TranslatePage = () => {
             setRuText(item.translation || '');
         }
         setError('');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const onDeleteHistory = (id) => {
@@ -181,6 +203,14 @@ const TranslatePage = () => {
             setRuText(value);
         } else {
             setTtText(value);
+        }
+    };
+
+    const onLeftTextareaKeyDown = (e) => {
+        if (e.key !== 'Enter' || e.shiftKey || e.nativeEvent?.isComposing) return;
+        e.preventDefault();
+        if (!loading) {
+            onTranslate();
         }
     };
 
@@ -345,6 +375,7 @@ const TranslatePage = () => {
                                 className={styles.langTextarea}
                                 value={leftValue}
                                 onChange={(e) => onChangeLeftText(e.target.value)}
+                                onKeyDown={onLeftTextareaKeyDown}
                                 placeholder={leftPlaceholder}
                                 maxLength={5000}
                             />
@@ -352,24 +383,28 @@ const TranslatePage = () => {
                                 {leftHasTatarSpeech && (
                                     <button
                                         type="button"
-                                        className={styles.copyIconBtn}
+                                        className={`${styles.copyIconBtn} ${styles.audioIconBtn}`}
                                         onClick={() => onSpeak(leftValue)}
                                         disabled={ttsLoading || (!leftValue.trim() && !isPlaying)}
                                         aria-label="Озвучить татарский текст"
                                         title={isPlaying ? 'Остановить озвучку' : 'Озвучить'}
                                     >
-                                        {isPlaying ? '■' : '🔊'}
+                                        {isPlaying ? (
+                                            <StopIcon className={styles.audioIcon} />
+                                        ) : (
+                                            <SpeakerIcon className={styles.audioIcon} />
+                                        )}
                                     </button>
                                 )}
                                 <button
                                     type="button"
-                                    className={styles.copyIconBtn}
+                                    className={`${styles.copyIconBtn} ${styles.audioIconBtn}`}
                                     onClick={() => onCopy(leftValue)}
                                     disabled={!leftValue}
                                     aria-label="Копировать исходный текст"
                                     title="Копировать"
                                 >
-                                    ⧉
+                                    <CopyIcon className={styles.audioIcon} />
                                 </button>
                             </div>
                         </div>
@@ -389,24 +424,28 @@ const TranslatePage = () => {
                                 {rightHasTatarSpeech && (
                                     <button
                                         type="button"
-                                        className={styles.copyIconBtn}
+                                        className={`${styles.copyIconBtn} ${styles.audioIconBtn}`}
                                         onClick={() => onSpeak(rightValue)}
                                         disabled={ttsLoading || (!rightValue.trim() && !isPlaying)}
                                         aria-label="Озвучить татарский текст"
                                         title={isPlaying ? 'Остановить озвучку' : 'Озвучить'}
                                     >
-                                        {isPlaying ? '■' : '🔊'}
+                                        {isPlaying ? (
+                                            <StopIcon className={styles.audioIcon} />
+                                        ) : (
+                                            <SpeakerIcon className={styles.audioIcon} />
+                                        )}
                                     </button>
                                 )}
                                 <button
                                     type="button"
-                                    className={styles.copyIconBtn}
+                                    className={`${styles.copyIconBtn} ${styles.audioIconBtn}`}
                                     onClick={() => onCopy(rightValue)}
                                     disabled={!rightValue}
                                     aria-label="Копировать перевод"
                                     title="Копировать"
                                 >
-                                    ⧉
+                                    <CopyIcon className={styles.audioIcon} />
                                 </button>
                             </div>
                         </div>
@@ -449,7 +488,7 @@ const TranslatePage = () => {
                             </div>
                         </div>
                     ))}
-                    {!history.length && <p className={styles.empty}>История пока пуста</p>}
+                    {!history.length && <p className={styles.empty}>Пусто</p>}
                 </div>
             </section>
         </div>
