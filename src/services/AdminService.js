@@ -23,17 +23,62 @@ export default class AdminService {
         return $api.delete(`/admin/words/${id}`);
     }
 
-    static async getUsers(page = 1, search = '', limit = 10) {
+    static async getUsers(params = {}) {
+        const {
+            page = 1,
+            search = '',
+            limit = 10,
+            role = '',
+            authorRequestStatus = '',
+            registrationDateFrom = '',
+            registrationDateTo = '',
+            hasCourses = '',
+            minPoints = '',
+            maxPoints = '',
+            sortBy = 'createdAt',
+            sortOrder = 'desc'
+        } = params;
         return $api.get('/admin/users', {
             params: {
                 page,
                 limit,
-                search
+                search,
+                role,
+                authorRequestStatus,
+                registrationDateFrom,
+                registrationDateTo,
+                hasCourses,
+                minPoints,
+                maxPoints,
+                sortBy,
+                sortOrder
             }
         });
     }
 
     static async deleteUser(id) {
         return $api.delete(`/admin/users/${id}`);
+    }
+
+    static async updateUserRole(id, role) {
+        return $api.patch(`/admin/users/${id}/role`, { role });
+    }
+
+    static async getAuthorRequests(page = 1, search = '', status = '', limit = 20) {
+        return $api.get('/admin/author/requests', {
+            params: {
+                page,
+                search,
+                status,
+                limit
+            }
+        });
+    }
+
+    static async reviewAuthorRequest(id, decision, adminComment = '') {
+        return $api.patch(`/admin/author/requests/${id}/review`, {
+            decision,
+            adminComment
+        });
     }
 }

@@ -25,10 +25,14 @@
     background: var(--color-bg);
     border: 1px solid var(--color-border, #dce2e8);
     border-radius: 12px;
-    padding: 14px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+.card h3 {
+    margin: 0;
 }
 
 .card input,
@@ -57,9 +61,21 @@
 
 .courseCategoryRow {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr;
     gap: 8px;
     align-items: start;
+}
+
+.courseCategoryRow > button {
+    width: 100% !important;
+}
+
+.courseCategoryRow button:disabled {
+    background: var(--color-bg-muted) !important;
+    color: var(--color-text-muted) !important;
+    cursor: not-allowed;
+    transform: none !important;
+    opacity: 1;
 }
 
 .multiSelect {
@@ -75,7 +91,19 @@
     padding: 8px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
+}
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fieldGroup > span {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    font-weight: 600;
 }
 
 .categoryCheck {
@@ -83,13 +111,27 @@
     align-items: center;
     gap: 8px;
     color: var(--color-text);
+    width: 100%;
+    border: 1px solid var(--color-border, #e0e6ed);
+    border-radius: 8px;
+    padding: 7px 9px;
+    background: var(--color-bg);
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .categoryCheck input {
-    width: 16px;
-    height: 16px;
-    flex: 0 0 auto;
-    margin: 0;
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.categoryCheckSelected {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--c-black);
 }
 
 .row {
@@ -100,6 +142,16 @@
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 12px;
     align-items: center;
+    cursor: grab;
+}
+
+.row:active {
+    cursor: grabbing;
+}
+
+.rowDragOver {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary);
 }
 
 .topicsList {
@@ -134,13 +186,15 @@
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 .topicActions {
     display: flex;
     gap: 8px;
-    flex-wrap: nowrap;
-    white-space: nowrap;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
 }
 
 .card button {
@@ -148,7 +202,7 @@
     border: 0;
     border-radius: 8px;
     background: var(--color-primary);
-    color: var(--color-bg);
+    color: var(--c-black);
     padding: 8px 12px;
     cursor: pointer;
     transition: transform 0.2s ease, background 0.2s ease;
@@ -162,8 +216,39 @@
 }
 
 .card button:disabled {
-    opacity: 0.6;
+    background: var(--color-bg-muted, #e9ecef);
+    color: var(--color-text-muted, #6f7882);
     cursor: not-allowed;
+    transform: none;
+    opacity: 1;
+}
+
+.fullWidthButton {
+    width: 100% !important;
+}
+
+.newTopicButton {
+    width: 100% !important;
+    margin-top: 8px;
+}
+
+.editorTabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.tabBtn {
+    width: 100% !important;
+    background: var(--color-bg-muted, #f2f4f6) !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border, #dce2e8) !important;
+}
+
+.tabBtnActive {
+    background: var(--color-primary) !important;
+    color: var(--c-black) !important;
+    border-color: var(--color-primary) !important;
 }
 
 .editTopicForm {
@@ -189,9 +274,24 @@
     gap: 6px;
 }
 
+.passScoreRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 120px;
+    gap: 10px;
+    align-items: center;
+}
+
+.passScoreRow label {
+    margin: 0;
+}
+
 .passScore small {
     color: var(--color-text-muted);
     font-size: 12px;
+}
+
+.topicPicker {
+    width: 100%;
 }
 
 .question {
@@ -210,6 +310,90 @@
     align-items: center;
 }
 
+.questionCard {
+    border: 1px solid var(--color-border, #dce2e8);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--color-bg-soft, #f8fbf8);
+}
+
+.questionCardCollapsed {
+    background: var(--color-bg);
+}
+
+.questionHeaderBtn {
+    width: 100% !important;
+    justify-content: space-between !important;
+    background: transparent !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border, #dce2e8) !important;
+}
+
+.questionLabel {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.questionContent {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.28s ease, opacity 0.22s ease;
+}
+
+.questionContentOpen {
+    max-height: 1200px;
+    opacity: 1;
+}
+
+.questionContentInner {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 8px;
+}
+
+.questionCardHead {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: center;
+}
+
+.questionToggle {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    text-align: left;
+    background: transparent !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border, #dce2e8) !important;
+    transform: none !important;
+    width: 100%;
+}
+
+.card .questionToggle:hover {
+    background: var(--color-bg-muted, #f2f4f6) !important;
+    transform: none !important;
+}
+
+.questionToggle small {
+    color: var(--color-text-muted);
+}
+
+.questionBody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .options {
     display: flex;
     flex-direction: column;
@@ -226,10 +410,92 @@
     flex: 1;
 }
 
+.optionsGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid var(--color-border, #dce2e8);
+    border-radius: 8px;
+    background: var(--color-bg);
+}
+
+.optionRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.optionRow input:not([type="radio"]) {
+    flex: 1;
+}
+
+.optionRow > input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    flex: 0 0 auto;
+    accent-color: var(--color-primary);
+}
+
+.inlineActions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.equalActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.equalActions > * {
+    width: 100% !important;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.successBtn {
+    background: var(--color-primary) !important;
+    color: var(--c-black) !important;
+}
+
+.ghostBtn {
+    background: var(--color-bg) !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border, #dce2e8) !important;
+}
+
+.ghostBtn:hover {
+    background: var(--color-bg-muted, #f2f4f6) !important;
+}
+
+.inlineActions button {
+    min-height: 38px;
+}
+
+.submitReviewButton {
+    width: 100% !important;
+    min-height: 40px;
+}
+
 .typeBlock {
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+.typeBlock select {
+    width: 100%;
+}
+
+.questionTypeRow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
 }
 
 .fieldLabel {
@@ -264,8 +530,8 @@
 }
 
 .correctMarkerActive {
-    background: #d8f7c9 !important;
-    border-color: #8ad66f !important;
+    background: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
 }
 
 .card .correctMarker:hover {
@@ -274,7 +540,7 @@
 }
 
 .card .correctMarkerActive:hover {
-    background: #d8f7c9 !important;
+    background: var(--color-primary) !important;
     transform: none !important;
 }
 
@@ -289,11 +555,31 @@
 }
 
 @media (max-width: 720px) {
+    .row {
+        grid-template-columns: 1fr;
+    }
+
+    .topicActions {
+        justify-content: center;
+    }
+
     .inlineFields {
         grid-template-columns: 1fr;
     }
 
+    .passScoreRow {
+        grid-template-columns: 1fr;
+    }
+
     .courseCategoryRow {
+        grid-template-columns: 1fr;
+    }
+
+    .equalActions {
+        grid-template-columns: 1fr;
+    }
+
+    .editorTabs {
         grid-template-columns: 1fr;
     }
 }

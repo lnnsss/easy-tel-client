@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import CourseService from '../../services/CourseService';
 import { useStores } from '../../stores/StoreContext';
+import TopicBlocksRenderer from '../../components/TopicBlocksRenderer/TopicBlocksRenderer';
 import styles from './CourseDetailPage.module.css';
 
 const CourseDetailPage = () => {
@@ -140,10 +141,14 @@ const CourseDetailPage = () => {
     if (!course) return <div className={styles.stateError}>Курс не найден</div>;
 
     return (
-        <div className={styles.page}>
-            <Link to="/courses" className={styles.back}>← Назад к материалам</Link>
-            <h1>{course.title}</h1>
-            <p className={styles.description}>{course.description}</p>
+        <div className={`${styles.page} app-page-shell`}>
+            <div className="app-page-top">
+                <div>
+                    <Link to="/courses" className={styles.back}>← Назад к материалам</Link>
+                    <h1 className="app-page-title">{course.title}</h1>
+                    <p className="app-page-subtitle">{course.description}</p>
+                </div>
+            </div>
 
             <div className={styles.layout}>
                 <aside className={styles.sidebar}>
@@ -173,7 +178,7 @@ const CourseDetailPage = () => {
                             {!isQuizMode && (
                                 <article className={styles.topicBlock}>
                                     <h2>{topicPayload.topic.title}</h2>
-                                    <div className={styles.topicText}>{topicPayload.topic.content}</div>
+                                    <TopicBlocksRenderer topic={topicPayload.topic} />
                                     <div className={styles.topicActions}>
                                         {topicPayload?.quiz ? (
                                             <button

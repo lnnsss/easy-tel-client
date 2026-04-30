@@ -68,7 +68,7 @@ const AdminDashboard = () => {
             await AdminService.updateWord(editingWord._id, editingWord);
             setIsModalOpen(false);
             fetchWords();
-        } catch (err) {
+        } catch {
             uiStore.showModal({
                 title: 'Ошибка',
                 message: 'Ошибка обновления',
@@ -126,11 +126,11 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div className={styles.wrapper}>
-            <header className={styles.header}>
+        <div className={`${styles.wrapper} app-page-shell`}>
+            <header className={`${styles.header} app-page-top`}>
                 <div className={styles.titleArea}>
-                    <h1>Административная панель</h1>
-                    <p>Управление словарем системы</p>
+                    <h1 className="app-page-title">Админ: словарь</h1>
+                    <p className="app-page-subtitle">Управление словарем.</p>
                 </div>
                 <div className={styles.searchBar}>
                     <input
@@ -146,14 +146,14 @@ const AdminDashboard = () => {
             <div className={styles.mainLayout}>
                 <aside className={styles.formContainer}>
                     <div className={styles.card}>
-                        <h3>Новая запись</h3>
+                        <h3>Новое слово</h3>
                         <form onSubmit={handleSubmit} className={styles.form}>
                             <input placeholder="Русский" value={formData.nameRu} onChange={e => setFormData({ ...formData, nameRu: e.target.value })} required />
                             <input placeholder="Татарский" value={formData.nameTatar} onChange={e => setFormData({ ...formData, nameTatar: e.target.value })} required />
                             <input placeholder="English" value={formData.nameEn} onChange={e => setFormData({ ...formData, nameEn: e.target.value })} required />
                             <input placeholder="Транскрипция" value={formData.transcription} onChange={e => setFormData({ ...formData, transcription: e.target.value })} />
                             <textarea placeholder="Описание" value={formData.descriptionRu} onChange={e => setFormData({ ...formData, descriptionRu: e.target.value })} />
-                            <button type="submit" className={styles.addBtn}>Создать запись</button>
+                            <button type="submit" className={styles.addBtn}>Создать слово</button>
                         </form>
                     </div>
                 </aside>
@@ -197,7 +197,7 @@ const AdminDashboard = () => {
                             <textarea value={editingWord.descriptionRu} onChange={e => setEditingWord({...editingWord, descriptionRu: e.target.value})} />
                             <div className={styles.modalButtons}>
                                 <button type="button" onClick={() => setIsModalOpen(false)} className={styles.cancelBtn}>Отмена</button>
-                                <button type="submit" className={styles.addBtn}>Сохранить</button>
+                                <button type="submit" className={`${styles.addBtn} ${styles.modalSubmitBtn}`}>Сохранить</button>
                             </div>
                         </form>
                     </div>

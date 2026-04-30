@@ -17,6 +17,40 @@
     font-size: 0.98rem;
 }
 
+.requestStatusCard {
+    margin-top: 12px;
+    border: 1px solid var(--color-border, #dce2e8);
+    border-radius: 12px;
+    background: var(--color-bg-soft);
+    padding: 10px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.requestStatusContent {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+}
+
+.requestStatusCard p {
+    margin: 6px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.requestHideBtn {
+    border: 1px solid var(--color-border, #dce2e8);
+    background: var(--color-bg);
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    align-self: center;
+}
+
 .filtersRow {
     margin-top: 12px;
     display: flex;
@@ -44,7 +78,7 @@
 
 .filterBtnActive {
     background: var(--color-primary);
-    color: var(--color-bg);
+    color: var(--c-black);
     border-color: var(--color-primary);
 }
 
@@ -70,6 +104,10 @@
     font-weight: 700;
     cursor: pointer;
     white-space: nowrap;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: transform 0.18s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -84,6 +122,92 @@
 
 .category {
     margin-top: 28px;
+}
+
+.authorRequestForm {
+    margin-top: 14px;
+    border: 1px solid var(--color-border, #dce2e8);
+    border-radius: 14px;
+    padding: 14px;
+    background: var(--color-bg);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.authorRequestForm h3 {
+    margin: 0;
+}
+
+.authorRequestForm label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.92rem;
+}
+
+.authorRequestGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.authorRequestForm input,
+.authorRequestForm select,
+.authorRequestForm textarea {
+    border: 1px solid var(--color-border, #dce2e8);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font: inherit;
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+.authorRequestForm textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.optionalLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.optionalStar {
+    color: var(--color-text-muted);
+    font-weight: 700;
+    cursor: help;
+    user-select: none;
+}
+
+.authorRequestActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.authorRequestActions button {
+    border: 1px solid var(--color-border, #dce2e8);
+    background: var(--color-bg-muted);
+    color: var(--color-text);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+}
+
+.authorRequestActions button:first-child {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--c-black);
+}
+
+@media (max-width: 720px) {
+    .authorRequestActions {
+        grid-template-columns: 1fr;
+    }
 }
 
 .categoryTitle {
@@ -191,7 +315,7 @@
 .btn {
     text-decoration: none;
     background: var(--color-primary);
-    color: var(--color-bg);
+    color: var(--c-black);
     border-radius: 8px;
     padding: 9px 12px;
     width: 170px;
@@ -236,6 +360,10 @@
 
     .authorBtn {
         width: 100%;
+    }
+
+    .authorRequestGrid {
+        grid-template-columns: 1fr;
     }
 
     .courseFooter {

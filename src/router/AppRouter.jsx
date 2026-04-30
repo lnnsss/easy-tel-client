@@ -22,8 +22,14 @@ import CoursesPage from '../pages/Courses/CoursesPage';
 import CourseDetailPage from '../pages/Courses/CourseDetailPage';
 import AdminLearningPage from '../pages/Admin/AdminLearningPage';
 import AdminLearningCoursePage from '../pages/Admin/AdminLearningCoursePage';
+import AdminTopicEditorPage from '../pages/Admin/AdminTopicEditorPage';
+import AdminCourseEditorPage from '../pages/Admin/AdminCourseEditorPage';
 import AdminUsersPage from '../pages/Admin/AdminUsersPage';
 import NotFoundPage from '../pages/NotFoundPage/NotFoundPage';
+import AuthorLearningPage from '../pages/Author/AuthorLearningPage';
+import AuthorLearningCoursePage from '../pages/Author/AuthorLearningCoursePage';
+import AuthorCourseEditorPage from '../pages/Author/AuthorCourseEditorPage';
+import AuthorTopicEditorPage from '../pages/Author/AuthorTopicEditorPage';
 
 const AppRouter = observer(() => {
     const { authStore } = useStores();
@@ -33,6 +39,7 @@ const AppRouter = observer(() => {
     }
 
     const isAdmin = authStore.isAuth && authStore.user?.role === 'admin';
+    const isAuthor = authStore.isAuth && authStore.user?.role === 'author';
 
     return (
         <Routes>
@@ -108,10 +115,44 @@ const AppRouter = observer(() => {
                 path="/admin/learning"
                 element={isAdmin ? <AdminLearningPage /> : <Navigate to="/" />}
             />
+            <Route
+                path="/admin/learning/courses/new"
+                element={isAdmin ? <AdminCourseEditorPage /> : <Navigate to="/" />}
+            />
 
             <Route
                 path="/admin/learning/courses/:courseId"
                 element={isAdmin ? <AdminLearningCoursePage /> : <Navigate to="/" />}
+            />
+            <Route
+                path="/admin/learning/courses/:courseId/topics/new"
+                element={isAdmin ? <AdminTopicEditorPage /> : <Navigate to="/" />}
+            />
+            <Route
+                path="/admin/learning/courses/:courseId/topics/:topicId/edit"
+                element={isAdmin ? <AdminTopicEditorPage /> : <Navigate to="/" />}
+            />
+
+            <Route
+                path="/author/learning"
+                element={isAuthor ? <AuthorLearningPage /> : <Navigate to="/" />}
+            />
+            <Route
+                path="/author/learning/courses/new"
+                element={isAuthor ? <AuthorCourseEditorPage /> : <Navigate to="/" />}
+            />
+
+            <Route
+                path="/author/learning/courses/:courseId"
+                element={isAuthor ? <AuthorLearningCoursePage /> : <Navigate to="/" />}
+            />
+            <Route
+                path="/author/learning/courses/:courseId/topics/new"
+                element={isAuthor ? <AuthorTopicEditorPage /> : <Navigate to="/" />}
+            />
+            <Route
+                path="/author/learning/courses/:courseId/topics/:topicId/edit"
+                element={isAuthor ? <AuthorTopicEditorPage /> : <Navigate to="/" />}
             />
 
             <Route

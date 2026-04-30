@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import CourseService from '../../services/CourseService';
 import { useStores } from '../../stores/StoreContext';
 import { getTopicBlockValidationErrors, hasTopicBlockValidationErrors } from '../../utils/topicContent';
-import styles from './AdminLearningCoursePage.module.css';
+import styles from '../Admin/AdminLearningCoursePage.module.css';
 
 const statusLabel = (value) => (value === 'published' ? 'Опубликован' : 'Черновик');
 const normalizedIds = (value) => [...new Set((value || []).map((id) => String(id)))].sort();
@@ -16,7 +16,7 @@ const moveItem = (items, fromIndex, toIndex) => {
     return next;
 };
 
-const AdminLearningCoursePage = () => {
+const AuthorLearningCoursePage = () => {
     const { uiStore } = useStores();
     const navigate = useNavigate();
     const { courseId } = useParams();
@@ -30,15 +30,23 @@ const AdminLearningCoursePage = () => {
     const [savedCourseCategoryIds, setSavedCourseCategoryIds] = useState([]);
     const [isSavingCategories, setIsSavingCategories] = useState(false);
     const [categoriesSaved, setCategoriesSaved] = useState(false);
+    const [locallySubmittedForReview, setLocallySubmittedForReview] = useState(false);
+
+    const isPendingReview = course?.reviewStatus === 'pending_review' || locallySubmittedForReview;
+    const editingBlocked = isPendingReview;
 
     const loadData = async () => {
         try {
             const [coursesRes, topicsRes, categoriesRes] = await Promise.all([
-                CourseService.getAdminCourses(),
-                CourseService.getAdminTopics(courseId),
-                CourseService.getAdminCategories()
+                CourseService.getAuthorCourses(),
+                CourseService.getAuthorTopics(courseId),
+                CourseService.getAuthorCategories()
             ]);
             const currentCourse = (coursesRes.data || []).find((item) => item._id === courseId) || null;
+            if (!currentCourse) {
+                navigate('/author/learning');
+                return;
+            }
             setCourse(currentCourse);
             setCategories(categoriesRes.data || []);
             setTopics(topicsRes.data || []);
@@ -53,8 +61,50 @@ const AdminLearningCoursePage = () => {
     };
 
     useEffect(() => {
-        loadData();
+        setLocallySubmittedForReview(false);
+        const timer = setTimeout(() => {
+            loadData();
+        }, 0);
+        return () => clearTimeout(timer);
     }, [courseId]);
+
+    const submitReview = async () => {
+        if (!course || editingBlocked) return;
+        if (course.canSubmitForReview === false) {
+            uiStore.showModal({
+                title: 'Отправка недоступна',
+                message: 'В курсе нет изменений после последней модерации.',
+                variant: 'info',
+                secondaryLabel: 'Закрыть'
+            });
+            return;
+        }
+        uiStore.showModal({
+            title: 'Отправить курс на модерацию?',
+            message: 'После отправки редактирование курса будет временно недоступно.',
+            variant: 'info',
+            primaryLabel: 'Отправить',
+            secondaryLabel: 'Отмена',
+            onPrimary: async () => {
+                uiStore.closeModal();
+                try {
+                    const { data } = await CourseService.submitAuthorCourseForReview(course._id);
+                    const alreadySubmitted = Boolean(data?.alreadySubmitted);
+                    setLocallySubmittedForReview(true);
+                    uiStore.showModal({
+                        title: alreadySubmitted ? 'Уже отправлено' : 'Отправлено',
+                        message: alreadySubmitted ? 'Курс уже отправлен на модерацию.' : 'Курс отправлен на модерацию.',
+                        variant: 'info',
+                        secondaryLabel: 'Закрыть'
+                    });
+                    await loadData();
+                } catch (err) {
+                    setError(err.response?.data?.message || 'Ошибка отправки на модерацию');
+                }
+            },
+            onSecondary: () => uiStore.closeModal()
+        });
+    };
 
     const persistTopicOrder = async (orderedTopics) => {
         const updates = orderedTopics
@@ -65,10 +115,11 @@ const AdminLearningCoursePage = () => {
             .filter((item, index) => Number(orderedTopics[index].order) !== item.order);
 
         if (!updates.length) return;
-        await Promise.all(updates.map((item) => CourseService.updateAdminTopic(item.id, { order: item.order })));
+        await Promise.all(updates.map((item) => CourseService.updateAuthorTopic(item.id, { order: item.order })));
     };
 
     const removeTopic = async (topicId) => {
+        if (editingBlocked) return;
         uiStore.showModal({
             title: 'Удалить тему?',
             message: 'Тема и связанный тест будут удалены.',
@@ -77,7 +128,7 @@ const AdminLearningCoursePage = () => {
             secondaryLabel: 'Отмена',
             onPrimary: async () => {
                 try {
-                    await CourseService.deleteAdminTopic(topicId);
+                    await CourseService.deleteAuthorTopic(topicId);
                     uiStore.closeModal();
                     await loadData();
                 } catch (err) {
@@ -93,12 +144,13 @@ const AdminLearningCoursePage = () => {
     };
 
     const toggleTopicStatus = async (topic) => {
+        if (editingBlocked) return;
         const nextStatus = topic.status === 'published' ? 'draft' : 'published';
         if (nextStatus === 'published' && hasTopicBlockValidationErrors(topic)) {
             const errors = getTopicBlockValidationErrors(topic.contentBlocks || []);
             setError('Чтобы опубликовать тему, заполните обязательные поля в блоках');
             if (errors.some(Boolean)) {
-                navigate(`/admin/learning/courses/${courseId}/topics/${topic._id}/edit`);
+                navigate(`/author/learning/courses/${courseId}/topics/${topic._id}/edit`);
             }
             return;
         }
@@ -110,7 +162,7 @@ const AdminLearningCoursePage = () => {
             secondaryLabel: 'Отмена',
             onPrimary: async () => {
                 try {
-                    await CourseService.updateAdminTopic(topic._id, { status: nextStatus });
+                    await CourseService.updateAuthorTopic(topic._id, { status: nextStatus });
                     uiStore.closeModal();
                     await loadData();
                 } catch (err) {
@@ -127,6 +179,7 @@ const AdminLearningCoursePage = () => {
     };
 
     const onDropTopic = async (dropIndex) => {
+        if (editingBlocked) return;
         if (topicDragIndex < 0 || dropIndex < 0 || topicDragIndex >= topics.length || dropIndex >= topics.length) {
             setTopicDragIndex(-1);
             setTopicDragOverIndex(-1);
@@ -147,14 +200,14 @@ const AdminLearningCoursePage = () => {
     };
 
     const saveCourseCategory = async () => {
-        if (!hasCategoryChanges || isSavingCategories) return;
+        if (editingBlocked || !hasCategoryChanges || isSavingCategories) return;
         if (!Array.isArray(courseCategoryIds) || courseCategoryIds.length === 0) {
             setError('Выберите хотя бы одну категорию');
             return;
         }
         try {
             setIsSavingCategories(true);
-            await CourseService.updateAdminCourse(courseId, { categoryIds: courseCategoryIds });
+            await CourseService.updateAuthorCourse(courseId, { categoryIds: courseCategoryIds });
             setSavedCourseCategoryIds(courseCategoryIds);
             setCategoriesSaved(true);
             uiStore.showModal({
@@ -165,18 +218,14 @@ const AdminLearningCoursePage = () => {
             });
             await loadData();
         } catch (err) {
-            uiStore.showModal({
-                title: 'Ошибка',
-                message: err.response?.data?.message || 'Не удалось сменить категорию курса',
-                variant: 'error',
-                secondaryLabel: 'Закрыть'
-            });
+            setError(err.response?.data?.message || 'Не удалось сменить категории курса');
         } finally {
             setIsSavingCategories(false);
         }
     };
 
     const toggleCourseCategory = (categoryId, checked) => {
+        if (editingBlocked) return;
         setCategoriesSaved(false);
         setCourseCategoryIds((prev) => {
             if (checked) {
@@ -195,16 +244,37 @@ const AdminLearningCoursePage = () => {
         ? (isSavingCategories ? 'Сохраняем...' : 'Сохранить категории')
         : (categoriesSaved ? 'Сохранено' : 'Изменений нет');
 
+    const submitReviewLabel = isPendingReview
+        ? 'Отправлено на модерацию'
+        : (course?.canSubmitForReview === false ? 'Нет изменений для отправки' : 'Отправить курс на модерацию');
+
     return (
         <div className={`${styles.page} app-page-shell`}>
             <div className="app-page-top">
                 <div>
-                    <Link to="/admin/learning" className={styles.back}>← К курсам</Link>
+                    <Link to="/author/learning" className={styles.back}>← К моим курсам</Link>
                     <h1 className="app-page-title">{course?.title || 'Курс'}</h1>
                     {course?.description && <p className="app-page-subtitle">{course.description}</p>}
                 </div>
             </div>
             {error && <p className={styles.error}>{error}</p>}
+
+            {isPendingReview && (
+                <section className={styles.card}>
+                    <p>Курс на модерации. Редактирование временно недоступно.</p>
+                </section>
+            )}
+
+            <section className={styles.card}>
+                <button
+                    type="button"
+                    onClick={submitReview}
+                    disabled={!Boolean(course?.canSubmitForReview) || isPendingReview}
+                    className={styles.fullWidthButton}
+                >
+                    {submitReviewLabel}
+                </button>
+            </section>
 
             <section className={styles.card}>
                 <h3>Категория</h3>
@@ -218,6 +288,7 @@ const AdminLearningCoursePage = () => {
                                 >
                                     <input
                                         type="checkbox"
+                                        disabled={editingBlocked}
                                         checked={courseCategoryIds.includes(category._id)}
                                         onChange={(e) => toggleCourseCategory(category._id, e.target.checked)}
                                     />
@@ -226,7 +297,11 @@ const AdminLearningCoursePage = () => {
                             ))}
                         </div>
                     </div>
-                    <button type="button" onClick={saveCourseCategory} disabled={!hasCategoryChanges || isSavingCategories}>
+                    <button
+                        type="button"
+                        onClick={saveCourseCategory}
+                        disabled={editingBlocked || !hasCategoryChanges || isSavingCategories}
+                    >
                         {categorySaveLabel}
                     </button>
                 </div>
@@ -239,9 +314,10 @@ const AdminLearningCoursePage = () => {
                         <div
                             key={topic._id}
                             className={`${styles.row} ${topicDragOverIndex === index ? styles.rowDragOver : ''}`}
-                            draggable
+                            draggable={!editingBlocked}
                             onDragStart={() => setTopicDragIndex(index)}
                             onDragOver={(e) => {
+                                if (editingBlocked) return;
                                 e.preventDefault();
                                 setTopicDragOverIndex(index);
                             }}
@@ -256,19 +332,20 @@ const AdminLearningCoursePage = () => {
                                 <small>{statusLabel(topic.status)}</small>
                             </div>
                             <div className={styles.topicActions}>
-                                <button type="button" onClick={() => navigate(`/admin/learning/courses/${courseId}/topics/${topic._id}/edit`)}>Редактировать</button>
-                                <button type="button" onClick={() => toggleTopicStatus(topic)}>
+                                <button type="button" disabled={editingBlocked} onClick={() => navigate(`/author/learning/courses/${courseId}/topics/${topic._id}/edit`)}>Редактировать</button>
+                                <button type="button" disabled={editingBlocked} onClick={() => toggleTopicStatus(topic)}>
                                     {topic.status === 'published' ? 'В черновик' : 'Опубликовать'}
                                 </button>
-                                <button type="button" onClick={() => removeTopic(topic._id)}>Удалить</button>
+                                <button type="button" disabled={editingBlocked} onClick={() => removeTopic(topic._id)}>Удалить</button>
                             </div>
                         </div>
                     ))}
                 </div>
                 <button
                     type="button"
+                    disabled={editingBlocked}
                     className={styles.newTopicButton}
-                    onClick={() => navigate(`/admin/learning/courses/${courseId}/topics/new`)}
+                    onClick={() => navigate(`/author/learning/courses/${courseId}/topics/new`)}
                 >
                     Новая тема
                 </button>
@@ -277,4 +354,4 @@ const AdminLearningCoursePage = () => {
     );
 };
 
-export default AdminLearningCoursePage;
+export default AuthorLearningCoursePage;

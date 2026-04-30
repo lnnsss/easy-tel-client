@@ -240,6 +240,23 @@ class AuthStore {
         }
     }
 
+    async markAuthorRequestSeen(requestId) {
+        if (!requestId) return;
+        try {
+            await $api.patch(`/author/requests/${requestId}/seen`);
+            runInAction(() => {
+                if (!this.user) return;
+                const latest = this.user.latestAuthorRequest || null;
+                if (latest && String(latest._id) === String(requestId)) {
+                    latest.decisionSeenAt = new Date().toISOString();
+                }
+                this.user.authorRequestNotice = null;
+            });
+        } catch (e) {
+            console.error('markAuthorRequestSeen error', e);
+        }
+    }
+
     logout() {
         this.clearAuthRetry();
         this.user = null;

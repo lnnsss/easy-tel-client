@@ -159,9 +159,9 @@ const DictionaryPage = observer(() => {
     if (loading) return <div className={styles.loader}>Загрузка словаря...</div>;
 
     return (
-        <div className={styles.container}>
-            <div className={styles.headerBar}>
-                <h1 className={styles.title}>Мои изученные слова</h1>
+        <div className={`${styles.container} app-page-shell`}>
+            <div className={`${styles.headerBar} app-page-top`}>
+                <h1 className={`${styles.title} app-page-title`}>Мои изученные слова</h1>
                 <div className={styles.viewSwitch}>
                     <button
                         className={`${styles.switchBtn} ${viewMode === 'table' ? styles.switchBtnActive : ''}`}

@@ -114,7 +114,7 @@
     width: fit-content;
     border: 0;
     background: var(--color-primary);
-    color: var(--color-bg);
+    color: var(--c-black);
     border-radius: 8px;
     padding: 8px 14px;
     cursor: pointer;

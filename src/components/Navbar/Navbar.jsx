@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Navbar.module.css';
 
 const Navbar = observer(() => {
-    const { authStore, chatStore } = useStores();
+    const { authStore, chatStore, uiStore } = useStores();
+    const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
@@ -25,6 +26,7 @@ const Navbar = observer(() => {
     };
 
     const isAdmin = authStore.user?.role === 'admin';
+    const isAuthor = authStore.user?.role === 'author';
     const profileRoute = isAdmin ? '/admin' : '/profile';
 
     const profileInitials = useMemo(() => {
@@ -76,6 +78,23 @@ const Navbar = observer(() => {
         document.documentElement.setAttribute('data-theme', nextTheme);
     };
 
+    const onLogoutConfirm = () => {
+        setIsSettingsOpen(false);
+        uiStore.showModal({
+            title: 'Выйти из аккаунта?',
+            message: 'Вы уверены, что хотите выйти?',
+            variant: 'info',
+            primaryLabel: 'Выйти',
+            secondaryLabel: 'Отмена',
+            onPrimary: () => {
+                authStore.logout();
+                uiStore.closeModal();
+                navigate('/login');
+            },
+            onSecondary: () => uiStore.closeModal()
+        });
+    };
+
     const settingsOverlay = authStore.isAuth && isSettingsOpen ? (
         <div className={styles.settingsOverlay} onClick={() => setIsSettingsOpen(false)}>
             <div
@@ -121,6 +140,10 @@ const Navbar = observer(() => {
                             ))}
                         </div>
                     </div>
+
+                    <button type="button" className={`${styles.settingsItem} ${styles.settingsLogout}`} onClick={onLogoutConfirm}>
+                        <span>Выйти</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -150,6 +173,7 @@ const Navbar = observer(() => {
                                 <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>
                                 <Link to="/dictionary" className={styles.link} onClick={closeMenu}>Словарь</Link>
                                 <Link to="/courses" className={styles.link} onClick={closeMenu}>Материал</Link>
+                                {isAuthor && <Link to="/author/learning" className={styles.link} onClick={closeMenu}>Авторство</Link>}
                                 <Link to="/friends" className={styles.link} onClick={closeMenu}>Друзья</Link>
                                 <Link to="/chats" className={`${styles.link} ${styles.chatLink}`} onClick={closeMenu}>
                                     Чаты

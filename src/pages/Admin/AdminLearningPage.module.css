@@ -4,15 +4,24 @@
     padding: 24px 16px 48px;
 }
 
+.back {
+    text-decoration: none;
+    color: var(--color-primary);
+}
+
 .card {
     margin-top: 12px;
     background: var(--color-bg);
     border: 1px solid var(--color-border, #dce2e8);
     border-radius: 12px;
-    padding: 14px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+.card h3 {
+    margin: 0;
 }
 
 .card input,
@@ -35,17 +44,23 @@
 
 .card button,
 .linkBtn {
-    width: fit-content;
+    width: 100%;
     border: 0;
     border-radius: 8px;
     background: var(--color-primary);
-    color: var(--color-bg);
+    color: var(--c-black);
     padding: 8px 12px;
     cursor: pointer;
     text-decoration: none;
     transition: transform 0.2s ease, background 0.2s ease;
     font-weight: 600;
     line-height: 1.2;
+}
+
+.topCreateBtn {
+    width: auto !important;
+    min-width: 180px;
+    align-self: center;
 }
 
 .card button:hover,
@@ -98,6 +113,7 @@
 }
 
 .categoryActions button {
+    width: auto;
     padding: 4px 7px;
     border-radius: 6px;
     font-size: 12px;
@@ -129,10 +145,10 @@
     border: 1px solid var(--color-border, #e0e6ed);
     border-radius: 8px;
     padding: 10px;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 12px;
-    align-items: center;
+    align-items: start;
 }
 
 .rowMain {
@@ -145,6 +161,16 @@
 
 .rowMain small {
     color: var(--color-text-muted);
+}
+
+.authorLink {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.authorLink:hover {
+    text-decoration: underline;
 }
 
 .courseCategoryRow {
@@ -160,11 +186,60 @@
 }
 
 .actions {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 8px;
-    justify-content: flex-end;
+    align-items: start;
+    width: auto;
+    min-width: min(420px, 100%);
+    max-width: 520px;
+}
+
+.actions > * {
+    width: 100%;
+    text-align: center;
+    min-height: 38px;
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.equalActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.equalActions > * {
+    width: 100% !important;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.successBtn {
+    background: var(--color-primary) !important;
+    color: var(--c-black) !important;
+}
+
+.ghostBtn {
+    background: var(--color-bg) !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border, #dce2e8) !important;
+}
+
+.ghostBtn:hover {
+    background: var(--color-bg-muted, #f2f4f6) !important;
+}
+
+.actions button:disabled {
+    background: var(--color-bg-muted, #e9ecef);
+    color: var(--color-text-muted, #6f7882);
+    cursor: not-allowed;
+    transform: none;
 }
 
 .sectionHead {
@@ -175,18 +250,34 @@
     flex-wrap: wrap;
 }
 
+.sectionHead > :last-child {
+    margin-left: auto;
+}
+
 .inlineCreate {
     display: grid;
     grid-template-columns: minmax(220px, 320px) auto;
     gap: 8px;
     align-items: stretch;
-    width: min(100%, 440px);
+    width: min(100%, 520px);
 }
 
 .createCourseForm {
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fieldGroup > span {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    font-weight: 600;
 }
 
 .pinToggle {
@@ -208,6 +299,12 @@
     gap: 8px;
 }
 
+.courseMetaFields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .multiSelect {
     min-height: 120px;
 }
@@ -221,7 +318,7 @@
     padding: 8px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
 }
 
 .categoryCheck {
@@ -229,13 +326,31 @@
     align-items: center;
     gap: 8px;
     color: var(--color-text);
+    width: 100%;
+    border: 1px solid var(--color-border, #e0e6ed);
+    border-radius: 8px;
+    padding: 7px 9px;
+    background: var(--color-bg);
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .categoryCheck input {
-    width: 16px;
-    height: 16px;
-    flex: 0 0 auto;
-    margin: 0;
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.categoryCheckSelected {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--c-black);
+}
+
+.fullWidthAction {
+    width: 100% !important;
 }
 
 .error {
@@ -248,11 +363,11 @@
 }
 
 .actionLink {
-    width: fit-content;
+    width: 100%;
     border: 0;
     border-radius: 8px;
     background: var(--color-primary);
-    color: var(--color-bg);
+    color: var(--c-black);
     padding: 8px 12px;
     cursor: pointer;
     text-decoration: none;
@@ -266,7 +381,94 @@
     transform: translateY(-1px);
 }
 
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.42);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+    padding: 16px;
+}
+
+.modalCard {
+    width: min(560px, 100%);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border, #dce2e8);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+}
+
+.modalClose {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px !important;
+    height: 30px;
+    padding: 0 !important;
+    border-radius: 999px !important;
+    background: var(--color-bg-muted, #f0f3f6) !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border, #dce2e8) !important;
+}
+
+.modalTitle {
+    margin: 0;
+    padding-right: 34px;
+}
+
+.modalDescription {
+    margin: 0;
+    color: var(--color-text-muted);
+}
+
+.modalField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.modalTextarea {
+    min-height: 96px;
+    resize: vertical;
+}
+
+.modalActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.modalActions button {
+    border: 0;
+    border-radius: 8px;
+    background: var(--color-primary);
+    color: var(--c-black);
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+    font-weight: 600;
+    line-height: 1.2;
+    min-height: 38px;
+}
+
+.modalActions button:hover {
+    background: var(--color-primary-hover, var(--color-primary));
+    transform: translateY(-1px);
+}
+
 @media (max-width: 900px) {
+    .row {
+        grid-template-columns: 1fr;
+    }
+
     .sectionHead {
         flex-direction: column;
     }
@@ -283,4 +485,37 @@
     .inlineFields {
         grid-template-columns: 1fr;
     }
+
+    .actions {
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+    }
+
+    .modalActions {
+        grid-template-columns: 1fr;
+    }
+
+.topCreateBtn {
+        width: 100% !important;
+    }
+
+    .equalActions {
+        grid-template-columns: 1fr;
+    }
+}
+
+.pinnedToggleButton {
+    width: 100% !important;
+}
+
+.pinnedToggleActive {
+    background: var(--color-primary) !important;
+    color: var(--c-black) !important;
+}
+
+.pinnedToggleInactive {
+    background: var(--color-bg-muted, #e9ecef) !important;
+    color: var(--color-text-muted, #6f7882) !important;
+    border: 1px solid var(--color-border, #dce2e8) !important;
 }

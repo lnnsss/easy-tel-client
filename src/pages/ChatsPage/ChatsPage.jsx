@@ -119,113 +119,118 @@ const ChatsPage = observer(() => {
     };
 
     return (
-        <div className={styles.container}>
-            <aside className={styles.sidebar}>
-                <div className={styles.sidebarHead}>
-                    <h2>Чаты</h2>
-                    <span>{chatStore.unreadTotal}</span>
-                </div>
-                <div className={styles.chatList}>
-                    {(chatStore.chats || []).map((chat) => (
-                        <button
-                            key={chat._id}
-                            type="button"
-                            className={`${styles.chatItem} ${String(chat._id) === String(activeConversationId) ? styles.chatItemActive : ''}`}
-                            onClick={() => chatStore.setActiveConversation(chat._id)}
-                        >
-                            <div className={styles.chatTitle}>
-                                {chat.otherUser?.firstName} {chat.otherUser?.lastName}
-                            </div>
-                            <div className={styles.chatPreview}>{chat.lastMessageText || 'Нет сообщений'}</div>
-                            {chat.unreadCount > 0 && <span className={styles.unread}>{chat.unreadCount}</span>}
-                        </button>
-                    ))}
-                    {!chatStore.isLoadingChats && !(chatStore.chats || []).length && (
-                        <p className={styles.empty}>Пока нет диалогов</p>
-                    )}
-                </div>
-                {chatStore.chatsPagination.totalPages > 1 && (
-                    <div className={styles.pagination}>
-                        <button
-                            type="button"
-                            disabled={chatStore.chatsPagination.page <= 1}
-                            onClick={() => setChatPage((p) => Math.max(p - 1, 1))}
-                        >
-                            Назад
-                        </button>
-                        <span>{chatStore.chatsPagination.page} / {chatStore.chatsPagination.totalPages}</span>
-                        <button
-                            type="button"
-                            disabled={chatStore.chatsPagination.page >= chatStore.chatsPagination.totalPages}
-                            onClick={() => setChatPage((p) => Math.min(p + 1, chatStore.chatsPagination.totalPages))}
-                        >
-                            Вперед
-                        </button>
+        <div className="app-page-shell">
+            <div className="app-page-top">
+                <h1 className="app-page-title">Чаты</h1>
+            </div>
+            <div className={styles.container}>
+                <aside className={styles.sidebar}>
+                    <div className={styles.sidebarHead}>
+                        <h2>Чаты</h2>
+                        <span>{chatStore.unreadTotal}</span>
                     </div>
-                )}
-            </aside>
-
-            <section className={styles.chatPanel}>
-                {activeChat ? (
-                    <>
-                        <header className={styles.panelHead}>
-                            <h3>
-                                <Link to={`/u/${encodeURIComponent(activeChat.otherUser?.username || '')}`} className={styles.chatUserLink}>
-                                    {activeChat.otherUser?.firstName} {activeChat.otherUser?.lastName}
-                                </Link>
-                            </h3>
-                        </header>
-                        <div className={styles.messages}>
-                            {currentMessages.map((item, index) => {
-                                const mine = isMine(item.senderId);
-                                const prev = currentMessages[index - 1];
-                                const currentDay = formatDateLabel(item.createdAt);
-                                const prevDay = prev ? formatDateLabel(prev.createdAt) : '';
-                                return (
-                                    <React.Fragment key={item._id}>
-                                        {currentDay !== prevDay && (
-                                            <div className={styles.dayDivider}>
-                                                <span>{currentDay}</span>
-                                            </div>
-                                        )}
-                                        <div className={`${styles.message} ${mine ? styles.messageMine : styles.messageOther}`}>
-                                            <p>{item.text}</p>
-                                            <time className={styles.messageTime}>{formatMessageDate(item.createdAt)}</time>
-                                        </div>
-                                    </React.Fragment>
-                                );
-                            })}
-                            <div ref={messagesEndRef} />
-                        </div>
-                        <form className={styles.inputArea} onSubmit={onSend}>
-                            <div className={styles.symbolBar}>
-                                <div className={styles.symbolButtons}>
-                                    {TATAR_SYMBOLS.map((symbol) => (
-                                        <button key={symbol} type="button" onClick={() => insertSymbol(symbol)}>
-                                            {symbol}
-                                        </button>
-                                    ))}
+                    <div className={styles.chatList}>
+                        {(chatStore.chats || []).map((chat) => (
+                            <button
+                                key={chat._id}
+                                type="button"
+                                className={`${styles.chatItem} ${String(chat._id) === String(activeConversationId) ? styles.chatItemActive : ''}`}
+                                onClick={() => chatStore.setActiveConversation(chat._id)}
+                            >
+                                <div className={styles.chatTitle}>
+                                    {chat.otherUser?.firstName} {chat.otherUser?.lastName}
                                 </div>
-                                <button type="button" className={styles.topicBtn} onClick={openTopicModal}>
-                                    Тема для разговора
-                                </button>
+                                <div className={styles.chatPreview}>{chat.lastMessageText || 'Нет сообщений'}</div>
+                                {chat.unreadCount > 0 && <span className={styles.unread}>{chat.unreadCount}</span>}
+                            </button>
+                        ))}
+                        {!chatStore.isLoadingChats && !(chatStore.chats || []).length && (
+                            <p className={styles.empty}>Пока нет диалогов</p>
+                        )}
+                    </div>
+                    {chatStore.chatsPagination.totalPages > 1 && (
+                        <div className={styles.pagination}>
+                            <button
+                                type="button"
+                                disabled={chatStore.chatsPagination.page <= 1}
+                                onClick={() => setChatPage((p) => Math.max(p - 1, 1))}
+                            >
+                                Назад
+                            </button>
+                            <span>{chatStore.chatsPagination.page} / {chatStore.chatsPagination.totalPages}</span>
+                            <button
+                                type="button"
+                                disabled={chatStore.chatsPagination.page >= chatStore.chatsPagination.totalPages}
+                                onClick={() => setChatPage((p) => Math.min(p + 1, chatStore.chatsPagination.totalPages))}
+                            >
+                                Вперед
+                            </button>
+                        </div>
+                    )}
+                </aside>
+
+                <section className={styles.chatPanel}>
+                    {activeChat ? (
+                        <>
+                            <header className={styles.panelHead}>
+                                <h3>
+                                    <Link to={`/u/${encodeURIComponent(activeChat.otherUser?.username || '')}`} className={styles.chatUserLink}>
+                                        {activeChat.otherUser?.firstName} {activeChat.otherUser?.lastName}
+                                    </Link>
+                                </h3>
+                            </header>
+                            <div className={styles.messages}>
+                                {currentMessages.map((item, index) => {
+                                    const mine = isMine(item.senderId);
+                                    const prev = currentMessages[index - 1];
+                                    const currentDay = formatDateLabel(item.createdAt);
+                                    const prevDay = prev ? formatDateLabel(prev.createdAt) : '';
+                                    return (
+                                        <React.Fragment key={item._id}>
+                                            {currentDay !== prevDay && (
+                                                <div className={styles.dayDivider}>
+                                                    <span>{currentDay}</span>
+                                                </div>
+                                            )}
+                                            <div className={`${styles.message} ${mine ? styles.messageMine : styles.messageOther}`}>
+                                                <p>{item.text}</p>
+                                                <time className={styles.messageTime}>{formatMessageDate(item.createdAt)}</time>
+                                            </div>
+                                        </React.Fragment>
+                                    );
+                                })}
+                                <div ref={messagesEndRef} />
                             </div>
-                            <div className={styles.composeRow}>
-                                <input
-                                    ref={inputRef}
-                                    value={message}
-                                    onChange={(e) => setMessage(e.target.value)}
-                                    placeholder="Введите сообщение..."
-                                    maxLength={2000}
-                                />
-                                <button type="submit">Отправить</button>
-                            </div>
-                        </form>
-                    </>
-                ) : (
-                    <div className={styles.placeholder}>Выберите чат слева</div>
-                )}
-            </section>
+                            <form className={styles.inputArea} onSubmit={onSend}>
+                                <div className={styles.symbolBar}>
+                                    <div className={styles.symbolButtons}>
+                                        {TATAR_SYMBOLS.map((symbol) => (
+                                            <button key={symbol} type="button" onClick={() => insertSymbol(symbol)}>
+                                                {symbol}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <button type="button" className={styles.topicBtn} onClick={openTopicModal}>
+                                        Тема для разговора
+                                    </button>
+                                </div>
+                                <div className={styles.composeRow}>
+                                    <input
+                                        ref={inputRef}
+                                        value={message}
+                                        onChange={(e) => setMessage(e.target.value)}
+                                        placeholder="Введите сообщение..."
+                                        maxLength={2000}
+                                    />
+                                    <button type="submit">Отправить</button>
+                                </div>
+                            </form>
+                        </>
+                    ) : (
+                        <div className={styles.placeholder}>Выберите чат слева</div>
+                    )}
+                </section>
+            </div>
             {isTopicModalOpen && (
                 <div className={styles.topicModalOverlay} onClick={() => setIsTopicModalOpen(false)}>
                     <div className={styles.topicModal} onClick={(e) => e.stopPropagation()}>

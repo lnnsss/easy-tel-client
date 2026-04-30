@@ -122,7 +122,7 @@
 .btnRegister {
     text-decoration: none;
     background: var(--color-primary);
-    color: var(--color-bg);
+    color: var(--c-black);
     padding: var(--space-2) var(--space-5);
     border-radius: 10px;
     font-weight: bold;
@@ -276,6 +276,15 @@
     background: var(--color-bg-soft);
 }
 
+.settingsLogout {
+    color: var(--color-danger);
+}
+
+.settingsLogout:hover,
+.settingsLogout:focus-visible {
+    border-color: var(--color-danger);
+}
+
 .settingsControlRow {
     width: 100%;
     border: 1px solid var(--color-border);
@@ -339,7 +348,7 @@
 .segmentedBtnActive:hover,
 .segmentedBtnActive:focus-visible {
     background: var(--color-primary);
-    color: var(--color-bg);
+    color: var(--c-black);
 }
 
 .settingsValue {

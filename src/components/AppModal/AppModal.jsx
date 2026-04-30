@@ -19,7 +19,7 @@ const AppModal = ({
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                 <h3 className={`${styles.title} ${styles[variant] || ''}`}>{title}</h3>
                 <p className={styles.message}>{message}</p>
-                <div className={styles.actions}>
+                <div className={`${styles.actions} ${!onPrimary ? styles.actionsSingle : ''}`}>
                     {onPrimary && (
                         <button
                             className={`${styles.primaryBtn} ${variant === 'error' ? styles.primaryDanger : ''}`}

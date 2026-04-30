@@ -8,8 +8,8 @@ const UserProfile = ({ user }) => {
     const navigate = useNavigate();
     const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [copiedUsername, setCopiedUsername] = useState(false);
     const [activeStat, setActiveStat] = useState(null);
+    const [nowTs] = useState(() => Date.now());
     const [form, setForm] = useState({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
@@ -20,12 +20,12 @@ const UserProfile = ({ user }) => {
     const totalPoints = Number.isFinite(user.totalPoints) ? user.totalPoints : wordsTotal;
     const analytics = user.analytics || null;
     const wordsWeek = useMemo(() => {
-        const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        const weekAgo = nowTs - 7 * 24 * 60 * 60 * 1000;
         return (user.dictionary || []).filter((entry) => {
             const ts = new Date(entry.learnedAt || 0).getTime();
             return Number.isFinite(ts) && ts >= weekAgo;
         }).length;
-    }, [user.dictionary]);
+    }, [user.dictionary, nowTs]);
 
     const initials = useMemo(() => {
         const first = (user.firstName || '').trim().charAt(0);
@@ -106,10 +106,8 @@ const UserProfile = ({ user }) => {
         if (!value) return;
         try {
             await navigator.clipboard.writeText(value);
-            setCopiedUsername(true);
-            setTimeout(() => setCopiedUsername(false), 1200);
         } catch {
-            setCopiedUsername(false);
+            // Ignore clipboard permission errors.
         }
     };
 
@@ -180,7 +178,6 @@ const UserProfile = ({ user }) => {
                 <h1 className={styles.fullName}>{user.firstName} {user.lastName}</h1>
                 <button type="button" className={styles.usernameBtn} onClick={onCopyUsername}>
                     @{user.username}
-                    {copiedUsername && <span className={styles.copiedHint}>скопировано</span>}
                 </button>
                 <div className={styles.rank}>Ранг: {user.rank}</div>
 

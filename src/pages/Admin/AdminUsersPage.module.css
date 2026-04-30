@@ -30,6 +30,22 @@
     font: inherit;
 }
 
+.filterPanel {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: var(--space-5);
+}
+
+.filterPanel select,
+.filterPanel input {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    font: inherit;
+    background: var(--white);
+}
+
 .card {
     background: var(--white);
     border: 1px solid var(--border);
@@ -37,10 +53,14 @@
     overflow: hidden;
 }
 
+.usersCard {
+    margin-top: 12px;
+}
+
 .tableHead,
 .row {
     display: grid;
-    grid-template-columns: 1.4fr 1.4fr 90px 90px 110px 120px;
+    grid-template-columns: minmax(170px, 1.1fr) minmax(180px, 1.3fr) minmax(110px, 0.8fr) minmax(80px, 0.6fr) minmax(96px, 0.7fr) minmax(260px, 1.8fr);
     gap: var(--space-3);
     align-items: center;
     padding: var(--space-3) var(--space-5);
@@ -50,6 +70,10 @@
     font-weight: 700;
     background: var(--bg-light);
     border-bottom: 1px solid var(--border);
+}
+
+.actionsHead {
+    text-align: left;
 }
 
 .tableBody .row {
@@ -65,13 +89,54 @@
     color: var(--text-main);
 }
 
-.row small {
-    color: var(--text-muted);
-}
-
 .email {
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.emailBtn {
+    border: none;
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.emailBtn:hover,
+.emailBtn:focus-visible {
+    color: var(--primary);
+}
+
+.row > div {
+    min-width: 0;
+}
+
+.roleCell,
+.pointsCell,
+.dateCell {
+    white-space: nowrap;
+}
+
+.usernameBtn {
+    display: inline-flex;
+    align-items: center;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0;
+    margin-top: 2px;
+}
+
+.usernameBtn:hover,
+.usernameBtn:focus-visible {
+    color: var(--primary);
 }
 
 .deleteBtn {
@@ -86,6 +151,48 @@
 
 .deleteBtn:hover {
     filter: brightness(0.97);
+}
+
+.rowActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-start;
+}
+
+.actionBtn {
+    border: 1px solid var(--border);
+    background: var(--white);
+    color: var(--text-main);
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.secondaryBtn {
+    border: 1px solid var(--border);
+    background: var(--bg-light);
+    color: var(--text-main);
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-light);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.roleText {
+    font-weight: 600;
 }
 
 .empty {
@@ -104,6 +211,183 @@
     justify-content: center;
     gap: var(--space-2);
     padding: var(--space-5);
+}
+
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.38);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1400;
+    padding: var(--space-4);
+}
+
+.modalCard {
+    position: relative;
+    width: min(500px, 100%);
+    background: var(--white);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.modalClose {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+}
+
+.modalTitle {
+    margin: 0;
+}
+
+.modalDescription {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.modalHint {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.modalField {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.modalField select {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: var(--white);
+}
+
+.modalTextarea {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    resize: vertical;
+    min-height: 110px;
+    font: inherit;
+    color: var(--text-main);
+    background: var(--white);
+}
+
+.modalActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.modalActions .actionBtn,
+.modalActions .secondaryBtn {
+    width: 100%;
+}
+
+.requestDetails {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: var(--bg-light);
+}
+
+.requestDetails p {
+    margin: 0;
+}
+
+.requestDetails p + p {
+    margin-top: 8px;
+}
+
+.sectionHead {
+    padding: var(--space-4) var(--space-5) 0;
+}
+
+.sectionHead h3 {
+    margin: 0;
+}
+
+.requestsList {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: var(--space-4) var(--space-5) var(--space-5);
+}
+
+.requestCard {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    border-bottom: 1px solid var(--border);
+}
+
+.requestCard:last-child {
+    border-bottom: none;
+}
+
+.requestHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.requestIdentity {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.requestMeta {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+}
+
+.requestsToggle {
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-light);
+    color: var(--text-main);
+    font-weight: 700;
+    padding: 12px var(--space-5);
+    width: 100%;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.toggleChevron {
+    display: inline-block;
+    line-height: 1;
+    font-size: 14px;
+    transition: transform 0.2s ease;
+}
+
+.toggleChevronOpen {
+    transform: rotate(180deg);
 }
 
 .pageBtn,
@@ -130,6 +414,10 @@
         flex-direction: column;
     }
 
+    .filterPanel {
+        grid-template-columns: 1fr;
+    }
+
     .tableHead {
         display: none;
     }
@@ -141,5 +429,9 @@
 
     .row > div::before {
         content: '';
+    }
+
+    .modalActions {
+        grid-template-columns: 1fr;
     }
 }

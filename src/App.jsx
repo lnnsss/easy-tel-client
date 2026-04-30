@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
 import { useStores } from './stores/StoreContext';
@@ -9,6 +9,7 @@ import AppModal from './components/AppModal/AppModal';
 const App = observer(() => {
     const { authStore, uiStore } = useStores();
     const navigate = useNavigate();
+    const shownNoticeRef = useRef('');
 
     useEffect(() => {
         // Проверяем токен при загрузке вкладки
@@ -20,6 +21,29 @@ const App = observer(() => {
         const initialTheme = savedTheme === 'dark' ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', initialTheme);
     }, []);
+
+    useEffect(() => {
+        const notice = authStore.user?.authorRequestNotice;
+        if (!notice?._id) return;
+        if (shownNoticeRef.current === String(notice._id)) return;
+        shownNoticeRef.current = String(notice._id);
+
+        const isApproved = notice.status === 'approved';
+        uiStore.showModal({
+            title: isApproved ? 'Роль автора одобрена' : 'Решение по заявке автора',
+            message: isApproved
+                ? 'Поздравляем! Вам выдана роль автора курсов.'
+                : (notice.adminComment
+                    ? `Заявка отклонена.\nКомментарий администратора: ${notice.adminComment}`
+                    : 'Заявка отклонена. Вы можете подать новую заявку в любое время.'),
+            variant: isApproved ? 'success' : 'info',
+            secondaryLabel: 'Закрыть',
+            onSecondary: async () => {
+                uiStore.closeModal();
+                await authStore.markAuthorRequestSeen(notice._id);
+            }
+        });
+    }, [authStore.user?.authorRequestNotice?._id]);
 
     // Если приложение проверяет токен в данный момент
     if (authStore.isLoading && !authStore.isAuth && localStorage.getItem('token')) {

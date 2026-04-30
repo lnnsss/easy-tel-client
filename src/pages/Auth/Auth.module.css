@@ -92,7 +92,7 @@
 
 .mainBtn {
     background: var(--primary);
-    color: var(--color-bg);
+    color: var(--c-black);
     padding: 15px;
     border: none;
     border-radius: 12px;

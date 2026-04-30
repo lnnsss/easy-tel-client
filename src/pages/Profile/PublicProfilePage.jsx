@@ -6,7 +6,7 @@ import profileStyles from './Profile.module.css';
 import styles from './PublicProfilePage.module.css';
 
 const PublicProfilePage = () => {
-    const { chatStore, uiStore } = useStores();
+    const { chatStore, uiStore, authStore } = useStores();
     const { username } = useParams();
     const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
@@ -14,10 +14,10 @@ const PublicProfilePage = () => {
     const [notFound, setNotFound] = useState(false);
     const [error, setError] = useState('');
     const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
-    const [copiedUsername, setCopiedUsername] = useState(false);
     const [activeStat, setActiveStat] = useState(null);
     const [isFriendActionLoading, setIsFriendActionLoading] = useState(false);
     const [isChatActionLoading, setIsChatActionLoading] = useState(false);
+    const isAdminViewer = authStore.user?.role === 'admin';
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -62,10 +62,8 @@ const PublicProfilePage = () => {
         if (!value) return;
         try {
             await navigator.clipboard.writeText(value);
-            setCopiedUsername(true);
-            setTimeout(() => setCopiedUsername(false), 1200);
         } catch {
-            setCopiedUsername(false);
+            // Ignore clipboard permission errors.
         }
     };
 
@@ -76,6 +74,7 @@ const PublicProfilePage = () => {
 
     const performFriendAction = async () => {
         if (!profile || isFriendActionLoading) return;
+        if (isAdminViewer) return;
 
         setIsFriendActionLoading(true);
         try {
@@ -119,6 +118,15 @@ const PublicProfilePage = () => {
 
     const onFriendAction = async () => {
         if (!profile || isFriendActionLoading) return;
+        if (isAdminViewer) {
+            uiStore.showModal({
+                title: 'Недоступно',
+                message: 'Администратор не может добавлять в друзья.',
+                variant: 'info',
+                secondaryLabel: 'Закрыть'
+            });
+            return;
+        }
 
         if (profile.relationStatus === 'none') {
             showConfirmModal('Отправить заявку?', 'Отправить запрос в друзья этому пользователю?', performFriendAction);
@@ -145,6 +153,15 @@ const PublicProfilePage = () => {
 
     const onStartChat = async () => {
         if (!profile?._id || isChatActionLoading) return;
+        if (isAdminViewer) {
+            uiStore.showModal({
+                title: 'Недоступно',
+                message: 'Администратор не может открывать личные чаты.',
+                variant: 'info',
+                secondaryLabel: 'Закрыть'
+            });
+            return;
+        }
 
         if (profile.relationStatus !== 'friend') {
             uiStore.showModal({
@@ -271,10 +288,9 @@ const PublicProfilePage = () => {
                 <h1 className={profileStyles.fullName}>{profile.firstName} {profile.lastName}</h1>
                 <button type="button" className={profileStyles.usernameBtn} onClick={onCopyUsername}>
                     @{profile.username}
-                    {copiedUsername && <span className={profileStyles.copiedHint}>скопировано</span>}
                 </button>
                 <div className={profileStyles.rank}>Ранг: {profile.rank}</div>
-                {profile.relationStatus !== 'self' && (
+                {!isAdminViewer && profile.relationStatus !== 'self' && (
                     <div className={styles.friendActionsRow}>
                         <button
                             type="button"

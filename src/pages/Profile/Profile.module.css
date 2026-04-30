@@ -27,7 +27,7 @@
     display: inline-block;
     white-space: nowrap;
     background: var(--color-warning-strong);
-    color: var(--color-bg);
+    color: var(--c-black);
     text-decoration: none;
     font-weight: 700;
     padding: 9px 14px;
@@ -129,12 +129,13 @@
     font-size: 0.95rem;
     cursor: pointer;
     padding: 0;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
 }
 
-.copiedHint {
-    font-size: 0.78rem;
-    color: var(--color-primary);
-    font-weight: 700;
+.usernameBtn:hover,
+.usernameBtn:focus-visible {
+    color: #9be84f;
+    text-shadow: 0 0 12px rgba(155, 232, 79, 0.42);
 }
 
 .rank { font-weight: bold; color: var(--color-primary); font-size: 1.1rem; }
@@ -216,7 +217,7 @@
 .saveBtn {
     border: none;
     background: var(--color-primary);
-    color: var(--color-bg);
+    color: var(--c-black);
     padding: var(--space-3);
     border-radius: 10px;
     font-weight: 700;
@@ -234,7 +235,7 @@
 .adminBadge {
     display: inline-block;
     font-weight: bold;
-    color: var(--color-bg);
+    color: var(--c-black);
     background: var(--color-primary);
     font-size: 0.9rem;
     padding: 6px 18px;
@@ -268,7 +269,7 @@
     display: block;
     width: 100%;
     background: var(--color-primary);
-    color: var(--color-bg);
+    color: var(--c-black);
     padding: var(--space-4);
     border-radius: 16px;
     text-decoration: none;

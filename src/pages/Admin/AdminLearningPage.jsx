@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CourseService from '../../services/CourseService';
 import { useStores } from '../../stores/StoreContext';
 import styles from './AdminLearningPage.module.css';
@@ -17,6 +17,13 @@ const PINNED_MODE_OPTIONS = [
 ];
 
 const statusLabel = (value) => (value === 'published' ? 'Опубликован' : 'Черновик');
+const reviewLabel = (value) => {
+    if (value === 'pending_review') return 'На модерации';
+    if (value === 'approved') return 'Одобрен';
+    if (value === 'rejected') return 'Отклонен';
+    if (value === 'draft') return 'Черновик';
+    return 'Без модерации';
+};
 
 const PencilIcon = () => (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -34,18 +41,9 @@ const TrashIcon = () => (
     </svg>
 );
 
-const emptyCourse = {
-    title: '',
-    description: '',
-    categoryIds: [],
-    status: 'published',
-    order: 0,
-    isPinnedHome: false,
-    pinnedHomeText: ''
-};
-
 const AdminLearningPage = () => {
     const { uiStore } = useStores();
+    const navigate = useNavigate();
     const [categories, setCategories] = useState([]);
     const [courses, setCourses] = useState([]);
     const [error, setError] = useState('');
@@ -53,7 +51,6 @@ const AdminLearningPage = () => {
     const [categoryName, setCategoryName] = useState('');
     const [editingCategoryId, setEditingCategoryId] = useState('');
     const [editingCategoryName, setEditingCategoryName] = useState('');
-    const [courseForm, setCourseForm] = useState(emptyCourse);
     const [pinForm, setPinForm] = useState({
         courseId: '',
         enabled: false,
@@ -64,6 +61,14 @@ const AdminLearningPage = () => {
     const [filterCategoryId, setFilterCategoryId] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
     const [search, setSearch] = useState('');
+    const [reviewModal, setReviewModal] = useState({
+        isOpen: false,
+        courseId: '',
+        courseTitle: '',
+        decision: 'approved',
+        adminComment: '',
+        isSubmitting: false
+    });
 
     const getCourseCategoryIds = (course) => {
         const fromArray = Array.isArray(course?.categoryIds) ? course.categoryIds : [];
@@ -145,36 +150,10 @@ const AdminLearningPage = () => {
         }
     };
 
-    const createCourse = async (e) => {
-        e.preventDefault();
-        if (!Array.isArray(courseForm.categoryIds) || courseForm.categoryIds.length === 0) {
-            setError('Выберите хотя бы одну категорию');
-            return;
-        }
+    const togglePinnedCourse = async () => {
+        const nextEnabled = !pinForm.enabled;
         try {
-            await CourseService.createAdminCourse(courseForm);
-            setCourseForm(emptyCourse);
-            await loadAll();
-        } catch (err) {
-            setError(err.response?.data?.message || 'Ошибка создания курса');
-        }
-    };
-
-    const toggleCourseFormCategory = (categoryId, checked) => {
-        setCourseForm((prev) => {
-            const current = Array.isArray(prev.categoryIds) ? prev.categoryIds : [];
-            if (checked) {
-                if (current.includes(categoryId)) return prev;
-                return { ...prev, categoryIds: [...current, categoryId] };
-            }
-            return { ...prev, categoryIds: current.filter((id) => id !== categoryId) };
-        });
-    };
-
-    const savePinnedCourse = async (e) => {
-        e.preventDefault();
-        try {
-            if (!pinForm.enabled) {
+            if (!nextEnabled) {
                 const currentPinned = courses.find((course) => course.isPinnedHome);
                 if (currentPinned) {
                     await CourseService.updateAdminCourse(currentPinned._id, {
@@ -185,7 +164,7 @@ const AdminLearningPage = () => {
 
                 uiStore.showModal({
                     title: 'Готово',
-                    message: 'Закрепленный курс снят с главной.',
+                    message: 'Закрепление отключено.',
                     variant: 'success',
                     secondaryLabel: 'Закрыть'
                 });
@@ -206,7 +185,7 @@ const AdminLearningPage = () => {
 
             uiStore.showModal({
                 title: 'Готово',
-                message: 'Курс закреплен на главной странице.',
+                message: 'Закрепление включено.',
                 variant: 'success',
                 secondaryLabel: 'Закрыть'
             });
@@ -217,14 +196,30 @@ const AdminLearningPage = () => {
     };
 
     const toggleCourseStatus = async (course) => {
-        try {
-            await CourseService.updateAdminCourse(course._id, {
-                status: course.status === 'published' ? 'draft' : 'published'
-            });
-            await loadAll();
-        } catch (err) {
-            setError(err.response?.data?.message || 'Ошибка обновления курса');
-        }
+        const nextStatus = course.status === 'published' ? 'draft' : 'published';
+        const nextLabel = nextStatus === 'published' ? 'Опубликован' : 'Черновик';
+        uiStore.showModal({
+            title: 'Подтвердить действие?',
+            message: `Статус курса "${course.title}" будет изменен на "${nextLabel}".`,
+            variant: 'info',
+            primaryLabel: 'Подтвердить',
+            secondaryLabel: 'Отмена',
+            onPrimary: async () => {
+                try {
+                    await CourseService.updateAdminCourse(course._id, { status: nextStatus });
+                    uiStore.closeModal();
+                    await loadAll();
+                } catch (err) {
+                    uiStore.showModal({
+                        title: 'Ошибка',
+                        message: err.response?.data?.message || 'Ошибка обновления курса',
+                        variant: 'error',
+                        secondaryLabel: 'Закрыть'
+                    });
+                }
+            },
+            onSecondary: () => uiStore.closeModal()
+        });
     };
 
     const removeCourse = async (courseId) => {
@@ -249,6 +244,37 @@ const AdminLearningPage = () => {
                 }
             }
         });
+    };
+
+    const openReviewModal = (course, decision) => {
+        setReviewModal({
+            isOpen: true,
+            courseId: course._id,
+            courseTitle: course.title,
+            decision,
+            adminComment: '',
+            isSubmitting: false
+        });
+    };
+
+    const closeReviewModal = () => {
+        setReviewModal((prev) => ({ ...prev, isOpen: false }));
+    };
+
+    const reviewCourse = async () => {
+        if (!reviewModal.courseId || reviewModal.isSubmitting) return;
+        try {
+            setReviewModal((prev) => ({ ...prev, isSubmitting: true }));
+            await CourseService.reviewAdminCourse(reviewModal.courseId, {
+                decision: reviewModal.decision,
+                adminComment: reviewModal.adminComment
+            });
+            closeReviewModal();
+            await loadAll();
+        } catch (err) {
+            setError(err.response?.data?.message || 'Ошибка модерации курса');
+            setReviewModal((prev) => ({ ...prev, isSubmitting: false }));
+        }
     };
 
     const removeCategory = async (categoryId) => {
@@ -293,8 +319,13 @@ const AdminLearningPage = () => {
     };
 
     return (
-        <div className={styles.page}>
-            <h1>Админ: обучение</h1>
+        <div className={`${styles.page} app-page-shell`}>
+            <div className="app-page-top">
+                <div>
+                    <h1 className="app-page-title">Админ: материал</h1>
+                    <p className="app-page-subtitle">Управление категориями и курсами.</p>
+                </div>
+            </div>
             {error && <p className={styles.error}>{error}</p>}
 
             <section className={styles.card}>
@@ -344,88 +375,61 @@ const AdminLearningPage = () => {
             </section>
 
             <section className={styles.card}>
-                <h3>Новый курс</h3>
-                <form className={styles.createCourseForm} onSubmit={createCourse}>
-                    <input
-                        value={courseForm.title}
-                        onChange={(e) => setCourseForm((prev) => ({ ...prev, title: e.target.value }))}
-                        placeholder="Название курса"
-                        required
-                    />
-                    <textarea
-                        value={courseForm.description}
-                        onChange={(e) => setCourseForm((prev) => ({ ...prev, description: e.target.value }))}
-                        placeholder="Описание курса"
-                    />
-                    <div className={styles.inlineFields}>
-                        <div className={styles.categoryChecks} role="group" aria-label="Категории курса">
-                            {categories.map((category) => (
-                                <label key={category._id} className={styles.categoryCheck}>
-                                    <input
-                                        type="checkbox"
-                                        checked={courseForm.categoryIds.includes(category._id)}
-                                        onChange={(e) => toggleCourseFormCategory(category._id, e.target.checked)}
-                                    />
-                                    <span>{category.name}</span>
-                                </label>
-                            ))}
-                            {categories.length === 0 && <p className={styles.empty}>Сначала создайте категорию</p>}
-                        </div>
-                        <select
-                            value={courseForm.status}
-                            onChange={(e) => setCourseForm((prev) => ({ ...prev, status: e.target.value }))}
-                        >
-                            <option value="published">Опубликован</option>
-                            <option value="draft">Черновик</option>
-                        </select>
-                    </div>
-                    <button type="submit">Создать курс</button>
-                </form>
-            </section>
-
-            <section className={styles.card}>
                 <h3>Закрепленный курс на главной</h3>
-                <form className={styles.createCourseForm} onSubmit={savePinnedCourse}>
-                    <select
-                        value={pinForm.courseId}
-                        onChange={(e) => setPinForm((prev) => ({ ...prev, courseId: e.target.value }))}
-                        disabled={!pinForm.enabled}
-                    >
-                        <option value="">Выберите курс</option>
-                        {courses.map((course) => (
-                            <option key={course._id} value={course._id}>{course.title}</option>
-                        ))}
-                    </select>
-                    <label className={styles.pinToggle}>
-                        <input
-                            type="checkbox"
-                            checked={pinForm.enabled}
-                            onChange={(e) => setPinForm((prev) => ({ ...prev, enabled: e.target.checked }))}
-                        />
-                        Показать закрепленную плашку на главной
+                <div className={styles.createCourseForm}>
+                    <label className={styles.fieldGroup}>
+                        <span>Курс</span>
+                        <select
+                            value={pinForm.courseId}
+                            onChange={(e) => setPinForm((prev) => ({ ...prev, courseId: e.target.value }))}
+                        >
+                            <option value="">Выберите курс</option>
+                            {courses.map((course) => (
+                                <option key={course._id} value={course._id}>{course.title}</option>
+                            ))}
+                        </select>
                     </label>
-                    <input
-                        value={pinForm.text}
-                        onChange={(e) => setPinForm((prev) => ({ ...prev, text: e.target.value }))}
-                        placeholder="Текст плашки на главной"
-                        disabled={!pinForm.enabled}
-                    />
-                    <select
-                        value={pinForm.mode}
-                        onChange={(e) => setPinForm((prev) => ({ ...prev, mode: e.target.value }))}
-                        disabled={!pinForm.enabled}
+                    <label className={styles.fieldGroup}>
+                        <span>Текст плашки</span>
+                        <input
+                            value={pinForm.text}
+                            onChange={(e) => setPinForm((prev) => ({ ...prev, text: e.target.value }))}
+                            placeholder="Текст плашки на главной"
+                        />
+                    </label>
+                    <label className={styles.fieldGroup}>
+                        <span>Режим</span>
+                        <select
+                            value={pinForm.mode}
+                            onChange={(e) => setPinForm((prev) => ({ ...prev, mode: e.target.value }))}
+                        >
+                            {PINNED_MODE_OPTIONS.map((item) => (
+                                <option key={item.value} value={item.value}>{item.label}</option>
+                            ))}
+                        </select>
+                    </label>
+                    <button
+                        type="button"
+                        onClick={togglePinnedCourse}
+                        className={`${styles.pinnedToggleButton} ${pinForm.enabled ? styles.pinnedToggleActive : styles.pinnedToggleInactive}`}
                     >
-                        {PINNED_MODE_OPTIONS.map((item) => (
-                            <option key={item.value} value={item.value}>{item.label}</option>
-                        ))}
-                    </select>
-                    <button type="submit">Сохранить закрепление</button>
-                </form>
+                        {pinForm.enabled ? 'Активно' : 'Активировать'}
+                    </button>
+                </div>
             </section>
 
             <section className={styles.card}>
                 <div className={styles.coursesHead}>
-                    <h3>Курсы</h3>
+                    <div className={styles.sectionHead}>
+                        <h3>Курсы</h3>
+                        <button
+                            type="button"
+                            className={`${styles.linkBtn} ${styles.topCreateBtn}`}
+                            onClick={() => navigate('/admin/learning/courses/new')}
+                        >
+                            Новый курс
+                        </button>
+                    </div>
                     <div className={styles.filters}>
                         <input
                             value={search}
@@ -450,7 +454,15 @@ const AdminLearningPage = () => {
                         <div className={styles.rowMain}>
                             <strong>{course.title}</strong>
                             <small>
-                                {(getCourseCategoryNames(course).join(', ') || 'Без категории')} · {statusLabel(course.status)}
+                                {(getCourseCategoryNames(course).join(', ') || 'Без категории')} · {statusLabel(course.status)} · {reviewLabel(course.reviewStatus)}
+                                {course?.ownerUserId?.username && (
+                                    <>
+                                        {' · '}
+                                        <Link className={styles.authorLink} to={`/u/${course.ownerUserId.username}`}>
+                                            @{course.ownerUserId.username}
+                                        </Link>
+                                    </>
+                                )}
                             </small>
                         </div>
                         <div className={styles.actions}>
@@ -464,12 +476,55 @@ const AdminLearningPage = () => {
                             <button type="button" onClick={() => toggleCourseStatus(course)}>
                                 {course.status === 'published' ? 'В черновик' : 'Опубликовать'}
                             </button>
+                            {course.reviewStatus === 'pending_review' && (
+                                <>
+                                    <button type="button" onClick={() => openReviewModal(course, 'approved')}>
+                                        Одобрить
+                                    </button>
+                                    <button type="button" onClick={() => openReviewModal(course, 'rejected')}>
+                                        Отклонить
+                                    </button>
+                                </>
+                            )}
                             <button type="button" onClick={() => removeCourse(course._id)}>Удалить</button>
                         </div>
                     </div>
                 ))}
                 {filteredCourses.length === 0 && <p className={styles.empty}>Курсы не найдены</p>}
             </section>
+
+            {reviewModal.isOpen && (
+                <div className={styles.modalOverlay} onClick={closeReviewModal}>
+                    <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+                        <button type="button" className={styles.modalClose} onClick={closeReviewModal} aria-label="Закрыть">
+                            ×
+                        </button>
+                        <h3 className={styles.modalTitle}>
+                            {reviewModal.decision === 'approved' ? 'Одобрить курс' : 'Отклонить курс'}
+                        </h3>
+                        <p className={styles.modalDescription}>
+                            Курс: <strong>{reviewModal.courseTitle || '—'}</strong>
+                        </p>
+                        <label className={styles.modalField}>
+                            Комментарий администратора (необязательно)
+                            <textarea
+                                className={styles.modalTextarea}
+                                value={reviewModal.adminComment}
+                                onChange={(e) => setReviewModal((prev) => ({ ...prev, adminComment: e.target.value }))}
+                                placeholder="Введите комментарий для автора"
+                            />
+                        </label>
+                        <div className={styles.modalActions}>
+                            <button type="button" onClick={reviewCourse} disabled={reviewModal.isSubmitting}>
+                                {reviewModal.decision === 'approved' ? 'Одобрить' : 'Отклонить'}
+                            </button>
+                            <button type="button" onClick={closeReviewModal} disabled={reviewModal.isSubmitting}>
+                                Отмена
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

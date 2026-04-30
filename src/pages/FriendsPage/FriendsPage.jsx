@@ -173,8 +173,10 @@ const FriendsPage = observer(() => {
 
     return (
         <>
-        <div className={styles.container}>
-            <h1 className={styles.title}>Друзья</h1>
+        <div className={`${styles.container} app-page-shell`}>
+            <div className="app-page-top">
+                <h1 className={`${styles.title} app-page-title`}>Друзья</h1>
+            </div>
 
             <div className={styles.findCompanionWrap}>
                 <button

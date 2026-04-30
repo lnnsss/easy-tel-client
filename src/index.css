@@ -59,7 +59,7 @@
     --color-primary-hover: #b7e047;
     --color-primary-soft: #eff9d1;
     --color-primary-tint: #f6fce7;
-    --color-primary-strong: #2a2a2a;
+    --color-primary-strong: var(--c-black);
     --color-accent-warning: var(--c-lime);
 
     --color-border: #d9d9d9;
@@ -170,7 +170,7 @@
     --color-primary-hover: #d8ff6f;
     --color-primary-soft: #2f3b13;
     --color-primary-tint: #252d13;
-    --color-primary-strong: #f3f3f3;
+    --color-primary-strong: var(--c-black);
 
     --color-border: #353535;
     --color-border-soft: #2b2b2b;
@@ -278,6 +278,36 @@ body {
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+.app-page-shell {
+    width: 100%;
+    max-width: var(--container-xl) !important;
+    margin: 0 auto !important;
+    padding: var(--space-7) var(--space-page-x) var(--space-8) !important;
+    box-sizing: border-box;
+}
+
+.app-page-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-6);
+}
+
+.app-page-title {
+    margin: 0;
+    font-size: clamp(1.7rem, 2.6vw, 2.2rem) !important;
+    line-height: 1.2 !important;
+    font-weight: var(--font-weight-extrabold) !important;
+}
+
+.app-page-subtitle {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.98rem !important;
+}
+
 a,
 button,
 input,
@@ -296,6 +326,21 @@ select {
     padding: 12px 14px;
     min-height: 46px;
     border-radius: 12px;
+}
+
+select:not([multiple]) {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    padding-right: 36px !important;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--color-text-muted) 50%),
+        linear-gradient(135deg, var(--color-text-muted) 50%, transparent 50%);
+    background-position:
+        calc(100% - 16px) calc(50% - 2px),
+        calc(100% - 11px) calc(50% - 2px);
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
 }
 
 input::placeholder,

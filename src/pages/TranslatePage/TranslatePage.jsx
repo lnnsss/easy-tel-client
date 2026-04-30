@@ -335,10 +335,13 @@ const TranslatePage = () => {
     }, [leftLang, leftValue, speaker]);
 
     return (
-        <div className={styles.container}>
+        <div className={`${styles.container} app-page-shell`}>
+            <div className="app-page-top">
+                <h1 className="app-page-title">Переводчик</h1>
+            </div>
             <section className={styles.card}>
                 <div className={styles.cardHead}>
-                    <h1>Переводчик</h1>
+                    <h2>Настройки перевода</h2>
                     <select
                         className={styles.speakerSelect}
                         value={speaker}

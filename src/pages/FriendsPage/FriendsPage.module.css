@@ -251,10 +251,6 @@
     margin-top: 2px;
 }
 
-.modalForm select {
-    appearance: auto;
-}
-
 .primaryAction {
     border: 0;
     border-radius: 10px;

@@ -276,7 +276,7 @@
 
 .addBtn {
     background: var(--color-primary);
-    color: var(--color-bg);
+    color: var(--c-black);
 }
 
 .addBtn:hover { background: var(--color-primary-hover); }
