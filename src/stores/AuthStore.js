@@ -165,6 +165,38 @@ class AuthStore {
         }
     }
 
+    async updateCharacterCustomization(characterCustomization) {
+        try {
+            const { data } = await $api.patch('/auth/profile', { characterCustomization });
+            runInAction(() => {
+                this.user = data.user;
+            });
+            return { success: true, message: data.message };
+        } catch (e) {
+            return {
+                success: false,
+                message: this.formatError(e, "Ошибка сохранения персонажа")
+            };
+        }
+    }
+
+    async purchaseCharacterItem(category, file) {
+        try {
+            const { data } = await $api.patch('/auth/profile', {
+                purchaseItem: { category, file }
+            });
+            runInAction(() => {
+                this.user = data.user;
+            });
+            return { success: true, message: data.message };
+        } catch (e) {
+            return {
+                success: false,
+                message: this.formatError(e, "Ошибка покупки")
+            };
+        }
+    }
+
     async uploadAvatar(file) {
         try {
             const formData = new FormData();

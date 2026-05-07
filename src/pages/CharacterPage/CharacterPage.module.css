@@ -1,0 +1,173 @@
+.page {
+    width: 100%;
+    max-width: var(--container-xl);
+    margin: 24px auto;
+    padding: 0 var(--space-page-x);
+    box-sizing: border-box;
+}
+
+.card {
+    display: grid;
+    grid-template-columns: minmax(280px, 420px) 1fr;
+    gap: 24px;
+    align-items: start;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-soft);
+    border-radius: 16px;
+    padding: 18px;
+}
+
+.previewWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.previewRect {
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 3 / 4;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-bg-muted);
+    position: relative;
+    overflow: hidden;
+}
+
+.backgroundLayer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+.layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.layerFade {
+    animation: fadeLayer 280ms ease;
+}
+
+@keyframes fadeLayer {
+    from { opacity: 0.25; }
+    to { opacity: 1; }
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.coinsLine {
+    font-weight: 700;
+    color: var(--color-text-alt);
+}
+
+.genderBtn,
+.rowBtns button,
+.saveBtn {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-muted);
+    color: var(--color-text);
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+}
+
+.genderBtn:hover,
+.rowBtns button:hover,
+.saveBtn:hover {
+    border-color: var(--color-primary);
+}
+
+.group {
+    border: 1px solid var(--color-border-soft);
+    border-radius: 10px;
+    padding: 10px;
+    background: var(--color-bg-soft);
+}
+
+.groupLabel {
+    font-size: 0.92rem;
+    color: var(--color-text-alt);
+    margin-bottom: 8px;
+}
+
+.controlsRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.metaRow {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: 8px;
+}
+
+.statusBadge {
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 4px 9px;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.buyBtn {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-muted);
+    color: var(--color-text);
+    border-radius: 10px;
+    min-height: 42px;
+    padding: 10px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.buyBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.rowBtns {
+    display: flex;
+    gap: 8px;
+}
+
+.rowBtns button {
+    min-height: 42px;
+}
+
+.saveBtn {
+    margin-top: 6px;
+    background: var(--color-primary);
+    color: var(--c-black);
+    font-weight: 700;
+}
+
+.saveBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.hint {
+    color: var(--color-text-muted);
+    font-size: 0.88rem;
+}
+
+@media (max-width: 900px) {
+    .card {
+        grid-template-columns: 1fr;
+    }
+}

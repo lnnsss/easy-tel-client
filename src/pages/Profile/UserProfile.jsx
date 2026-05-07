@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Profile.module.css';
+import CharacterPreviewCard from '../../components/CharacterPreviewCard/CharacterPreviewCard';
 
 const UserProfile = ({ user }) => {
     const { authStore, uiStore } = useStores();
@@ -18,6 +19,7 @@ const UserProfile = ({ user }) => {
 
     const wordsTotal = user.dictionary?.length || 0;
     const totalPoints = Number.isFinite(user.totalPoints) ? user.totalPoints : wordsTotal;
+    const coins = Number.isFinite(user.coins) ? user.coins : totalPoints;
     const analytics = user.analytics || null;
     const wordsWeek = useMemo(() => {
         const weekAgo = nowTs - 7 * 24 * 60 * 60 * 1000;
@@ -137,6 +139,12 @@ const UserProfile = ({ user }) => {
             description: 'Сумма очков за активность: сканирование слов и обучение в курсах.'
         },
         {
+            key: 'coins',
+            displayValue: String(coins),
+            label: 'Монеты',
+            description: 'Игровая валюта для покупки одежды персонажа. Очки при покупке не списываются.'
+        },
+        {
             key: 'discipline',
             displayValue: `${analytics?.discipline?.score ?? 0}/100`,
             label: 'Дисциплина',
@@ -148,6 +156,13 @@ const UserProfile = ({ user }) => {
             label: 'Мотивация',
             description: 'Оценка вовлеченности в учебу: насколько активно вы продолжаете прогресс.'
         }
+    ];
+
+    const statByKey = Object.fromEntries(stats.map((s) => [s.key, s]));
+    const statRows = [
+        ['streak', 'wordsWeek', 'wordsTotal'],
+        ['totalPoints', 'coins'],
+        ['discipline', 'motivation']
     ];
 
     return (
@@ -236,17 +251,28 @@ const UserProfile = ({ user }) => {
                 )}
             </div>
 
-            <div className={styles.statsRow}>
-                {stats.map((stat) => (
-                    <button
-                        key={stat.key}
-                        type="button"
-                        className={`${styles.statBox} ${styles.statBoxBtn}`}
-                        onClick={() => setActiveStat(stat)}
+            <div className={styles.statsRows}>
+                {statRows.map((row, rowIndex) => (
+                    <div
+                        key={`row-${rowIndex}`}
+                        className={`${styles.statsRow} ${row.length === 2 ? styles.statsRowTwo : styles.statsRowThree}`}
                     >
-                        <span className={styles.statVal}>{stat.displayValue}</span>
-                        <span className={styles.statLabel}>{stat.label}</span>
-                    </button>
+                        {row.map((key) => {
+                            const stat = statByKey[key];
+                            if (!stat) return null;
+                            return (
+                                <button
+                                    key={stat.key}
+                                    type="button"
+                                    className={`${styles.statBox} ${styles.statBoxBtn}`}
+                                    onClick={() => setActiveStat(stat)}
+                                >
+                                    <span className={styles.statVal}>{stat.displayValue}</span>
+                                    <span className={styles.statLabel}>{stat.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
                 ))}
             </div>
 
@@ -265,6 +291,8 @@ const UserProfile = ({ user }) => {
                     )}
                 </div>
             </div>
+
+            <CharacterPreviewCard customization={user.characterCustomization} editable />
 
             {activeStat && (
                 <div className={styles.statModalOverlay} onClick={() => setActiveStat(null)}>

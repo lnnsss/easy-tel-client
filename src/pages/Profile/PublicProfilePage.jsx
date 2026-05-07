@@ -4,6 +4,7 @@ import $api from '../../api/instance';
 import { useStores } from '../../stores/StoreContext';
 import profileStyles from './Profile.module.css';
 import styles from './PublicProfilePage.module.css';
+import CharacterPreviewCard from '../../components/CharacterPreviewCard/CharacterPreviewCard';
 
 const PublicProfilePage = () => {
     const { chatStore, uiStore, authStore } = useStores();
@@ -264,7 +265,32 @@ const PublicProfilePage = () => {
             displayValue: String(profile.totalPoints || 0),
             label: 'Всего очков',
             description: 'Сумма очков, которые пользователь получил за учебную активность.'
+        },
+        {
+            key: 'coins',
+            displayValue: String(profile.coins || 0),
+            label: 'Монеты',
+            description: 'Игровая валюта для покупки одежды персонажа.'
+        },
+        {
+            key: 'discipline',
+            displayValue: `${profile?.analytics?.discipline?.score ?? 0}/100`,
+            label: 'Дисциплина',
+            description: 'Оценка регулярности занятий и стабильности учебной активности.'
+        },
+        {
+            key: 'motivation',
+            displayValue: `${profile?.analytics?.motivation?.score ?? 0}/100`,
+            label: 'Мотивация',
+            description: 'Оценка вовлеченности в учебу: насколько активно пользователь продолжает прогресс.'
         }
+    ];
+
+    const statByKey = Object.fromEntries(stats.map((s) => [s.key, s]));
+    const statRows = [
+        ['streak', 'wordsWeek', 'wordsTotal'],
+        ['totalPoints', 'coins'],
+        ['discipline', 'motivation']
     ];
 
     return (
@@ -316,17 +342,28 @@ const PublicProfilePage = () => {
                 )}
             </div>
 
-            <div className={profileStyles.statsRow}>
-                {stats.map((stat) => (
-                    <button
-                        key={stat.key}
-                        type="button"
-                        className={`${profileStyles.statBox} ${profileStyles.statBoxBtn}`}
-                        onClick={() => setActiveStat(stat)}
+            <div className={profileStyles.statsRows}>
+                {statRows.map((row, rowIndex) => (
+                    <div
+                        key={`row-${rowIndex}`}
+                        className={`${profileStyles.statsRow} ${row.length === 2 ? profileStyles.statsRowTwo : profileStyles.statsRowThree}`}
                     >
-                        <span className={profileStyles.statVal}>{stat.displayValue}</span>
-                        <span className={profileStyles.statLabel}>{stat.label}</span>
-                    </button>
+                        {row.map((key) => {
+                            const stat = statByKey[key];
+                            if (!stat) return null;
+                            return (
+                                <button
+                                    key={stat.key}
+                                    type="button"
+                                    className={`${profileStyles.statBox} ${profileStyles.statBoxBtn}`}
+                                    onClick={() => setActiveStat(stat)}
+                                >
+                                    <span className={profileStyles.statVal}>{stat.displayValue}</span>
+                                    <span className={profileStyles.statLabel}>{stat.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
                 ))}
             </div>
 
@@ -345,6 +382,8 @@ const PublicProfilePage = () => {
                     )}
                 </div>
             </div>
+
+            <CharacterPreviewCard customization={profile.characterCustomization} />
 
             {activeStat && (
                 <div className={profileStyles.statModalOverlay} onClick={() => setActiveStat(null)}>

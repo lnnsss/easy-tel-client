@@ -30,6 +30,7 @@ import AuthorLearningPage from '../pages/Author/AuthorLearningPage';
 import AuthorLearningCoursePage from '../pages/Author/AuthorLearningCoursePage';
 import AuthorCourseEditorPage from '../pages/Author/AuthorCourseEditorPage';
 import AuthorTopicEditorPage from '../pages/Author/AuthorTopicEditorPage';
+import CharacterPage from '../pages/CharacterPage/CharacterPage';
 
 const AppRouter = observer(() => {
     const { authStore } = useStores();
@@ -89,6 +90,10 @@ const AppRouter = observer(() => {
             <Route
                 path="/dictionary"
                 element={authStore.isAuth && !isAdmin ? <DictionaryPage /> : <Navigate to="/" />}
+            />
+            <Route
+                path="/character"
+                element={authStore.isAuth && !isAdmin ? <CharacterPage /> : <Navigate to="/" />}
             />
 
             <Route

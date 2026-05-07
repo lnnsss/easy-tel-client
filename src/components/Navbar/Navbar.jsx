@@ -117,6 +117,19 @@ const Navbar = observer(() => {
                 </div>
 
                 <div className={styles.settingsList}>
+                    {!isAdmin && (
+                        <button
+                            type="button"
+                            className={styles.settingsItem}
+                            onClick={() => {
+                                setIsSettingsOpen(false);
+                                navigate('/character');
+                            }}
+                        >
+                            <span>Персонаж</span>
+                        </button>
+                    )}
+
                     <button type="button" className={styles.settingsItem} onClick={onToggleTheme}>
                         <span>Тема</span>
                         <span className={styles.settingsValue}>{theme === 'dark' ? 'Тёмная' : 'Светлая'}</span>
