@@ -19,7 +19,12 @@
 .titleArea h1 span { color: var(--primary); }
 .titleArea p { color: var(--text-muted); margin: var(--space-1) 0 0; font-size: 14px; }
 
-.searchBar { width: 350px; }
+.searchBar {
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
 .searchInput {
     width: 100%;
     padding: 12px 18px;
@@ -73,6 +78,12 @@
 
 .formContainer .form {
     flex: 1;
+}
+
+.formContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
 }
 
 .formContainer .form textarea {
@@ -137,6 +148,32 @@
 .editBtn:hover { background: var(--color-border); color: var(--primary); }
 .actionBtnDel:hover { background: var(--color-danger-soft-bg); color: var(--color-danger-strong); }
 
+.importBtn {
+    background: var(--primary);
+    color: var(--c-black);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 800;
+}
+
+.importBtn:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+.cleanupBtn {
+    border: 1px solid var(--color-danger-strong);
+    color: var(--color-danger-strong);
+    background: var(--color-danger-soft-bg);
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
 .modalOverlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -198,6 +235,88 @@
 }
 
 .empty { text-align: center; padding: 40px; color: var(--text-muted); grid-column: span 2; }
+
+.sourceBadge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: var(--space-2);
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+.sourceBadgeLocal {
+    background: rgba(16, 185, 129, 0.12);
+    color: #047857;
+}
+
+.sourceBadgeExternal {
+    background: rgba(59, 130, 246, 0.12);
+    color: #1d4ed8;
+}
+
+.helperText {
+    margin: 0 0 var(--space-3);
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.externalToolbar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.checkboxRow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.externalActions {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.externalList {
+    margin-top: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-height: 320px;
+    overflow: auto;
+}
+
+.externalRow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-light);
+}
+
+.externalInfo {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.importedBadge {
+    font-size: 11px;
+    border-radius: 999px;
+    padding: 4px 8px;
+    background: rgba(16, 185, 129, 0.12);
+    color: #047857;
+    font-weight: 700;
+    white-space: nowrap;
+}
 
 @media (max-width: 1000px) {
     .mainLayout { grid-template-columns: 1fr; }

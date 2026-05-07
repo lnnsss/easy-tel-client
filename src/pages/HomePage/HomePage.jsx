@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import $api from '../../api/instance';
 import { useStores } from '../../stores/StoreContext';
+import AppAvatar from '../../components/AppAvatar/AppAvatar';
 import styles from './HomePage.module.css';
 
 const HomePage = observer(() => {
@@ -22,12 +23,6 @@ const HomePage = observer(() => {
         const apiBase = import.meta.env.VITE_API_URL || '';
         const serverBase = apiBase.replace(/\/api\/?$/, '');
         return `${serverBase}${avatarUrl}`;
-    };
-
-    const getInitials = (firstName, lastName) => {
-        const first = (firstName || '').trim().charAt(0);
-        const last = (lastName || '').trim().charAt(0);
-        return `${first}${last}`.toUpperCase() || 'U';
     };
 
     useEffect(() => {
@@ -210,19 +205,13 @@ const HomePage = observer(() => {
                                         <div className={styles.rankingLeft}>
                                             <span className={styles.orderNum}>{index + 1}</span>
                                             <div className={styles.rankingIdentity}>
-                                                <div className={styles.rankingAvatar}>
-                                                    {user.avatarUrl ? (
-                                                        <img
-                                                            src={getAvatarSrc(user.avatarUrl)}
-                                                            alt={`${user.firstName} ${user.lastName}`}
-                                                            className={styles.rankingAvatarImg}
-                                                        />
-                                                    ) : (
-                                                        <span className={styles.rankingAvatarFallback}>
-                                                            {getInitials(user.firstName, user.lastName)}
-                                                        </span>
-                                                    )}
-                                                </div>
+                                                <AppAvatar
+                                                    src={getAvatarSrc(user.avatarUrl)}
+                                                    fullName={`${user.firstName || ''} ${user.lastName || ''}`.trim()}
+                                                    className={styles.rankingAvatar}
+                                                    imgClassName={styles.rankingAvatarImg}
+                                                    fallbackClassName={styles.rankingAvatarFallback}
+                                                />
                                                 <span className={styles.fullName}>
                                                     {user.firstName} {user.lastName}
                                                 </span>

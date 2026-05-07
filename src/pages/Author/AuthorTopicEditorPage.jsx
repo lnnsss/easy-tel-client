@@ -21,11 +21,20 @@ const createQuestion = () => ({
     options: [
         { text: '', isCorrect: true },
         { text: '', isCorrect: false },
-        { text: '', isCorrect: false },
         { text: '', isCorrect: false }
     ],
     correctText: ''
 });
+
+const TrashIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 7H20" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+        <path d="M9 3H15" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+        <path d="M7 7L8 20C8.06 20.67 8.62 21.18 9.29 21.18H14.71C15.38 21.18 15.94 20.67 16 20L17 7" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+        <path d="M10 11V17" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+        <path d="M14 11V17" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+    </svg>
+);
 
 const AuthorTopicEditorPage = () => {
     const { uiStore } = useStores();
@@ -189,12 +198,7 @@ const AuthorTopicEditorPage = () => {
             setQuizSaving(true);
             await CourseService.upsertAuthorTopicQuiz(topicId, quizForm);
             uiStore.closeModal();
-            uiStore.showModal({
-                title: 'Тест сохранен',
-                message: 'Тест темы успешно сохранен.',
-                variant: 'success',
-                secondaryLabel: 'Закрыть'
-            });
+            navigate(`/author/learning/courses/${courseId}`);
         } catch (err) {
             setError(err.response?.data?.message || 'Ошибка сохранения теста');
         } finally {
@@ -211,6 +215,26 @@ const AuthorTopicEditorPage = () => {
             primaryLabel: 'Сохранить',
             secondaryLabel: 'Отмена',
             onPrimary: saveQuizRequest,
+            onSecondary: () => uiStore.closeModal()
+        });
+    };
+
+    const confirmRemoveQuestion = (qIndex) => {
+        if ((quizForm.questions || []).length <= 1 || editingBlocked) return;
+        uiStore.showModal({
+            title: 'Удалить задание?',
+            message: 'Задание будет удалено из теста.',
+            variant: 'warning',
+            primaryLabel: 'Удалить',
+            secondaryLabel: 'Отмена',
+            onPrimary: () => {
+                setQuizForm((prev) => {
+                    const nextQuestions = prev.questions.filter((_, i) => i !== qIndex);
+                    setActiveQuestionIndex(Math.max(-1, Math.min(nextQuestions.length - 1, qIndex - 1)));
+                    return { ...prev, questions: nextQuestions };
+                });
+                uiStore.closeModal();
+            },
             onSecondary: () => uiStore.closeModal()
         });
     };
@@ -363,6 +387,16 @@ const AuthorTopicEditorPage = () => {
                             >
                                 {`Задание ${qIndex + 1}`}
                             </button>
+                            <button
+                                type="button"
+                                className={styles.questionDeleteBtn}
+                                onClick={() => confirmRemoveQuestion(qIndex)}
+                                disabled={(quizForm.questions || []).length <= 1 || editingBlocked}
+                                aria-label={`Удалить задание ${qIndex + 1}`}
+                                title="Удалить задание"
+                            >
+                                <TrashIcon />
+                            </button>
                             <div className={`${styles.questionContent} ${activeQuestionIndex === qIndex ? styles.questionContentOpen : ''}`}>
                                 <div className={styles.questionContentInner}>
                                     <label className={styles.questionLabel}>Вопрос</label>
@@ -395,6 +429,7 @@ const AuthorTopicEditorPage = () => {
                                     >
                                         <option value="single_choice">Один вариант</option>
                                         <option value="text_input">Текстовый ответ</option>
+                                        <option value="sentence_order">Составь предложение из слов</option>
                                     </select>
 
                                     {question.type === 'single_choice' ? (
@@ -432,36 +467,66 @@ const AuthorTopicEditorPage = () => {
                                                             })
                                                         }))}
                                                     />
+                                                    <button
+                                                        type="button"
+                                                        className={styles.correctMarker}
+                                                        disabled={(question.options || []).length <= 3 || editingBlocked}
+                                                        onClick={() => setQuizForm((prev) => ({
+                                                            ...prev,
+                                                            questions: prev.questions.map((item, i) => {
+                                                                if (i !== qIndex) return item;
+                                                                if ((item.options || []).length <= 3) return item;
+                                                                const nextOptions = item.options.filter((_, oi) => oi !== optionIndex);
+                                                                const hasCorrect = nextOptions.some((opt) => opt.isCorrect);
+                                                                return {
+                                                                    ...item,
+                                                                    options: hasCorrect ? nextOptions : nextOptions.map((opt, oi) => ({ ...opt, isCorrect: oi === 0 }))
+                                                                };
+                                                            })
+                                                        }))}
+                                                        title="Удалить вариант"
+                                                        aria-label={`Удалить вариант ${optionIndex + 1}`}
+                                                    >
+                                                        <TrashIcon />
+                                                    </button>
                                                 </div>
                                             ))}
+                                            <button
+                                                type="button"
+                                                className={styles.ghostBtn}
+                                                onClick={() => setQuizForm((prev) => ({
+                                                    ...prev,
+                                                    questions: prev.questions.map((item, i) => {
+                                                        if (i !== qIndex) return item;
+                                                        return {
+                                                            ...item,
+                                                            options: [...(item.options || []), { text: '', isCorrect: false }]
+                                                        };
+                                                    })
+                                                }))}
+                                                disabled={editingBlocked}
+                                            >
+                                                Добавить вариант
+                                            </button>
                                         </div>
                                     ) : (
-                                        <input
-                                            value={question.correctText || ''}
-                                            onChange={(e) => setQuizForm((prev) => ({
-                                                ...prev,
-                                                questions: prev.questions.map((item, i) => i === qIndex ? { ...item, correctText: e.target.value } : item)
-                                            }))}
-                                            placeholder="Правильный ответ"
-                                            required
-                                            disabled={editingBlocked}
-                                        />
+                                        <>
+                                            {question.type === 'sentence_order' ? (
+                                                <small className={styles.questionHint}>Введите предложение без знаков препинания</small>
+                                            ) : null}
+                                            <input
+                                                value={question.correctText || ''}
+                                                onChange={(e) => setQuizForm((prev) => ({
+                                                    ...prev,
+                                                    questions: prev.questions.map((item, i) => i === qIndex ? { ...item, correctText: e.target.value } : item)
+                                                }))}
+                                                placeholder={question.type === 'sentence_order' ? 'Например: Мин бүген китап укыйм' : 'Правильный ответ'}
+                                                required
+                                                disabled={editingBlocked}
+                                            />
+                                        </>
                                     )}
 
-                                    <button
-                                        type="button"
-                                        className={styles.ghostBtn}
-                                        disabled={(quizForm.questions || []).length <= 1 || editingBlocked}
-                                        onClick={() => setQuizForm((prev) => {
-                                            const nextQuestions = prev.questions.length <= 1
-                                                ? prev.questions
-                                                : prev.questions.filter((_, i) => i !== qIndex);
-                                            setActiveQuestionIndex(Math.max(-1, Math.min(nextQuestions.length - 1, qIndex - 1)));
-                                            return { ...prev, questions: nextQuestions };
-                                        })}
-                                    >
-                                        Удалить вопрос
-                                    </button>
                                 </div>
                             </div>
                         </div>

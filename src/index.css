@@ -59,6 +59,7 @@
     --color-primary-hover: #b7e047;
     --color-primary-soft: #eff9d1;
     --color-primary-tint: #f6fce7;
+    --color-on-primary: #111111;
     --color-primary-strong: var(--c-black);
     --color-accent-warning: var(--c-lime);
 
@@ -170,6 +171,7 @@
     --color-primary-hover: #d8ff6f;
     --color-primary-soft: #2f3b13;
     --color-primary-tint: #252d13;
+    --color-on-primary: #111111;
     --color-primary-strong: var(--c-black);
 
     --color-border: #353535;
@@ -315,6 +317,43 @@ textarea,
 select {
     font: inherit;
     color: inherit;
+}
+
+button {
+    transition: background-color 0.22s ease, border-color 0.22s ease, color 0.22s ease, transform 0.2s ease, box-shadow 0.22s ease;
+}
+
+button:not(:disabled):hover {
+    transform: translateY(-1px);
+}
+
+button[aria-expanded],
+.tabBtn,
+.questionHeaderBtn {
+    transition: background-color 0.22s ease, border-color 0.22s ease, color 0.22s ease, transform 0.2s ease;
+}
+
+[data-theme='light'] button:not(:disabled) {
+    color: var(--color-text);
+}
+
+@keyframes appFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.app-page-shell section,
+.app-page-shell .card,
+.app-page-shell [class*='Item'],
+.app-page-shell [class*='Row'],
+.app-page-shell [class*='Block'] {
+    animation: appFadeIn 0.24s ease both;
 }
 
 input,

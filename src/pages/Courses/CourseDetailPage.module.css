@@ -89,10 +89,21 @@
     gap: 12px;
 }
 
+.quizTitle {
+    margin: 0;
+    font-size: clamp(1.45rem, 2.2vw, 1.9rem);
+    line-height: 1.2;
+}
+
 .question {
-    border: 1px solid var(--color-border, #dce2e8);
-    border-radius: 10px;
-    padding: 10px;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+}
+
+.question + .question {
+    margin-top: 16px;
+    padding-top: 14px;
 }
 
 .question input[type='text'] {
@@ -108,6 +119,73 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+.optionCard {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: var(--color-bg);
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.18s ease;
+}
+
+.optionCard input[type='radio'] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.optionCardActive {
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
+}
+
+.sentenceBuilder {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sentenceBuilder small {
+    color: var(--color-text-muted);
+}
+
+.sentenceWords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.wordChip {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+    border-radius: 10px;
+    padding: 8px 12px;
+    cursor: grab;
+}
+
+.wordChip:active {
+    cursor: grabbing;
+}
+
+.resetWordOrder {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: var(--color-text-neutral-5);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    width: fit-content;
+    cursor: pointer;
+    font-size: 11px;
+    margin-top: 12px;
 }
 
 .primaryBtn {

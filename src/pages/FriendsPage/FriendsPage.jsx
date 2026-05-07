@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStores } from '../../stores/StoreContext';
+import AppAvatar from '../../components/AppAvatar/AppAvatar';
 import styles from './FriendsPage.module.css';
 
 const FriendsPage = observer(() => {
@@ -54,12 +55,6 @@ const FriendsPage = observer(() => {
         const apiBase = import.meta.env.VITE_API_URL || '';
         const serverBase = apiBase.replace(/\/api\/?$/, '');
         return `${serverBase}${avatarUrl}`;
-    };
-
-    const getInitials = (firstName, lastName) => {
-        const first = (firstName || '').trim().charAt(0);
-        const last = (lastName || '').trim().charAt(0);
-        return `${first}${last}`.toUpperCase() || 'U';
     };
 
     const normalizedSearch = useMemo(
@@ -203,13 +198,11 @@ const FriendsPage = observer(() => {
                     {normalizedSearch.map((user) => (
                         <div key={user._id} className={styles.userRow}>
                             <Link to={`/u/${encodeURIComponent(user.username)}`} className={styles.userLeft}>
-                                <div className={styles.avatar}>
-                                    {user.avatarUrl ? (
-                                        <img src={getAvatarSrc(user.avatarUrl)} alt={user.username} />
-                                    ) : (
-                                        <span>{getInitials(user.firstName, user.lastName)}</span>
-                                    )}
-                                </div>
+                                <AppAvatar
+                                    src={getAvatarSrc(user.avatarUrl)}
+                                    fullName={`${user.firstName || ''} ${user.lastName || ''}`.trim()}
+                                    className={styles.avatar}
+                                />
                                 <div className={styles.userMeta}>
                                     <strong>{user.firstName} {user.lastName}</strong>
                                     <span>@{user.username}</span>
@@ -246,13 +239,11 @@ const FriendsPage = observer(() => {
                         {(socialStore.friends || []).map((friend) => (
                             <div key={friend._id} className={styles.userRow}>
                                 <Link to={`/u/${encodeURIComponent(friend.username)}`} className={styles.userLeft}>
-                                    <div className={styles.avatar}>
-                                        {friend.avatarUrl ? (
-                                            <img src={getAvatarSrc(friend.avatarUrl)} alt={friend.username} />
-                                        ) : (
-                                            <span>{getInitials(friend.firstName, friend.lastName)}</span>
-                                        )}
-                                    </div>
+                                    <AppAvatar
+                                        src={getAvatarSrc(friend.avatarUrl)}
+                                        fullName={`${friend.firstName || ''} ${friend.lastName || ''}`.trim()}
+                                        className={styles.avatar}
+                                    />
                                     <div className={styles.userMeta}>
                                         <strong>{friend.firstName} {friend.lastName}</strong>
                                         <span>{friend.totalPoints || 0} очков</span>
@@ -277,13 +268,11 @@ const FriendsPage = observer(() => {
                         {(socialStore.incomingRequests || []).map((item) => (
                             <div key={item._id} className={styles.userRow}>
                                 <div className={styles.userLeft}>
-                                    <div className={styles.avatar}>
-                                        {item.from.avatarUrl ? (
-                                            <img src={getAvatarSrc(item.from.avatarUrl)} alt={item.from.username} />
-                                        ) : (
-                                            <span>{getInitials(item.from.firstName, item.from.lastName)}</span>
-                                        )}
-                                    </div>
+                                    <AppAvatar
+                                        src={getAvatarSrc(item.from.avatarUrl)}
+                                        fullName={`${item.from.firstName || ''} ${item.from.lastName || ''}`.trim()}
+                                        className={styles.avatar}
+                                    />
                                     <div className={styles.userMeta}>
                                         <strong>{item.from.firstName} {item.from.lastName}</strong>
                                         <span>@{item.from.username}</span>
@@ -310,13 +299,11 @@ const FriendsPage = observer(() => {
                         {(socialStore.outgoingRequests || []).map((item) => (
                             <div key={item._id} className={styles.userRow}>
                                 <Link to={`/u/${encodeURIComponent(item.to.username)}`} className={styles.userLeft}>
-                                    <div className={styles.avatar}>
-                                        {item.to.avatarUrl ? (
-                                            <img src={getAvatarSrc(item.to.avatarUrl)} alt={item.to.username} />
-                                        ) : (
-                                            <span>{getInitials(item.to.firstName, item.to.lastName)}</span>
-                                        )}
-                                    </div>
+                                    <AppAvatar
+                                        src={getAvatarSrc(item.to.avatarUrl)}
+                                        fullName={`${item.to.firstName || ''} ${item.to.lastName || ''}`.trim()}
+                                        className={styles.avatar}
+                                    />
                                     <div className={styles.userMeta}>
                                         <strong>{item.to.firstName} {item.to.lastName}</strong>
                                         <span>@{item.to.username}</span>
@@ -405,13 +392,11 @@ const FriendsPage = observer(() => {
                         {(socialStore.companionRequests || []).map((item) => (
                             <div key={item._id} className={styles.userRow}>
                                 <Link to={`/u/${encodeURIComponent(item.user.username)}`} className={styles.userLeft}>
-                                    <div className={styles.avatar}>
-                                        {item.user.avatarUrl ? (
-                                            <img src={getAvatarSrc(item.user.avatarUrl)} alt={item.user.username} />
-                                        ) : (
-                                            <span>{getInitials(item.user.firstName, item.user.lastName)}</span>
-                                        )}
-                                    </div>
+                                    <AppAvatar
+                                        src={getAvatarSrc(item.user.avatarUrl)}
+                                        fullName={`${item.user.firstName || ''} ${item.user.lastName || ''}`.trim()}
+                                        className={styles.avatar}
+                                    />
                                     <div className={styles.userMeta}>
                                         <strong>{item.user.firstName} {item.user.lastName}</strong>
                                         <span>{item.purposeLabel}</span>

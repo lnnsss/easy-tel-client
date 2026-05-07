@@ -5,6 +5,15 @@ import { useStores } from '../../stores/StoreContext';
 import TopicBlocksRenderer from '../../components/TopicBlocksRenderer/TopicBlocksRenderer';
 import styles from './CourseDetailPage.module.css';
 
+const shuffleWords = (words = []) => {
+    const next = [...words];
+    for (let i = next.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [next[i], next[j]] = [next[j], next[i]];
+    }
+    return next;
+};
+
 const CourseDetailPage = () => {
     const { uiStore, authStore } = useStores();
     const navigate = useNavigate();
@@ -17,6 +26,8 @@ const CourseDetailPage = () => {
     const [error, setError] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [answers, setAnswers] = useState({});
+    const [sentenceWordsMap, setSentenceWordsMap] = useState({});
+    const [draggingWordMap, setDraggingWordMap] = useState({});
     const [isQuizMode, setIsQuizMode] = useState(false);
 
     const selectedTopicMeta = useMemo(
@@ -49,6 +60,8 @@ const CourseDetailPage = () => {
             try {
                 setError('');
                 setAnswers({});
+                setSentenceWordsMap({});
+                setDraggingWordMap({});
                 setIsQuizMode(false);
                 const { data } = await CourseService.getTopic(courseId, selectedTopicId);
                 setTopicPayload(data);
@@ -60,16 +73,34 @@ const CourseDetailPage = () => {
         loadTopic();
     }, [courseId, selectedTopicId]);
 
+    useEffect(() => {
+        if (!isQuizMode || !topicPayload?.quiz?.questions?.length) return;
+
+        const nextMap = {};
+        for (const question of topicPayload.quiz.questions) {
+            if (question.type !== 'sentence_order') continue;
+            const words = String(question.sentenceText || '').trim().split(/\s+/).filter(Boolean);
+            nextMap[question._id] = shuffleWords(words);
+        }
+        setSentenceWordsMap(nextMap);
+        setDraggingWordMap({});
+    }, [isQuizMode, topicPayload]);
+
     const submitQuiz = async (e) => {
         e.preventDefault();
         if (!topicPayload?.quiz?.questions?.length) return;
         try {
             setSubmitting(true);
-            const payload = topicPayload.quiz.questions.map((question) => ({
-                questionId: question._id,
-                selectedOptionIndex: answers[question._id]?.selectedOptionIndex,
-                answerText: answers[question._id]?.answerText || ''
-            }));
+            const payload = topicPayload.quiz.questions.map((question) => {
+                const sentenceAnswer = question.type === 'sentence_order'
+                    ? (sentenceWordsMap[question._id] || []).join(' ')
+                    : '';
+                return {
+                    questionId: question._id,
+                    selectedOptionIndex: answers[question._id]?.selectedOptionIndex,
+                    answerText: question.type === 'sentence_order' ? sentenceAnswer : (answers[question._id]?.answerText || '')
+                };
+            });
             const { data } = await CourseService.submitTopicQuiz(courseId, selectedTopicId, payload);
             const refreshed = await CourseService.getCourse(courseId);
             const refreshedTopics = refreshed.data.topics || [];
@@ -195,16 +226,18 @@ const CourseDetailPage = () => {
 
                             {isQuizMode && topicPayload?.quiz && (
                                 <>
-                                    <h2>{topicPayload.topic.title}</h2>
                                     <form className={styles.quiz} onSubmit={submitQuiz}>
-                                        <h3>Тест</h3>
+                                        <h3 className={styles.quizTitle}>Тест</h3>
                                         {(topicPayload.quiz.questions || []).map((question, index) => (
                                             <div key={question._id} className={styles.question}>
                                                 <p>{index + 1}. {question.title}</p>
                                                 {question.type === 'single_choice' ? (
                                                     <div className={styles.options}>
                                                         {(question.options || []).map((option, optionIndex) => (
-                                                            <label key={`${question._id}-${optionIndex}`}>
+                                                            <label
+                                                                key={`${question._id}-${optionIndex}`}
+                                                                className={`${styles.optionCard} ${answers[question._id]?.selectedOptionIndex === optionIndex ? styles.optionCardActive : ''}`}
+                                                            >
                                                                 <input
                                                                     type="radio"
                                                                     name={`q-${question._id}`}
@@ -214,9 +247,52 @@ const CourseDetailPage = () => {
                                                                         [question._id]: { selectedOptionIndex: optionIndex, answerText: '' }
                                                                     }))}
                                                                 />
-                                                                {option.text}
+                                                                <span>{option.text}</span>
                                                             </label>
                                                         ))}
+                                                    </div>
+                                                ) : question.type === 'sentence_order' ? (
+                                                    <div className={styles.sentenceBuilder}>
+                                                        <small>Перетащите слова в правильном порядке</small>
+                                                        <div className={styles.sentenceWords}>
+                                                            {(sentenceWordsMap[question._id] || []).map((word, wordIndex) => (
+                                                                <button
+                                                                    key={`${question._id}-${wordIndex}-${word}`}
+                                                                    type="button"
+                                                                    className={styles.wordChip}
+                                                                    draggable
+                                                                    onDragStart={() => {
+                                                                        setDraggingWordMap((prev) => ({ ...prev, [question._id]: wordIndex }));
+                                                                    }}
+                                                                    onDragOver={(event) => event.preventDefault()}
+                                                                    onDrop={() => {
+                                                                        const dragIndex = draggingWordMap[question._id];
+                                                                        if (!Number.isInteger(dragIndex) || dragIndex === wordIndex) return;
+                                                                        setSentenceWordsMap((prev) => {
+                                                                            const source = [...(prev[question._id] || [])];
+                                                                            const [moved] = source.splice(dragIndex, 1);
+                                                                            source.splice(wordIndex, 0, moved);
+                                                                            return { ...prev, [question._id]: source };
+                                                                        });
+                                                                    }}
+                                                                    onDragEnd={() => {
+                                                                        setDraggingWordMap((prev) => ({ ...prev, [question._id]: null }));
+                                                                    }}
+                                                                >
+                                                                    {word}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            className={styles.resetWordOrder}
+                                                            onClick={() => {
+                                                                const baseWords = String(question.sentenceText || '').trim().split(/\s+/).filter(Boolean);
+                                                                setSentenceWordsMap((prev) => ({ ...prev, [question._id]: shuffleWords(baseWords) }));
+                                                            }}
+                                                        >
+                                                            Сбросить порядок
+                                                        </button>
                                                     </div>
                                                 ) : (
                                                     <input
