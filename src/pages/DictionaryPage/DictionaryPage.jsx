@@ -20,6 +20,10 @@ const StopIcon = ({ className }) => (
 const DictionaryPage = observer(() => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(false);
+    const [totalItems, setTotalItems] = useState(0);
     const [viewMode, setViewMode] = useState('cards');
     const [openedWordId, setOpenedWordId] = useState(null);
     const [openedTableWordId, setOpenedTableWordId] = useState(null);
@@ -33,11 +37,33 @@ const DictionaryPage = observer(() => {
     const [usageExamplesRequestedByWordId, setUsageExamplesRequestedByWordId] = useState({});
     const [descriptionExpandedByWordId, setDescriptionExpandedByWordId] = useState({});
 
+    const loadDictionaryPage = async (nextPage, mode = 'replace') => {
+        const isAppend = mode === 'append';
+        if (isAppend) setLoadingMore(true);
+        else setLoading(true);
+
+        try {
+            const { data } = await $api.get('/dictionary', {
+                params: {
+                    page: nextPage,
+                    limit: 20
+                }
+            });
+            const nextItems = Array.isArray(data?.items) ? data.items : (Array.isArray(data) ? data : []);
+            setItems((prev) => (isAppend ? [...prev, ...nextItems] : nextItems));
+            setPage(Number(data?.currentPage) || nextPage);
+            setHasMore(Boolean(data?.hasMore));
+            setTotalItems(Number(data?.totalItems) || nextItems.length);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            if (isAppend) setLoadingMore(false);
+            else setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        $api.get('/dictionary')
-            .then(res => setItems(res.data))
-            .catch(err => console.error(err))
-            .finally(() => setLoading(false));
+        loadDictionaryPage(1, 'replace');
     }, []);
 
     useEffect(() => {
@@ -161,7 +187,10 @@ const DictionaryPage = observer(() => {
     return (
         <div className={`${styles.container} app-page-shell`}>
             <div className={`${styles.headerBar} app-page-top`}>
-                <h1 className={`${styles.title} app-page-title`}>Мои изученные слова</h1>
+                <div>
+                    <h1 className={`${styles.title} app-page-title`}>Мои изученные слова</h1>
+                    <p className={styles.totalLabel}>Всего: {totalItems}</p>
+                </div>
                 <div className={styles.viewSwitch}>
                     <button
                         className={`${styles.switchBtn} ${viewMode === 'table' ? styles.switchBtnActive : ''}`}
@@ -471,6 +500,19 @@ const DictionaryPage = observer(() => {
                             })}
                         </tbody>
                     </table>
+                </div>
+            )}
+
+            {hasMore && (
+                <div className={styles.loadMoreWrap}>
+                    <button
+                        type="button"
+                        className={styles.loadMoreBtn}
+                        onClick={() => loadDictionaryPage(page + 1, 'append')}
+                        disabled={loadingMore}
+                    >
+                        {loadingMore ? 'Загрузка...' : 'Загрузить еще'}
+                    </button>
                 </div>
             )}
         </div>

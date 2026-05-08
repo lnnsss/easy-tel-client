@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '../../stores/StoreContext';
+import $api from '../../api/instance';
 import {
     CHARACTER_ASSETS,
     CHARACTER_DEFAULTS,
@@ -15,11 +16,12 @@ const CATEGORY_FIELD_MAP = {
     shoes: 'shoesFile',
     bottom: 'bottomFile',
     top: 'topFile',
-    headdress: 'headdressFile'
+    headdress: 'headdressFile',
+    background: 'backgroundFile'
 };
 
-const normalizeConfig = (raw = {}) => {
-    const safe = { ...CHARACTER_DEFAULTS, ...(raw || {}) };
+const normalizeConfig = (raw = {}, assets = CHARACTER_ASSETS, defaults = CHARACTER_DEFAULTS) => {
+    const safe = { ...defaults, ...(raw || {}) };
 
     const pickFromList = (value, list, fallback) => {
         const candidate = String(value || '').trim();
@@ -28,16 +30,16 @@ const normalizeConfig = (raw = {}) => {
     };
 
     const gender = safe.gender === 'female' ? 'female' : 'male';
-    const characterFile = pickFromList(safe.characterFile, CHARACTER_ASSETS.characters, CHARACTER_ASSETS.genderDefaults[gender]);
+    const characterFile = pickFromList(safe.characterFile, assets.characters, assets.genderDefaults[gender]);
 
     return {
         gender,
         characterFile,
-        shoesFile: pickFromList(safe.shoesFile, CHARACTER_ASSETS.shoes, CHARACTER_DEFAULTS.shoesFile),
-        bottomFile: pickFromList(safe.bottomFile, CHARACTER_ASSETS.bottom, CHARACTER_DEFAULTS.bottomFile),
-        topFile: pickFromList(safe.topFile, CHARACTER_ASSETS.top, CHARACTER_DEFAULTS.topFile),
-        headdressFile: pickFromList(safe.headdressFile, CHARACTER_ASSETS.headdress, CHARACTER_DEFAULTS.headdressFile),
-        backgroundFile: pickFromList(safe.backgroundFile, CHARACTER_ASSETS.backgrounds, CHARACTER_DEFAULTS.backgroundFile)
+        shoesFile: pickFromList(safe.shoesFile, assets.shoes, defaults.shoesFile),
+        bottomFile: pickFromList(safe.bottomFile, assets.bottom, defaults.bottomFile),
+        topFile: pickFromList(safe.topFile, assets.top, defaults.topFile),
+        headdressFile: pickFromList(safe.headdressFile, assets.headdress, defaults.headdressFile),
+        backgroundFile: pickFromList(safe.backgroundFile, assets.backgrounds, defaults.backgroundFile)
     };
 };
 
@@ -50,12 +52,16 @@ const nextInList = (list, current, dir = 1) => {
 
 const CharacterPage = observer(() => {
     const { authStore, uiStore } = useStores();
-    const [saving, setSaving] = useState(false);
-    const [buyingCategory, setBuyingCategory] = useState('');
+    const [actionCategory, setActionCategory] = useState('');
+    const [runtimeAssets, setRuntimeAssets] = useState(CHARACTER_ASSETS);
+    const [runtimeDefaults, setRuntimeDefaults] = useState(CHARACTER_DEFAULTS);
+    const [runtimeFreeItems, setRuntimeFreeItems] = useState(FREE_ITEMS_WHITELIST);
+    const [runtimePrice, setRuntimePrice] = useState(ITEM_PRICE_COINS);
+    const [runtimePaidCategories, setRuntimePaidCategories] = useState(PAID_CATEGORIES);
 
     const initialConfig = useMemo(
-        () => normalizeConfig(authStore.user?.characterCustomization),
-        [authStore.user?.characterCustomization]
+        () => normalizeConfig(authStore.user?.characterCustomization, runtimeAssets, runtimeDefaults),
+        [authStore.user?.characterCustomization, runtimeAssets, runtimeDefaults]
     );
 
     const [config, setConfig] = useState(initialConfig);
@@ -72,26 +78,36 @@ const CharacterPage = observer(() => {
         setConfig(initialConfig);
     }, [initialConfig]);
 
+    useEffect(() => {
+        const loadAssets = async () => {
+            try {
+                const { data } = await $api.get('/auth/character-assets');
+                if (data?.assets) setRuntimeAssets(data.assets);
+                if (data?.defaults) setRuntimeDefaults(data.defaults);
+                if (data?.freeItemsWhitelist) setRuntimeFreeItems(data.freeItemsWhitelist);
+                if (Number.isFinite(Number(data?.itemPriceCoins))) setRuntimePrice(Number(data.itemPriceCoins));
+                if (Array.isArray(data?.paidCategories)) setRuntimePaidCategories(data.paidCategories);
+            } catch (_e) {
+                // Fallback остается на статических значениях.
+            }
+        };
+        loadAssets();
+    }, []);
+
     const ownedCosmetics = authStore.user?.ownedCosmetics || {};
     const coins = Number(authStore.user?.coins) || 0;
 
+    const equippedConfig = useMemo(
+        () => normalizeConfig(authStore.user?.characterCustomization, runtimeAssets, runtimeDefaults),
+        [authStore.user?.characterCustomization, runtimeAssets, runtimeDefaults]
+    );
+
     const isOwnedOrFree = (category, file) => {
-        const free = new Set(FREE_ITEMS_WHITELIST[category] || []);
+        const free = new Set(runtimeFreeItems[category] || []);
         if (free.has(file)) return true;
         const owned = new Set(Array.isArray(ownedCosmetics?.[category]) ? ownedCosmetics[category] : []);
         return owned.has(file);
     };
-
-    const getStatusLabel = (category, file) => {
-        if ((FREE_ITEMS_WHITELIST[category] || []).includes(file)) return 'Бесплатно';
-        if (isOwnedOrFree(category, file)) return 'Куплено';
-        return `${ITEM_PRICE_COINS} монет`;
-    };
-
-    const hasUnownedSelection = PAID_CATEGORIES.some((category) => {
-        const field = CATEGORY_FIELD_MAP[category];
-        return !isOwnedOrFree(category, config[field]);
-    });
 
     const bodySrc = `/customize/characters/${config.characterFile}`;
     const shoesSrc = `/customize/shoes/${config.shoesFile}`;
@@ -110,23 +126,27 @@ const CharacterPage = observer(() => {
         setLayerKeys((prev) => ({ ...prev, [field]: prev[field] + 1 }));
     };
 
-    const onToggleGender = () => {
+    const onToggleGender = async () => {
+        let nextConfig = null;
         setConfig((prev) => {
             const nextGender = prev.gender === 'male' ? 'female' : 'male';
-            const nextCharacter = CHARACTER_ASSETS.genderDefaults[nextGender];
-            return {
+            const nextCharacter = runtimeAssets.genderDefaults[nextGender];
+            nextConfig = {
                 ...prev,
                 gender: nextGender,
                 characterFile: nextCharacter
             };
+            return nextConfig;
         });
         setLayerKeys((prev) => ({ ...prev, characterFile: prev.characterFile + 1 }));
+        if (!nextConfig) return;
+        await authStore.updateCharacterCustomization(nextConfig);
     };
 
     const onPurchase = async (category, file) => {
-        setBuyingCategory(category);
+        setActionCategory(category);
         const result = await authStore.purchaseCharacterItem(category, file);
-        setBuyingCategory('');
+        setActionCategory('');
 
         if (!result.success) {
             uiStore.showModal({
@@ -141,28 +161,19 @@ const CharacterPage = observer(() => {
 
         uiStore.showModal({
             title: 'Покупка успешна',
-            message: `Вы купили «${getFileLabel(file)}» за ${ITEM_PRICE_COINS} монет`,
+            message: `Вы купили «${getFileLabel(file)}» за ${runtimePrice} монет`,
             variant: 'success',
             primaryLabel: 'Закрыть',
             secondaryLabel: 'Закрыть'
         });
     };
 
-    const onSave = async () => {
-        setSaving(true);
+    const onWear = async (category) => {
+        setActionCategory(category);
         const result = await authStore.updateCharacterCustomization(config);
-        setSaving(false);
+        setActionCategory('');
 
-        if (result.success) {
-            uiStore.showModal({
-                title: 'Готово',
-                message: 'Образ персонажа сохранен',
-                variant: 'success',
-                primaryLabel: 'Закрыть',
-                secondaryLabel: 'Закрыть'
-            });
-            return;
-        }
+        if (result.success) return;
 
         uiStore.showModal({
             title: 'Ошибка',
@@ -176,7 +187,14 @@ const CharacterPage = observer(() => {
     const renderPaidControl = (category, title, field, list) => {
         const file = config[field];
         const owned = isOwnedOrFree(category, file);
-        const canBuy = !owned && coins >= ITEM_PRICE_COINS && buyingCategory !== category;
+        const isEquipped = equippedConfig[field] === file;
+        const busy = actionCategory === category;
+
+        const actionLabel = !owned ? `${runtimePrice} монет` : (isEquipped ? 'Надето' : 'Надеть');
+        const actionDisabled = busy || (!owned && coins < runtimePrice) || (owned && isEquipped);
+        const onAction = !owned
+            ? () => onPurchase(category, file)
+            : () => onWear(category);
 
         return (
             <div className={styles.group}>
@@ -186,19 +204,14 @@ const CharacterPage = observer(() => {
                         <button type="button" onClick={() => onCycle(field, list, -1)}>◀</button>
                         <button type="button" onClick={() => onCycle(field, list, 1)}>▶</button>
                     </div>
-                    {!owned && (
-                        <button
-                            type="button"
-                            className={styles.buyBtn}
-                            onClick={() => onPurchase(category, file)}
-                            disabled={!canBuy}
-                        >
-                            {buyingCategory === category ? 'Покупка...' : `Купить (${ITEM_PRICE_COINS})`}
-                        </button>
-                    )}
-                </div>
-                <div className={styles.metaRow}>
-                    <span className={styles.statusBadge}>{getStatusLabel(category, file)}</span>
+                    <button
+                        type="button"
+                        className={styles.buyBtn}
+                        onClick={onAction}
+                        disabled={actionDisabled}
+                    >
+                        {busy ? '...' : actionLabel}
+                    </button>
                 </div>
             </div>
         );
@@ -232,23 +245,12 @@ const CharacterPage = observer(() => {
                         Пол: {config.gender === 'male' ? 'Мужской' : 'Женский'}
                     </button>
 
-                    <div className={styles.group}>
-                        <div className={styles.groupLabel}>Фон: {getFileLabel(config.backgroundFile)}</div>
-                        <div className={styles.rowBtns}>
-                            <button type="button" onClick={() => onCycle('backgroundFile', CHARACTER_ASSETS.backgrounds, -1)}>◀</button>
-                            <button type="button" onClick={() => onCycle('backgroundFile', CHARACTER_ASSETS.backgrounds, 1)}>▶</button>
-                        </div>
-                    </div>
+                    {runtimePaidCategories.includes('background') && renderPaidControl('background', 'Фон', 'backgroundFile', runtimeAssets.backgrounds)}
 
-                    {renderPaidControl('headdress', 'Головной убор', 'headdressFile', CHARACTER_ASSETS.headdress)}
-                    {renderPaidControl('top', 'Верхняя одежда', 'topFile', CHARACTER_ASSETS.top)}
-                    {renderPaidControl('bottom', 'Штаны', 'bottomFile', CHARACTER_ASSETS.bottom)}
-                    {renderPaidControl('shoes', 'Обувь', 'shoesFile', CHARACTER_ASSETS.shoes)}
-
-                    <button type="button" className={styles.saveBtn} onClick={onSave} disabled={saving || hasUnownedSelection}>
-                        {saving ? 'Сохранение...' : 'Сохранить изменения'}
-                    </button>
-                    {hasUnownedSelection && <div className={styles.hint}>Купите выбранные вещи, чтобы сохранить образ</div>}
+                    {runtimePaidCategories.includes('headdress') && renderPaidControl('headdress', 'Головной убор', 'headdressFile', runtimeAssets.headdress)}
+                    {runtimePaidCategories.includes('top') && renderPaidControl('top', 'Верхняя одежда', 'topFile', runtimeAssets.top)}
+                    {runtimePaidCategories.includes('bottom') && renderPaidControl('bottom', 'Штаны', 'bottomFile', runtimeAssets.bottom)}
+                    {runtimePaidCategories.includes('shoes') && renderPaidControl('shoes', 'Обувь', 'shoesFile', runtimeAssets.shoes)}
                 </div>
             </div>
         </div>

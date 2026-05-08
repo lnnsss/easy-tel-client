@@ -21,7 +21,31 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
     box-sizing: border-box;
+}
+
+.leftZone {
+    display: flex;
+    align-items: center;
+    z-index: 1001;
+}
+
+.rightZone {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    z-index: 1001;
+}
+
+.centerNav {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    z-index: 1000;
 }
 
 .logo {
@@ -57,9 +81,13 @@
 }
 
 .links {
-    display: flex;
+    display: none;
+}
+
+.authBtns {
+    display: inline-flex;
     align-items: center;
-    gap: var(--space-5);
+    gap: var(--space-4);
 }
 
 .link {
@@ -357,11 +385,17 @@
 }
 
 @media (max-width: 768px) {
+    .centerNav {
+        display: none;
+    }
+
     .burger {
         display: flex;
+        margin-left: 10px;
     }
 
     .links {
+        display: flex;
         position: fixed;
         top: 70px;
         left: 0;
@@ -398,6 +432,10 @@
 
     .links .link {
         justify-content: center;
+    }
+
+    .authBtns {
+        display: none;
     }
 
     .links .navUserControls {

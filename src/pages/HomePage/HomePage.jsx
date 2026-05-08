@@ -117,54 +117,81 @@ const HomePage = observer(() => {
     const theoryRoute = !authStore.isAuth ? '/login' : '/courses';
 
     return (
-        <div className={styles.container}>
-            {authStore.isAuth && !isAdmin && pinnedCourse && !bannerHidden && (
-                <div className={styles.pinnedBanner}>
-                    <Link to={`/courses/${pinnedCourse._id}`} className={styles.pinnedBannerLink}>
-                        {pinnedCourse.pinnedHomeText}
-                    </Link>
-                    {(pinnedCourse.pinnedHomeMode === 'dismiss_once' || pinnedCourse.pinnedHomeMode === 'confirm_hide') && (
-                        <button
-                            type="button"
-                            className={styles.pinnedBannerClose}
-                            onClick={onClosePinnedBanner}
-                            aria-label="Скрыть плашку"
-                        >
-                            ×
-                        </button>
+        <div className={styles.page}>
+            <section className={styles.topShowcase}>
+                <video
+                    className={styles.topVideo}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    aria-hidden="true"
+                >
+                    <source src="/bg_video.mp4" type="video/mp4" />
+                </video>
+                <div className={styles.topOverlay} />
+
+                <div className={styles.topContentInner}>
+                    {authStore.isAuth && !isAdmin && pinnedCourse && !bannerHidden && (
+                        <div className={styles.pinnedBanner}>
+                            <Link to={`/courses/${pinnedCourse._id}`} className={styles.pinnedBannerLink}>
+                                {pinnedCourse.pinnedHomeText}
+                            </Link>
+                            {(pinnedCourse.pinnedHomeMode === 'dismiss_once' || pinnedCourse.pinnedHomeMode === 'confirm_hide') && (
+                                <button
+                                    type="button"
+                                    className={styles.pinnedBannerClose}
+                                    onClick={onClosePinnedBanner}
+                                    aria-label="Скрыть плашку"
+                                >
+                                    ×
+                                </button>
+                            )}
+                        </div>
                     )}
-                </div>
-            )}
 
-            <section className={styles.hero}>
-                <h1 className={styles.title}>Easy<span>Tel</span></h1>
-                <p className={styles.description}>
-                    EasyTel — это платформа для изучения татарского языка, где мы объединили
-                    искусственный интеллект, компьютерное зрение и структурированный учебный материал.
-                </p>
+                    <section className={styles.hero}>
+                        <h1 className={styles.title}>Easy<span>Tel</span></h1>
+                        <p className={styles.description}>
+                            EasyTel — это платформа для изучения татарского языка, где мы объединили
+                            искусственный интеллект, компьютерное зрение и структурированный учебный материал.
+                        </p>
 
-                <div className={styles.ctaRow}>
-                    <Link to={practiceRoute} className={`${styles.mainBtn} ${styles.mainBtnPrimary}`}>
-                        Сканер
-                    </Link>
-                    <Link to={theoryRoute} className={`${styles.mainBtn} ${styles.mainBtnSecondary}`}>
-                        Материал
-                    </Link>
+                        <div className={styles.ctaRow}>
+                            <Link to={practiceRoute} className={`${styles.mainBtn} ${styles.mainBtnPrimary}`}>
+                                Сканер
+                            </Link>
+                            <Link to={theoryRoute} className={`${styles.mainBtn} ${styles.mainBtnSecondary}`}>
+                                Материал
+                            </Link>
+                        </div>
+                    </section>
                 </div>
             </section>
 
+            <div className={styles.container}>
             <section className={styles.features}>
                 <div className={styles.featureCard}>
-                    <h3>Интерактивность</h3>
-                    <p>Мгновенная идентификация объектов окружающего мира через камеру.</p>
+                    <h3>Интерактивность и мотивация</h3>
+                    <p>
+                        Изучение строится через действие: сканируйте предметы, сразу получайте перевод и
+                        закрепляйте слова в игровой системе очков, прогресса и личных достижений.
+                    </p>
                 </div>
                 <div className={styles.featureCard}>
-                    <h3>Словарь</h3>
-                    <p>Автоматическое формирование персональной базы слов.</p>
+                    <h3>Качественный учебный материал</h3>
+                    <p>
+                        Курсы собраны по темам и уровням сложности: от базовой лексики до устойчивых выражений.
+                        Материал помогает учить язык системно, а не фрагментами.
+                    </p>
                 </div>
                 <div className={styles.featureCard}>
-                    <h3>Геймификация</h3>
-                    <p>Система рангов и достижений для прогресса.</p>
+                    <h3>Сохранение культурной ценности</h3>
+                    <p>
+                        EasyTel поддерживает живой интерес к татарскому языку и помогает использовать его в
+                        повседневной жизни, сохраняя связь с культурой, историей и речевой традицией.
+                    </p>
                 </div>
             </section>
 
@@ -256,6 +283,7 @@ const HomePage = observer(() => {
                     </div>
                 </div>
             )}
+            </div>
         </div>
     );
 });

@@ -1,28 +1,19 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CHARACTER_ASSETS, CHARACTER_DEFAULTS } from '../../constants/characterAssets';
+import { CHARACTER_DEFAULTS } from '../../constants/characterAssets';
 import styles from './CharacterPreviewCard.module.css';
 
 const normalizeConfig = (raw = {}) => {
     const safe = { ...CHARACTER_DEFAULTS, ...(raw || {}) };
 
-    const pickFromList = (value, list, fallback) => {
-        const candidate = String(value || '').trim();
-        if (list.includes(candidate)) return candidate;
-        return fallback;
-    };
-
-    const gender = safe.gender === 'female' ? 'female' : 'male';
-    const characterFile = pickFromList(safe.characterFile, CHARACTER_ASSETS.characters, CHARACTER_ASSETS.genderDefaults[gender]);
-
     return {
-        gender,
-        characterFile,
-        shoesFile: pickFromList(safe.shoesFile, CHARACTER_ASSETS.shoes, CHARACTER_DEFAULTS.shoesFile),
-        bottomFile: pickFromList(safe.bottomFile, CHARACTER_ASSETS.bottom, CHARACTER_DEFAULTS.bottomFile),
-        topFile: pickFromList(safe.topFile, CHARACTER_ASSETS.top, CHARACTER_DEFAULTS.topFile),
-        headdressFile: pickFromList(safe.headdressFile, CHARACTER_ASSETS.headdress, CHARACTER_DEFAULTS.headdressFile),
-        backgroundFile: pickFromList(safe.backgroundFile, CHARACTER_ASSETS.backgrounds, CHARACTER_DEFAULTS.backgroundFile)
+        gender: safe.gender === 'female' ? 'female' : 'male',
+        characterFile: String(safe.characterFile || CHARACTER_DEFAULTS.characterFile).trim(),
+        shoesFile: String(safe.shoesFile || CHARACTER_DEFAULTS.shoesFile).trim(),
+        bottomFile: String(safe.bottomFile || CHARACTER_DEFAULTS.bottomFile).trim(),
+        topFile: String(safe.topFile || CHARACTER_DEFAULTS.topFile).trim(),
+        headdressFile: String(safe.headdressFile || CHARACTER_DEFAULTS.headdressFile).trim(),
+        backgroundFile: String(safe.backgroundFile || CHARACTER_DEFAULTS.backgroundFile).trim()
     };
 };
 

@@ -135,6 +135,10 @@
     white-space: nowrap;
 }
 
+.buyBtn:not(:disabled):hover {
+    border-color: #99ff66;
+}
+
 .buyBtn:disabled {
     opacity: 0.6;
     cursor: not-allowed;

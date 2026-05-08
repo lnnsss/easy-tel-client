@@ -1,15 +1,52 @@
 import React, { useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useNavigate } from 'react-router-dom';
+import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 import { useStores } from './stores/StoreContext';
 import AppRouter from './router/AppRouter';
 import Navbar from './components/Navbar/Navbar';
 import AppModal from './components/AppModal/AppModal';
+import Footer from './components/Footer/Footer';
 
 const App = observer(() => {
     const { authStore, uiStore } = useStores();
     const navigate = useNavigate();
+    const location = useLocation();
     const shownNoticeRef = useRef('');
+    const hideNavbar = location.pathname === '/login' || location.pathname === '/register';
+    const knownRoutePatterns = [
+        '/',
+        '/translate',
+        '/scanner',
+        '/login',
+        '/register',
+        '/forgot-password',
+        '/reset-password',
+        '/google-auth-callback',
+        '/verify-email',
+        '/profile',
+        '/u/:username',
+        '/dictionary',
+        '/character',
+        '/friends',
+        '/chats',
+        '/courses',
+        '/courses/:courseId',
+        '/admin/learning',
+        '/admin/learning/courses/new',
+        '/admin/learning/courses/:courseId',
+        '/admin/learning/courses/:courseId/topics/new',
+        '/admin/learning/courses/:courseId/topics/:topicId/edit',
+        '/author/learning',
+        '/author/learning/courses/new',
+        '/author/learning/courses/:courseId',
+        '/author/learning/courses/:courseId/topics/new',
+        '/author/learning/courses/:courseId/topics/:topicId/edit',
+        '/admin/users',
+        '/words',
+        '/admin'
+    ];
+    const isKnownRoute = knownRoutePatterns.some((pattern) => Boolean(matchPath({ path: pattern, end: true }, location.pathname)));
+    const hideFooter = hideNavbar || !isKnownRoute;
 
     useEffect(() => {
         // Проверяем токен при загрузке вкладки
@@ -51,8 +88,8 @@ const App = observer(() => {
     }
 
     return (
-        <>
-            <Navbar />
+        <div className="app-shell">
+            {!hideNavbar && <Navbar />}
             {authStore.authRecovering && localStorage.getItem('token') && (
                 <div
                     style={{
@@ -67,7 +104,10 @@ const App = observer(() => {
                     Восстанавливаем соединение с сервером...
                 </div>
             )}
-            <AppRouter />
+            <main className="app-main">
+                <AppRouter />
+            </main>
+            {!hideFooter && <Footer />}
             <AppModal
                 isOpen={uiStore.modal.isOpen}
                 title={uiStore.modal.title}
@@ -82,7 +122,7 @@ const App = observer(() => {
                 onSecondary={uiStore.modal.onSecondary || null}
                 onClose={() => uiStore.closeModal()}
             />
-        </>
+        </div>
     );
 });
 

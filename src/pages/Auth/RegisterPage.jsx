@@ -95,125 +95,130 @@ const RegisterPage = observer(() => {
 
     return (
         <div className={styles.container}>
-            <form className={styles.card} onSubmit={onSubmit}>
-                <h1>Регистрация в <span className={styles.brand}>EasyTel</span></h1>
-                {error && <p className={styles.error}>{error}</p>}
+            <div className={styles.splitLayout}>
+                <div className={styles.visualPane} aria-hidden="true" />
+                <div className={styles.formPane}>
+                    <form className={`${styles.card} ${styles.splitCard}`} onSubmit={onSubmit}>
+                        <h1>Регистрация в <Link to="/" className={styles.brand}>EasyTel</Link></h1>
+                        {error && <p className={styles.error}>{error}</p>}
 
-                <div className={styles.grid}>
-                    <input
-                        placeholder="Имя"
-                        value={form.firstName}
-                        onChange={e => {
-                            setForm({...form, firstName: e.target.value});
-                            if (error) setError('');
-                        }}
-                        required
-                    />
-                    <input
-                        placeholder="Фамилия"
-                        value={form.lastName}
-                        onChange={e => {
-                            setForm({...form, lastName: e.target.value});
-                            if (error) setError('');
-                        }}
-                        required
-                    />
+                        <div className={styles.grid}>
+                            <input
+                                placeholder="Имя"
+                                value={form.firstName}
+                                onChange={e => {
+                                    setForm({...form, firstName: e.target.value});
+                                    if (error) setError('');
+                                }}
+                                required
+                            />
+                            <input
+                                placeholder="Фамилия"
+                                value={form.lastName}
+                                onChange={e => {
+                                    setForm({...form, lastName: e.target.value});
+                                    if (error) setError('');
+                                }}
+                                required
+                            />
+                        </div>
+                        <input
+                            placeholder="Username"
+                            value={form.username}
+                            onChange={e => {
+                                setForm({...form, username: e.target.value});
+                                if (error) setError('');
+                            }}
+                            required
+                        />
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={form.email}
+                            onChange={e => {
+                                setForm({...form, email: e.target.value});
+                                if (error) setError('');
+                            }}
+                            required
+                        />
+
+                        <div className={styles.passwordField}>
+                            <input
+                                className={styles.passwordInput}
+                                type={showPassword ? 'text' : 'password'}
+                                placeholder="Пароль"
+                                value={form.password}
+                                onChange={e => {
+                                    setForm({...form, password: e.target.value});
+                                    if (error) setError('');
+                                }}
+                                required
+                            />
+                            <button
+                                type="button"
+                                className={styles.togglePasswordBtn}
+                                onClick={() => setShowPassword(prev => !prev)}
+                                aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                            >
+                                <svg
+                                    className={styles.eyeIcon}
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                    {showPassword && <line x1="3" y1="21" x2="21" y2="3" />}
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div className={styles.passwordField}>
+                            <input
+                                className={styles.passwordInput}
+                                type={showConfirmPassword ? 'text' : 'password'}
+                                placeholder="Подтвердите пароль"
+                                value={form.confirmPassword}
+                                onChange={e => {
+                                    setForm({...form, confirmPassword: e.target.value});
+                                    if (error) setError('');
+                                }}
+                                required
+                            />
+                            <button
+                                type="button"
+                                className={styles.togglePasswordBtn}
+                                onClick={() => setShowConfirmPassword(prev => !prev)}
+                                aria-label={showConfirmPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                            >
+                                <svg
+                                    className={styles.eyeIcon}
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                    {showConfirmPassword && <line x1="3" y1="21" x2="21" y2="3" />}
+                                </svg>
+                            </button>
+                        </div>
+
+                        <button type="submit" className={styles.mainBtn} disabled={authStore.isLoading}>
+                            {authStore.isLoading ? 'Создаем аккаунт...' : 'Зарегистрироваться'}
+                        </button>
+                        <p className={styles.footerText}>Уже есть аккаунт? <Link to="/login">Войти</Link></p>
+                    </form>
                 </div>
-                <input
-                    placeholder="Username"
-                    value={form.username}
-                    onChange={e => {
-                        setForm({...form, username: e.target.value});
-                        if (error) setError('');
-                    }}
-                    required
-                />
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={form.email}
-                    onChange={e => {
-                        setForm({...form, email: e.target.value});
-                        if (error) setError('');
-                    }}
-                    required
-                />
-
-                <div className={styles.passwordField}>
-                    <input
-                        className={styles.passwordInput}
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="Пароль"
-                        value={form.password}
-                        onChange={e => {
-                            setForm({...form, password: e.target.value});
-                            if (error) setError('');
-                        }}
-                        required
-                    />
-                    <button
-                        type="button"
-                        className={styles.togglePasswordBtn}
-                        onClick={() => setShowPassword(prev => !prev)}
-                        aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
-                    >
-                        <svg
-                            className={styles.eyeIcon}
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden="true"
-                        >
-                            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
-                            <circle cx="12" cy="12" r="3" />
-                            {showPassword && <line x1="3" y1="21" x2="21" y2="3" />}
-                        </svg>
-                    </button>
-                </div>
-
-                <div className={styles.passwordField}>
-                    <input
-                        className={styles.passwordInput}
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        placeholder="Подтвердите пароль"
-                        value={form.confirmPassword}
-                        onChange={e => {
-                            setForm({...form, confirmPassword: e.target.value});
-                            if (error) setError('');
-                        }}
-                        required
-                    />
-                    <button
-                        type="button"
-                        className={styles.togglePasswordBtn}
-                        onClick={() => setShowConfirmPassword(prev => !prev)}
-                        aria-label={showConfirmPassword ? 'Скрыть пароль' : 'Показать пароль'}
-                    >
-                        <svg
-                            className={styles.eyeIcon}
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden="true"
-                        >
-                            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
-                            <circle cx="12" cy="12" r="3" />
-                            {showConfirmPassword && <line x1="3" y1="21" x2="21" y2="3" />}
-                        </svg>
-                    </button>
-                </div>
-
-                <button type="submit" className={styles.mainBtn} disabled={authStore.isLoading}>
-                    {authStore.isLoading ? 'Создаем аккаунт...' : 'Зарегистрироваться'}
-                </button>
-                <p className={styles.footerText}>Уже есть аккаунт? <Link to="/login">Войти</Link></p>
-            </form>
+            </div>
         </div>
     );
 });

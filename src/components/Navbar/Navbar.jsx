@@ -166,9 +166,98 @@ const Navbar = observer(() => {
         <>
             <nav className={styles.navbar}>
                 <div className={styles.container}>
-                    <Link to="/" className={styles.logo} onClick={closeMenu}>
-                        Easy<span>Tel</span>
-                    </Link>
+                    <div className={styles.leftZone}>
+                        <Link to="/" className={styles.logo} onClick={closeMenu}>
+                            Easy<span>Tel</span>
+                        </Link>
+                    </div>
+
+                    <div className={styles.centerNav}>
+                        {(!authStore.isAuth || !isAdmin) && (
+                            <>
+                                <Link to="/translate" className={styles.link} onClick={closeMenu}>Переводчик</Link>
+                                <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>
+                            </>
+                        )}
+
+                        {authStore.isAuth && !isAdmin && (
+                            <>
+                                <Link to="/dictionary" className={styles.link} onClick={closeMenu}>Словарь</Link>
+                                <Link to="/courses" className={styles.link} onClick={closeMenu}>Материал</Link>
+                                {isAuthor && <Link to="/author/learning" className={styles.link} onClick={closeMenu}>Авторство</Link>}
+                                <Link to="/friends" className={styles.link} onClick={closeMenu}>Друзья</Link>
+                                <Link to="/chats" className={`${styles.link} ${styles.chatLink}`} onClick={closeMenu}>
+                                    Чаты
+                                    {chatStore.unreadTotal > 0 && <span className={styles.chatBadge}>{chatStore.unreadTotal}</span>}
+                                </Link>
+                            </>
+                        )}
+
+                        {isAdmin && (
+                            <>
+                                <Link to="/words" className={styles.link} onClick={closeMenu}>Словарь</Link>
+                                <Link to="/admin/learning" className={styles.link} onClick={closeMenu}>Материал</Link>
+                                <Link to="/admin/users" className={styles.link} onClick={closeMenu}>Пользователи</Link>
+                            </>
+                        )}
+                    </div>
+
+                    <div className={styles.rightZone}>
+                        {authStore.isAuth ? (
+                            <div className={styles.navUserControls}>
+                                <Link
+                                    to={profileRoute}
+                                    className={styles.profileAvatarBtn}
+                                    onClick={closeMenu}
+                                    aria-label="Личный кабинет"
+                                >
+                                    {profileAvatarSrc && !avatarLoadFailed ? (
+                                        <img
+                                            src={profileAvatarSrc}
+                                            alt="Профиль"
+                                            className={styles.profileAvatarImage}
+                                            onError={() => setAvatarLoadFailed(true)}
+                                        />
+                                    ) : (
+                                        <span className={styles.profileAvatarFallback}>{profileInitials}</span>
+                                    )}
+                                </Link>
+
+                                <button
+                                    type="button"
+                                    className={styles.settingsBtn}
+                                    aria-label="Настройки интерфейса"
+                                    aria-expanded={isSettingsOpen}
+                                    onClick={() => {
+                                        setIsMenuOpen(false);
+                                        setIsSettingsOpen((prev) => !prev);
+                                    }}
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path
+                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.757.426 1.757 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.757-2.924 1.757-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.757-.426-1.757-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065Z"
+                                            stroke="currentColor"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+                                        <path
+                                            d="M12 15.25a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5Z"
+                                            stroke="currentColor"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+                        ) : (
+                            <div className={styles.authBtns}>
+                                <Link to="/login" className={styles.link} onClick={closeMenu}>Вход</Link>
+                                <Link to="/register" className={styles.btnRegister} onClick={closeMenu}>Регистрация</Link>
+                            </div>
+                        )}
+                    </div>
 
                     <button className={styles.burger} onClick={toggleMenu} aria-label="Menu">
                         <span className={styles.line}></span>
@@ -178,12 +267,14 @@ const Navbar = observer(() => {
 
                     <div className={`${styles.links} ${isMenuOpen ? styles.linksActive : ''}`}>
                         {(!authStore.isAuth || !isAdmin) && (
-                            <Link to="/translate" className={styles.link} onClick={closeMenu}>Переводчик</Link>
+                            <>
+                                <Link to="/translate" className={styles.link} onClick={closeMenu}>Переводчик</Link>
+                                <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>
+                            </>
                         )}
 
                         {authStore.isAuth && !isAdmin && (
                             <>
-                                <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>
                                 <Link to="/dictionary" className={styles.link} onClick={closeMenu}>Словарь</Link>
                                 <Link to="/courses" className={styles.link} onClick={closeMenu}>Материал</Link>
                                 {isAuthor && <Link to="/author/learning" className={styles.link} onClick={closeMenu}>Авторство</Link>}
@@ -204,54 +295,6 @@ const Navbar = observer(() => {
                                         <Link to="/admin/users" className={styles.link} onClick={closeMenu}>Пользователи</Link>
                                     </>
                                 )}
-
-                                <div className={styles.navUserControls}>
-                                    <Link
-                                        to={profileRoute}
-                                        className={styles.profileAvatarBtn}
-                                        onClick={closeMenu}
-                                        aria-label="Личный кабинет"
-                                    >
-                                        {profileAvatarSrc && !avatarLoadFailed ? (
-                                            <img
-                                                src={profileAvatarSrc}
-                                                alt="Профиль"
-                                                className={styles.profileAvatarImage}
-                                                onError={() => setAvatarLoadFailed(true)}
-                                            />
-                                        ) : (
-                                            <span className={styles.profileAvatarFallback}>{profileInitials}</span>
-                                        )}
-                                    </Link>
-
-                                    <button
-                                        type="button"
-                                        className={styles.settingsBtn}
-                                        aria-label="Настройки интерфейса"
-                                        aria-expanded={isSettingsOpen}
-                                        onClick={() => {
-                                            setIsMenuOpen(false);
-                                            setIsSettingsOpen((prev) => !prev);
-                                        }}
-                                    >
-                                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                            <path
-                                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.757.426 1.757 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.757-2.924 1.757-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.757-.426-1.757-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065Z"
-                                                stroke="currentColor"
-                                                strokeWidth="1.5"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                            />
-                                            <path
-                                                d="M12 15.25a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5Z"
-                                                stroke="currentColor"
-                                                strokeWidth="1.5"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                            />
-                                        </svg>
-                                    </button>
-                                </div>
 
                             </>
                         ) : (

@@ -288,39 +288,103 @@ const AdminUsersPage = () => {
     };
 
     const renderPagination = () => {
-        const buttons = [];
+        const elements = [];
+        const pushPage = (i) => {
+            elements.push(
+                <button
+                    key={i}
+                    type="button"
+                    className={page === i ? styles.activePage : styles.pageBtn}
+                    onClick={() => setPage(i)}
+                >
+                    {i}
+                </button>
+            );
+        };
+
+        elements.push(
+            <button
+                key="prev"
+                type="button"
+                className={styles.pageBtn}
+                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                disabled={page <= 1}
+            >
+                ←
+            </button>
+        );
+
         for (let i = 1; i <= totalPages; i += 1) {
             if (i === 1 || i === totalPages || (i >= page - 2 && i <= page + 2)) {
-                buttons.push(
-                    <button
-                        key={i}
-                        className={page === i ? styles.activePage : styles.pageBtn}
-                        onClick={() => setPage(i)}
-                    >
-                        {i}
-                    </button>
-                );
+                pushPage(i);
+            } else if (i === page - 3 || i === page + 3) {
+                elements.push(<span key={`dots-${i}`} className={styles.pageDots}>…</span>);
             }
         }
-        return buttons;
+
+        elements.push(
+            <button
+                key="next"
+                type="button"
+                className={styles.pageBtn}
+                onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={page >= totalPages}
+            >
+                →
+            </button>
+        );
+
+        return elements;
     };
 
     const renderRequestsPagination = () => {
-        const buttons = [];
+        const elements = [];
+        const pushPage = (i) => {
+            elements.push(
+                <button
+                    key={`r-${i}`}
+                    type="button"
+                    className={requestsPage === i ? styles.activePage : styles.pageBtn}
+                    onClick={() => setRequestsPage(i)}
+                >
+                    {i}
+                </button>
+            );
+        };
+
+        elements.push(
+            <button
+                key="r-prev"
+                type="button"
+                className={styles.pageBtn}
+                onClick={() => setRequestsPage((prev) => Math.max(prev - 1, 1))}
+                disabled={requestsPage <= 1}
+            >
+                ←
+            </button>
+        );
+
         for (let i = 1; i <= requestsTotalPages; i += 1) {
             if (i === 1 || i === requestsTotalPages || (i >= requestsPage - 2 && i <= requestsPage + 2)) {
-                buttons.push(
-                    <button
-                        key={`r-${i}`}
-                        className={requestsPage === i ? styles.activePage : styles.pageBtn}
-                        onClick={() => setRequestsPage(i)}
-                    >
-                        {i}
-                    </button>
-                );
+                pushPage(i);
+            } else if (i === requestsPage - 3 || i === requestsPage + 3) {
+                elements.push(<span key={`r-dots-${i}`} className={styles.pageDots}>…</span>);
             }
         }
-        return buttons;
+
+        elements.push(
+            <button
+                key="r-next"
+                type="button"
+                className={styles.pageBtn}
+                onClick={() => setRequestsPage((prev) => Math.min(prev + 1, requestsTotalPages))}
+                disabled={requestsPage >= requestsTotalPages}
+            >
+                →
+            </button>
+        );
+
+        return elements;
     };
 
     return (

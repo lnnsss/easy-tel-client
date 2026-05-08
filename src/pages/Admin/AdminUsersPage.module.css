@@ -209,8 +209,14 @@
 .pagination {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: var(--space-2);
     padding: var(--space-5);
+}
+
+.pageDots {
+    color: var(--text-muted);
+    padding: 0 2px;
 }
 
 .modalOverlay {
@@ -400,6 +406,11 @@
 .pageBtn {
     border: 1px solid var(--border);
     background: var(--white);
+}
+
+.pageBtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
 }
 
 .activePage {

@@ -49,7 +49,7 @@ const AppRouter = observer(() => {
 
             <Route
                 path="/scanner"
-                element={authStore.isAuth && !isAdmin ? <RecognizePage /> : <Navigate to={isAdmin ? "/admin" : "/login"} />}
+                element={authStore.isAuth && !isAdmin ? <RecognizePage /> : <Navigate to={isAdmin ? "/admin" : "/register"} />}
             />
 
             <Route

@@ -20,6 +20,12 @@
     font-weight: 800;
 }
 
+.totalLabel {
+    margin: 6px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.92rem;
+}
+
 .viewSwitch {
     display: flex;
     gap: 8px;
@@ -329,6 +335,31 @@
     width: 100%;
     border-collapse: collapse;
     min-width: 640px;
+}
+
+.loadMoreWrap {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+}
+
+.loadMoreBtn {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.loadMoreBtn:hover {
+    border-color: var(--color-primary);
+}
+
+.loadMoreBtn:disabled {
+    opacity: 0.6;
+    cursor: wait;
 }
 
 .table th,
