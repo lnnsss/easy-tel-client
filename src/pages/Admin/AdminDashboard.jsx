@@ -11,7 +11,6 @@ const AdminDashboard = () => {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [importing, setImporting] = useState(false);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingWord, setEditingWord] = useState(null);
@@ -126,59 +125,6 @@ const AdminDashboard = () => {
         return btns;
     };
 
-    const handleImportExternal = async (wordId) => {
-        try {
-            setImporting(true);
-            const { data } = await AdminService.importExternalWords([wordId], false);
-            uiStore.showModal({
-                title: 'Импорт завершен',
-                message: `Импортировано: ${data.imported || 0}, пропущено: ${data.skipped || 0}, обновлено: ${data.updated || 0}.`,
-                variant: 'success',
-                secondaryLabel: 'Закрыть'
-            });
-            fetchWords();
-        } catch (err) {
-            uiStore.showModal({
-                title: 'Ошибка',
-                message: err.response?.data?.message || 'Ошибка импорта',
-                variant: 'error',
-                secondaryLabel: 'Закрыть'
-            });
-        } finally {
-            setImporting(false);
-        }
-    };
-
-    const handleCleanupExternal = () => {
-        uiStore.showModal({
-            title: 'Удалить внешний импорт?',
-            message: 'Будут удалены только слова, импортированные из внешних источников. Ваши 58 ручных слов останутся.',
-            variant: 'error',
-            primaryLabel: 'Удалить',
-            secondaryLabel: 'Отмена',
-            onPrimary: async () => {
-                try {
-                    const { data } = await AdminService.cleanupExternalImports();
-                    uiStore.closeModal();
-                    uiStore.showModal({
-                        title: 'Готово',
-                        message: `Удалено внешних слов: ${data.deleted || 0}.`,
-                        variant: 'success',
-                        secondaryLabel: 'Закрыть'
-                    });
-                    fetchWords();
-                } catch (err) {
-                    uiStore.showModal({
-                        title: 'Ошибка',
-                        message: err.response?.data?.message || 'Ошибка очистки',
-                        variant: 'error',
-                        secondaryLabel: 'Закрыть'
-                    });
-                }
-            }
-        });
-    };
-
     return (
         <div className={`${styles.wrapper} app-page-shell`}>
             <header className={`${styles.header} app-page-top`}>
@@ -194,9 +140,6 @@ const AdminDashboard = () => {
                         onChange={(e) => setSearch(e.target.value)}
                         className={styles.searchInput}
                     />
-                    <button type="button" className={styles.cleanupBtn} onClick={handleCleanupExternal}>
-                        Очистить внешний импорт
-                    </button>
                 </div>
             </header>
 
@@ -227,27 +170,12 @@ const AdminDashboard = () => {
                                     <div className={styles.wordInfo}>
                                         <span className={styles.tatWord}>
                                             {word.nameTatar}
-                                            <span className={`${styles.sourceBadge} ${word.isExternalCandidate ? styles.sourceBadgeExternal : styles.sourceBadgeLocal}`}>
-                                                {word.isExternalCandidate ? 'Из speak.tatar' : word.source === 'external' ? 'В Mongo' : 'Ручное'}
-                                            </span>
                                         </span>
                                         <span className={styles.ruWord}>{word.nameRu} / {word.nameEn}</span>
                                     </div>
                                     <div className={styles.rowActions}>
-                                        {word.isExternalCandidate ? (
-                                            <button
-                                                onClick={() => handleImportExternal(word.id)}
-                                                className={styles.importBtn}
-                                                disabled={importing}
-                                            >
-                                                +
-                                            </button>
-                                        ) : (
-                                            <>
-                                                <button onClick={() => openModal(word)} className={styles.editBtn}>✎</button>
-                                                <button onClick={() => handleDeleteFull(word._id)} className={styles.actionBtnDel}>✕</button>
-                                            </>
-                                        )}
+                                        <button onClick={() => openModal(word)} className={styles.editBtn}>✎</button>
+                                        <button onClick={() => handleDeleteFull(word._id)} className={styles.actionBtnDel}>✕</button>
                                     </div>
                                 </div>
                             ))}

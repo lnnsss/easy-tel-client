@@ -23,14 +23,6 @@ export default class AdminService {
         return $api.delete(`/admin/words/${id}`);
     }
 
-    static async importExternalWords(wordIds = [], overwrite = false) {
-        return $api.post('/admin/words/import', { wordIds, overwrite });
-    }
-
-    static async cleanupExternalImports() {
-        return $api.delete('/admin/words/external-imports');
-    }
-
     static async getUsers(params = {}) {
         const {
             page = 1,
