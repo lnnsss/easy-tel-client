@@ -13,6 +13,12 @@
     margin-bottom: 24px;
 }
 
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
 .title {
     margin: 0;
     color: var(--color-text);
@@ -32,6 +38,59 @@
     background: var(--color-bg-muted);
     padding: 6px;
     border-radius: 12px;
+}
+
+.assessmentStatus {
+    min-height: 52px;
+    min-width: 52px;
+    max-width: 128px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    font-weight: 700;
+    font-size: 0.88rem;
+    line-height: 1.2;
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.assessmentStatusWrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.assessmentTooltip {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 8px);
+    width: 220px;
+    border-radius: 10px;
+    padding: 8px 10px;
+    background: rgba(16, 16, 16, 0.92);
+    color: #fff;
+    font-size: 0.74rem;
+    line-height: 1.35;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    z-index: 8;
+}
+
+.assessmentStatusWrap:hover .assessmentTooltip,
+.assessmentStatusWrap:focus-within .assessmentTooltip {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.assessmentStatusPending {
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+.assessmentStatusDone {
+    background: var(--color-primary);
+    color: var(--c-black);
+    border-color: var(--color-primary-strong, var(--color-primary));
 }
 
 .switchBtn {
@@ -322,6 +381,123 @@
     border-top: 1px solid var(--color-bg-soft);
     padding-top: 10px;
     margin-top: auto;
+}
+
+.assessmentOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.38);
+    z-index: 1400;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+}
+
+.assessmentModal {
+    width: min(760px, 100%);
+    max-height: 84vh;
+    overflow: auto;
+    border-radius: 16px;
+    border: 1px solid var(--color-border-soft);
+    background: var(--color-bg);
+    box-shadow: var(--shadow-xl);
+    padding: 14px;
+}
+
+.assessmentHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.assessmentHead h3 {
+    margin: 0;
+}
+
+.assessmentHead button {
+    border: 0;
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+
+.assessmentProgress {
+    margin: 0 0 10px;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.assessmentQuestions {
+    display: grid;
+    gap: 10px;
+}
+
+.assessmentQuestionCard {
+    border: 1px solid var(--color-border-soft);
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.assessmentQuestionTitle {
+    margin: 0 0 8px;
+    font-weight: 700;
+}
+
+.assessmentOptions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.assessmentOptionBtn {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-bg-soft);
+    color: var(--color-text);
+    min-height: 38px;
+    padding: 8px 10px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.assessmentOptionBtnSelected {
+    border-color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 18%, var(--color-bg));
+}
+
+.assessmentActions {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.assessmentPrimaryBtn,
+.assessmentSecondaryBtn {
+    border-radius: 10px;
+    min-height: 38px;
+    padding: 8px 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.assessmentPrimaryBtn {
+    border: 0;
+    background: var(--color-primary);
+    color: var(--c-black);
+}
+
+.assessmentSecondaryBtn {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+.assessmentResult p {
+    margin: 0 0 8px;
 }
 
 .tableWrap {

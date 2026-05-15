@@ -13,3 +13,18 @@ $api.interceptors.request.use((config) => {
 });
 
 export default $api;
+
+$api.interceptors.response.use((response) => {
+    const payload = response?.data;
+    const unlocked = Array.isArray(payload?.unlockedNow)
+        ? payload.unlockedNow
+        : Array.isArray(payload?.data?.unlockedNow)
+            ? payload.data.unlockedNow
+            : [];
+
+    if (unlocked.length && typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('achievements:unlocked', { detail: unlocked }));
+    }
+
+    return response;
+});

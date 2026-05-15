@@ -6,6 +6,7 @@ import AppRouter from './router/AppRouter';
 import Navbar from './components/Navbar/Navbar';
 import AppModal from './components/AppModal/AppModal';
 import Footer from './components/Footer/Footer';
+import AchievementToast from './components/AchievementToast/AchievementToast';
 
 const App = observer(() => {
     const { authStore, uiStore } = useStores();
@@ -13,6 +14,9 @@ const App = observer(() => {
     const location = useLocation();
     const shownNoticeRef = useRef('');
     const hideNavbar = location.pathname === '/login' || location.pathname === '/register';
+    const [activeAchievement, setActiveAchievement] = React.useState(null);
+    const [isAchievementClosing, setIsAchievementClosing] = React.useState(false);
+    const [copyToastClosing, setCopyToastClosing] = React.useState(false);
     const knownRoutePatterns = [
         '/',
         '/translate',
@@ -26,7 +30,9 @@ const App = observer(() => {
         '/profile',
         '/u/:username',
         '/dictionary',
+        '/dictionary/assessment',
         '/character',
+        '/achievements',
         '/friends',
         '/chats',
         '/courses',
@@ -82,6 +88,57 @@ const App = observer(() => {
         });
     }, [authStore.user?.authorRequestNotice?._id]);
 
+
+    useEffect(() => {
+        const handler = (event) => {
+            const unlocked = Array.isArray(event?.detail) ? event.detail : [];
+            if (unlocked.length) {
+                uiStore.enqueueAchievements(unlocked);
+            }
+        };
+        window.addEventListener('achievements:unlocked', handler);
+        return () => window.removeEventListener('achievements:unlocked', handler);
+    }, [uiStore]);
+
+    useEffect(() => {
+        if (activeAchievement) return;
+        if (!uiStore.achievementQueue.length) return;
+        const next = uiStore.shiftAchievement();
+        if (!next) return;
+        setIsAchievementClosing(false);
+        setActiveAchievement({
+            ...next,
+            title: `Новое достижение: ${next.title}`
+        });
+    }, [activeAchievement, uiStore, uiStore.achievementQueue.length]);
+
+    useEffect(() => {
+        if (!activeAchievement) return;
+        const closeTimer = setTimeout(() => setIsAchievementClosing(true), 4300);
+        const clearTimer = setTimeout(() => {
+            setActiveAchievement(null);
+            setIsAchievementClosing(false);
+        }, 5000);
+        return () => {
+            clearTimeout(closeTimer);
+            clearTimeout(clearTimer);
+        };
+    }, [activeAchievement]);
+
+    useEffect(() => {
+        if (!uiStore.copyToast.isOpen) return;
+        setCopyToastClosing(false);
+        const closeTimer = setTimeout(() => setCopyToastClosing(true), 1400);
+        const clearTimer = setTimeout(() => {
+            uiStore.hideCopyToast();
+            setCopyToastClosing(false);
+        }, 2000);
+        return () => {
+            clearTimeout(closeTimer);
+            clearTimeout(clearTimer);
+        };
+    }, [uiStore, uiStore.copyToast.isOpen, uiStore.copyToast.message]);
+
     // Если приложение проверяет токен в данный момент
     if (authStore.isLoading && !authStore.isAuth && localStorage.getItem('token')) {
         return <div style={{textAlign: 'center', marginTop: '50px'}}>Загрузка сессии...</div>;
@@ -108,6 +165,13 @@ const App = observer(() => {
                 <AppRouter />
             </main>
             {!hideFooter && <Footer />}
+            {activeAchievement && <AchievementToast item={activeAchievement} isClosing={isAchievementClosing} />}
+            {uiStore.copyToast.isOpen && (
+                <AchievementToast
+                    item={{ title: uiStore.copyToast.message }}
+                    isClosing={copyToastClosing}
+                />
+            )}
             <AppModal
                 isOpen={uiStore.modal.isOpen}
                 title={uiStore.modal.title}

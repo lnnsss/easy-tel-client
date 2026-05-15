@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import $api from '../../api/instance';
+import { useNavigate } from 'react-router-dom';
+import { useStores } from '../../stores/StoreContext';
 import styles from './DictionaryPage.module.css';
 
 const SpeakerIcon = ({ className }) => (
@@ -18,6 +20,8 @@ const StopIcon = ({ className }) => (
 );
 
 const DictionaryPage = observer(() => {
+    const { uiStore } = useStores();
+    const navigate = useNavigate();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
@@ -36,6 +40,15 @@ const DictionaryPage = observer(() => {
     const [usageExamplesErrorByWordId, setUsageExamplesErrorByWordId] = useState({});
     const [usageExamplesRequestedByWordId, setUsageExamplesRequestedByWordId] = useState({});
     const [descriptionExpandedByWordId, setDescriptionExpandedByWordId] = useState({});
+    const [assessmentStatus, setAssessmentStatus] = useState({
+        hasEnoughWords: false,
+        requiredWords: 20,
+        wordsCount: 0,
+        weekKey: '',
+        needsRetake: true,
+        result: null
+    });
+    const [assessmentLoading, setAssessmentLoading] = useState(false);
 
     const loadDictionaryPage = async (nextPage, mode = 'replace') => {
         const isAppend = mode === 'append';
@@ -64,6 +77,26 @@ const DictionaryPage = observer(() => {
 
     useEffect(() => {
         loadDictionaryPage(1, 'replace');
+    }, []);
+
+    const loadAssessmentStatus = async () => {
+        try {
+            const { data } = await $api.get('/dictionary/weekly-assessment');
+            setAssessmentStatus({
+                hasEnoughWords: Boolean(data?.hasEnoughWords),
+                requiredWords: Number(data?.requiredWords) || 20,
+                wordsCount: Number(data?.wordsCount) || 0,
+                weekKey: String(data?.weekKey || ''),
+                needsRetake: Boolean(data?.needsRetake),
+                result: data?.result || null
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    useEffect(() => {
+        loadAssessmentStatus();
     }, []);
 
     useEffect(() => {
@@ -182,6 +215,27 @@ const DictionaryPage = observer(() => {
         }
     };
 
+    const openAssessment = async () => {
+        if (!assessmentStatus.hasEnoughWords) {
+            uiStore.showModal({
+                title: 'Недостаточно слов',
+                message: `Нужно изучить минимум ${assessmentStatus.requiredWords} слов`,
+                variant: 'info',
+                secondaryLabel: 'Закрыть'
+            });
+            return;
+        }
+        if (!assessmentStatus.needsRetake && assessmentStatus.result) return;
+        setAssessmentLoading(true);
+        try {
+            navigate('/dictionary/assessment');
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setAssessmentLoading(false);
+        }
+    };
+
     if (loading) return <div className={styles.loader}>Загрузка словаря...</div>;
 
     return (
@@ -191,7 +245,26 @@ const DictionaryPage = observer(() => {
                     <h1 className={`${styles.title} app-page-title`}>Мои изученные слова</h1>
                     <p className={styles.totalLabel}>Всего: {totalItems}</p>
                 </div>
-                <div className={styles.viewSwitch}>
+                <div className={styles.headerRight}>
+                    <div className={styles.assessmentStatusWrap}>
+                        <button
+                            type="button"
+                            className={`${styles.assessmentStatus} ${assessmentStatus.needsRetake ? styles.assessmentStatusPending : styles.assessmentStatusDone}`}
+                            onClick={openAssessment}
+                            disabled={assessmentLoading}
+                        >
+                            {assessmentLoading
+                                ? '...'
+                                : assessmentStatus.needsRetake
+                                    ? 'Проверить себя'
+                                    : (assessmentStatus.result?.level || 'A1')}
+                        </button>
+                        <div className={styles.assessmentTooltip}>
+                            Уровни: A1 (0-11), B1 (12-17), B2 (18-20).<br />
+                            Самый высокий уровень: B2.
+                        </div>
+                    </div>
+                    <div className={styles.viewSwitch}>
                     <button
                         className={`${styles.switchBtn} ${viewMode === 'table' ? styles.switchBtnActive : ''}`}
                         onClick={() => setViewMode('table')}
@@ -218,6 +291,7 @@ const DictionaryPage = observer(() => {
                         </svg>
                         <span>Блоки</span>
                     </button>
+                    </div>
                 </div>
             </div>
             {ttsError && <p className={styles.ttsError}>{ttsError}</p>}

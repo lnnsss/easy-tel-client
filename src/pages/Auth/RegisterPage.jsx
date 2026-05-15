@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Auth.module.css';
 
@@ -14,6 +14,7 @@ const PASSWORD_COMPLEXITY_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0
 const RegisterPage = observer(() => {
     const { authStore } = useStores();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [form, setForm] = useState({
         email: '',
         password: '',
@@ -87,6 +88,8 @@ const RegisterPage = observer(() => {
             firstName,
             lastName
         };
+        const referralCode = String(searchParams.get('ref') || '').trim();
+        if (referralCode) preparedForm.referralCode = referralCode;
         const { confirmPassword, ...registerData } = preparedForm;
         const res = await authStore.register(registerData);
         if (res.success) navigate('/profile');

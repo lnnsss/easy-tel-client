@@ -1,28 +1,24 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { observer } from 'mobx-react-lite';
 import { Link, useNavigate } from 'react-router-dom';
-import { createPortal } from 'react-dom';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Navbar.module.css';
 
 const Navbar = observer(() => {
     const { authStore, chatStore, uiStore } = useStores();
     const navigate = useNavigate();
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
+    const [isDesktopSettingsOpen, setIsDesktopSettingsOpen] = useState(false);
     const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
     const [interfaceLang, setInterfaceLang] = useState('ru');
     const [theme, setTheme] = useState(() => (
         document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
     ));
 
-    const toggleMenu = () => {
-        setIsSettingsOpen(false);
-        setIsMenuOpen(!isMenuOpen);
-    };
     const closeMenu = () => {
-        setIsMenuOpen(false);
-        setIsSettingsOpen(false);
+        setIsMobileDropdownOpen(false);
+        setIsDesktopSettingsOpen(false);
     };
 
     const isAdmin = authStore.user?.role === 'admin';
@@ -59,27 +55,35 @@ const Navbar = observer(() => {
 
     useEffect(() => {
         if (!authStore.isAuth) {
-            setIsSettingsOpen(false);
-            setIsMenuOpen(false);
+            setIsMobileDropdownOpen(false);
+            setIsDesktopSettingsOpen(false);
         }
     }, [authStore.isAuth]);
 
     useEffect(() => {
-        if (isSettingsOpen) {
+        if (isMobileDropdownOpen) {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             setTheme(currentTheme === 'dark' ? 'dark' : 'light');
         }
-    }, [isSettingsOpen]);
+    }, [isMobileDropdownOpen]);
 
-    const onToggleTheme = () => {
+    const onToggleTheme = async () => {
         const nextTheme = theme === 'light' ? 'dark' : 'light';
         setTheme(nextTheme);
         localStorage.setItem('theme', nextTheme);
         document.documentElement.setAttribute('data-theme', nextTheme);
+        if (nextTheme === 'dark') {
+            try {
+                const { default: $api } = await import('../../api/instance');
+                await $api.post('/achievements/event', { eventType: 'theme_dark_used' });
+            } catch (e) {
+                console.error(e);
+            }
+        }
     };
 
     const onLogoutConfirm = () => {
-        setIsSettingsOpen(false);
+        closeMenu();
         uiStore.showModal({
             title: 'Выйти из аккаунта?',
             message: 'Вы уверены, что хотите выйти?',
@@ -95,222 +99,299 @@ const Navbar = observer(() => {
         });
     };
 
-    const settingsOverlay = authStore.isAuth && isSettingsOpen ? (
-        <div className={styles.settingsOverlay} onClick={() => setIsSettingsOpen(false)}>
-            <div
-                className={styles.settingsModal}
-                role="dialog"
-                aria-modal="true"
-                aria-label="Настройки"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className={styles.settingsHead}>
-                    <h3 className={styles.settingsTitle}>Настройки</h3>
-                    <button
-                        type="button"
-                        className={styles.settingsCloseBtn}
-                        onClick={() => setIsSettingsOpen(false)}
-                        aria-label="Закрыть"
-                    >
-                        ×
-                    </button>
-                </div>
-
-                <div className={styles.settingsList}>
-                    {!isAdmin && (
-                        <button
-                            type="button"
-                            className={styles.settingsItem}
-                            onClick={() => {
-                                setIsSettingsOpen(false);
-                                navigate('/character');
-                            }}
-                        >
-                            <span>Персонаж</span>
-                        </button>
-                    )}
-
-                    <button type="button" className={styles.settingsItem} onClick={onToggleTheme}>
-                        <span>Тема</span>
-                        <span className={styles.settingsValue}>{theme === 'dark' ? 'Тёмная' : 'Светлая'}</span>
-                    </button>
-
-                    <div className={styles.settingsControlRow}>
-                        <span className={styles.settingsControlLabel}>Язык</span>
-                        <div className={styles.segmentedControl} role="group" aria-label="Язык интерфейса">
-                            {[
-                                { value: 'ru', label: 'ру' },
-                                { value: 'tat', label: 'тат' }
-                            ].map((langOption) => (
-                                <button
-                                    key={langOption.value}
-                                    type="button"
-                                    className={`${styles.segmentedBtn} ${interfaceLang === langOption.value ? styles.segmentedBtnActive : ''}`}
-                                    onClick={() => setInterfaceLang(langOption.value)}
-                                >
-                                    {langOption.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <button type="button" className={`${styles.settingsItem} ${styles.settingsLogout}`} onClick={onLogoutConfirm}>
-                        <span>Выйти</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    ) : null;
+    const onCopyReferralLink = async () => {
+        const refCode = String(authStore.user?.referralCode || '').trim();
+        if (!refCode) {
+            uiStore.showModal({
+                title: 'Реферальная ссылка недоступна',
+                message: 'Попробуйте обновить страницу и открыть настройки снова.',
+                variant: 'info',
+                secondaryLabel: 'Закрыть'
+            });
+            return;
+        }
+        const origin = window.location.origin;
+        const link = `${origin}/register?ref=${encodeURIComponent(refCode)}`;
+        try {
+            await navigator.clipboard.writeText(link);
+            uiStore.showCopyToast('Скопировано в буфер обмена');
+        } catch {
+            uiStore.showModal({
+                title: 'Не удалось скопировать',
+                message: 'Скопируйте ссылку вручную: ' + link,
+                variant: 'info',
+                secondaryLabel: 'Закрыть'
+            });
+        }
+    };
 
     return (
-        <>
-            <nav className={styles.navbar}>
-                <div className={styles.container}>
-                    <div className={styles.leftZone}>
-                        <Link to="/" className={styles.logo} onClick={closeMenu}>
-                            Easy<span>Tel</span>
-                        </Link>
-                    </div>
+        <nav className={styles.navbar}>
+            <div className={styles.container}>
+                <div className={styles.leftZone}>
+                    <Link to="/" className={styles.logo} onClick={closeMenu}>
+                        Easy<span>Tel</span>
+                    </Link>
+                </div>
 
-                    <div className={styles.centerNav}>
-                        {(!authStore.isAuth || !isAdmin) && (
-                            <>
-                                <Link to="/translate" className={styles.link} onClick={closeMenu}>Переводчик</Link>
-                                <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>
-                            </>
+                <div className={styles.centerNav}>
+                    {(!authStore.isAuth || !isAdmin) && (
+                        <>
+                            <Link to="/translate" className={styles.link} onClick={closeMenu}>Переводчик</Link>
+                            <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>
+                        </>
+                    )}
+
+                    {authStore.isAuth && !isAdmin && (
+                        <>
+                            <Link to="/dictionary" className={styles.link} onClick={closeMenu}>Словарь</Link>
+                            <Link to="/courses" className={styles.link} onClick={closeMenu}>Материал</Link>
+                            <Link to="/achievements" className={styles.link} onClick={closeMenu}>Достижения</Link>
+                            {isAuthor && <Link to="/author/learning" className={styles.link} onClick={closeMenu}>Авторство</Link>}
+                            <Link to="/friends" className={styles.link} onClick={closeMenu}>Друзья</Link>
+                            <Link to="/chats" className={`${styles.link} ${styles.chatLink}`} onClick={closeMenu}>
+                                Чаты
+                                {chatStore.unreadTotal > 0 && <span className={styles.chatBadge}>{chatStore.unreadTotal}</span>}
+                            </Link>
+                        </>
+                    )}
+
+                    {isAdmin && (
+                        <>
+                            <Link to="/words" className={styles.link} onClick={closeMenu}>Словарь</Link>
+                            <Link to="/admin/learning" className={styles.link} onClick={closeMenu}>Материал</Link>
+                            <Link to="/admin/users" className={styles.link} onClick={closeMenu}>Пользователи</Link>
+                        </>
+                    )}
+                </div>
+
+                <div className={styles.rightZone}>
+                    {authStore.isAuth ? (
+                        <div className={styles.navUserControls}>
+                            <Link
+                                to={profileRoute}
+                                className={styles.profileAvatarBtn}
+                                onClick={closeMenu}
+                                aria-label="Личный кабинет"
+                            >
+                                {profileAvatarSrc && !avatarLoadFailed ? (
+                                    <img
+                                        src={profileAvatarSrc}
+                                        alt="Профиль"
+                                        className={styles.profileAvatarImage}
+                                        onError={() => setAvatarLoadFailed(true)}
+                                    />
+                                ) : (
+                                    <span className={styles.profileAvatarFallback}>{profileInitials}</span>
+                                )}
+                            </Link>
+
+                            <button
+                                type="button"
+                                className={styles.settingsBtn}
+                                aria-label="Настройки и меню"
+                                aria-expanded={isMobileDropdownOpen || isDesktopSettingsOpen}
+                                onClick={() => {
+                                    if (window.innerWidth <= 768) {
+                                        setIsMobileDropdownOpen((prev) => !prev);
+                                        return;
+                                    }
+                                    setIsDesktopSettingsOpen((prev) => !prev);
+                                }}
+                            >
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path
+                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.757.426 1.757 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.757-2.924 1.757-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.757-.426-1.757-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065Z"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    />
+                                    <path
+                                        d="M12 15.25a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5Z"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+                    ) : (
+                        <div className={styles.authBtns}>
+                            <Link to="/login" className={styles.link} onClick={closeMenu}>Вход</Link>
+                            <Link to="/register" className={styles.btnRegister} onClick={closeMenu}>Регистрация</Link>
+                        </div>
+                    )}
+                </div>
+
+                {authStore.isAuth && (
+                    <>
+                        {isDesktopSettingsOpen && window.innerWidth > 768 && createPortal(
+                            <div className={styles.settingsOverlay} onClick={closeMenu}>
+                                <div className={styles.settingsModal} onClick={(e) => e.stopPropagation()}>
+                                    <div className={styles.settingsHead}>
+                                        <h3 className={styles.settingsTitle}>Настройки</h3>
+                                        <button type="button" className={styles.settingsCloseBtn} onClick={closeMenu} aria-label="Закрыть">×</button>
+                                    </div>
+
+                                    <div className={styles.settingsList}>
+                                        {!isAdmin && (
+                                            <button type="button" className={styles.referralBtn} onClick={onCopyReferralLink}>
+                                                <span>Рефералка</span>
+                                                <span className={styles.referralHelpWrap}>
+                                                    <span className={styles.referralHelp}>?</span>
+                                                    <span className={styles.referralTooltip}>
+                                                        Вы получите 10 монет, если кто-то зарегистрируется по вашей ссылке
+                                                    </span>
+                                                </span>
+                                            </button>
+                                        )}
+
+                                        {!isAdmin && (
+                                            <button
+                                                type="button"
+                                                className={styles.settingsItem}
+                                                onClick={() => {
+                                                    closeMenu();
+                                                    navigate('/character');
+                                                }}
+                                            >
+                                                <span>Персонаж</span>
+                                            </button>
+                                        )}
+
+                                        <button type="button" className={styles.settingsItem} onClick={onToggleTheme}>
+                                            <span>Тема</span>
+                                            <span className={styles.settingsValue}>{theme === 'dark' ? 'Тёмная' : 'Светлая'}</span>
+                                        </button>
+
+                                        <div className={styles.settingsControlRow}>
+                                            <span className={styles.settingsControlLabel}>Язык</span>
+                                            <div className={styles.segmentedControl} role="group" aria-label="Язык интерфейса">
+                                                {[
+                                                    { value: 'ru', label: 'ру' },
+                                                    { value: 'tat', label: 'тат' }
+                                                ].map((langOption) => (
+                                                    <button
+                                                        key={langOption.value}
+                                                        type="button"
+                                                        className={`${styles.segmentedBtn} ${interfaceLang === langOption.value ? styles.segmentedBtnActive : ''}`}
+                                                        onClick={() => setInterfaceLang(langOption.value)}
+                                                    >
+                                                        {langOption.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <button type="button" className={`${styles.settingsItem} ${styles.settingsLogout}`} onClick={onLogoutConfirm}>Выйти</button>
+                                    </div>
+                                </div>
+                            </div>,
+                            document.body
                         )}
 
-                        {authStore.isAuth && !isAdmin && (
-                            <>
-                                <Link to="/dictionary" className={styles.link} onClick={closeMenu}>Словарь</Link>
-                                <Link to="/courses" className={styles.link} onClick={closeMenu}>Материал</Link>
-                                {isAuthor && <Link to="/author/learning" className={styles.link} onClick={closeMenu}>Авторство</Link>}
-                                <Link to="/friends" className={styles.link} onClick={closeMenu}>Друзья</Link>
-                                <Link to="/chats" className={`${styles.link} ${styles.chatLink}`} onClick={closeMenu}>
-                                    Чаты
-                                    {chatStore.unreadTotal > 0 && <span className={styles.chatBadge}>{chatStore.unreadTotal}</span>}
-                                </Link>
-                            </>
-                        )}
+                        <div className={`${styles.mobileOverlay} ${isMobileDropdownOpen ? styles.mobileOverlayActive : ''}`} onClick={closeMenu} />
+                        <div className={`${styles.mobileDropdown} ${isMobileDropdownOpen ? styles.mobileDropdownActive : ''}`}>
+                            <div className={styles.mobileSettingsSection}>
+                                {!isAdmin && (
+                                    <button type="button" className={`${styles.mobileMenuItem} ${styles.referralBtnMobile}`} onClick={onCopyReferralLink}>
+                                        <span>Рефералка</span>
+                                        <span className={styles.referralHelpWrap}>
+                                            <span className={styles.referralHelp}>?</span>
+                                            <span className={styles.referralTooltip}>
+                                                Вы получите 10 монет, если кто-то зарегистрируется по вашей ссылке
+                                            </span>
+                                        </span>
+                                    </button>
+                                )}
 
-                        {isAdmin && (
-                            <>
-                                <Link to="/words" className={styles.link} onClick={closeMenu}>Словарь</Link>
-                                <Link to="/admin/learning" className={styles.link} onClick={closeMenu}>Материал</Link>
-                                <Link to="/admin/users" className={styles.link} onClick={closeMenu}>Пользователи</Link>
-                            </>
-                        )}
-                    </div>
-
-                    <div className={styles.rightZone}>
-                        {authStore.isAuth ? (
-                            <div className={styles.navUserControls}>
-                                <Link
-                                    to={profileRoute}
-                                    className={styles.profileAvatarBtn}
-                                    onClick={closeMenu}
-                                    aria-label="Личный кабинет"
-                                >
-                                    {profileAvatarSrc && !avatarLoadFailed ? (
-                                        <img
-                                            src={profileAvatarSrc}
-                                            alt="Профиль"
-                                            className={styles.profileAvatarImage}
-                                            onError={() => setAvatarLoadFailed(true)}
-                                        />
-                                    ) : (
-                                        <span className={styles.profileAvatarFallback}>{profileInitials}</span>
-                                    )}
-                                </Link>
+                                {!isAdmin && (
+                                    <button
+                                        type="button"
+                                        className={styles.mobileMenuItem}
+                                        onClick={() => {
+                                            closeMenu();
+                                            navigate('/character');
+                                        }}
+                                    >
+                                        Персонаж
+                                    </button>
+                                )}
 
                                 <button
                                     type="button"
-                                    className={styles.settingsBtn}
-                                    aria-label="Настройки интерфейса"
-                                    aria-expanded={isSettingsOpen}
-                                    onClick={() => {
-                                        setIsMenuOpen(false);
-                                        setIsSettingsOpen((prev) => !prev);
+                                    className={`${styles.mobileMenuItem} ${styles.mobileThemeRow}`}
+                                    onClick={async () => {
+                                        await onToggleTheme();
                                     }}
                                 >
-                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                        <path
-                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.757.426 1.757 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.757-2.924 1.757-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.757-.426-1.757-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065Z"
-                                            stroke="currentColor"
-                                            strokeWidth="1.5"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        />
-                                        <path
-                                            d="M12 15.25a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5Z"
-                                            stroke="currentColor"
-                                            strokeWidth="1.5"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        />
-                                    </svg>
+                                    <span>Тема</span>
+                                    <span className={styles.settingsValue}>{theme === 'dark' ? 'Тёмная' : 'Светлая'}</span>
+                                </button>
+
+                                <div className={styles.mobileLanguageRow}>
+                                    <span className={styles.settingsControlLabel}>Язык</span>
+                                    <div className={styles.segmentedControl} role="group" aria-label="Язык интерфейса">
+                                        {[
+                                            { value: 'ru', label: 'ру' },
+                                            { value: 'tat', label: 'тат' }
+                                        ].map((langOption) => (
+                                            <button
+                                                key={langOption.value}
+                                                type="button"
+                                                className={`${styles.segmentedBtn} ${interfaceLang === langOption.value ? styles.segmentedBtnActive : ''}`}
+                                                onClick={() => setInterfaceLang(langOption.value)}
+                                            >
+                                                {langOption.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <button type="button" className={`${styles.mobileMenuItem} ${styles.settingsLogout}`} onClick={onLogoutConfirm}>
+                                    Выйти
                                 </button>
                             </div>
-                        ) : (
-                            <div className={styles.authBtns}>
-                                <Link to="/login" className={styles.link} onClick={closeMenu}>Вход</Link>
-                                <Link to="/register" className={styles.btnRegister} onClick={closeMenu}>Регистрация</Link>
-                            </div>
-                        )}
-                    </div>
 
-                    <button className={styles.burger} onClick={toggleMenu} aria-label="Menu">
-                        <span className={styles.line}></span>
-                        <span className={styles.line}></span>
-                        <span className={styles.line}></span>
-                    </button>
+                            <div className={styles.mobileDivider} />
 
-                    <div className={`${styles.links} ${isMenuOpen ? styles.linksActive : ''}`}>
-                        {(!authStore.isAuth || !isAdmin) && (
-                            <>
-                                <Link to="/translate" className={styles.link} onClick={closeMenu}>Переводчик</Link>
-                                <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>
-                            </>
-                        )}
-
-                        {authStore.isAuth && !isAdmin && (
-                            <>
-                                <Link to="/dictionary" className={styles.link} onClick={closeMenu}>Словарь</Link>
-                                <Link to="/courses" className={styles.link} onClick={closeMenu}>Материал</Link>
-                                {isAuthor && <Link to="/author/learning" className={styles.link} onClick={closeMenu}>Авторство</Link>}
-                                <Link to="/friends" className={styles.link} onClick={closeMenu}>Друзья</Link>
-                                <Link to="/chats" className={`${styles.link} ${styles.chatLink}`} onClick={closeMenu}>
-                                    Чаты
-                                    {chatStore.unreadTotal > 0 && <span className={styles.chatBadge}>{chatStore.unreadTotal}</span>}
-                                </Link>
-                            </>
-                        )}
-
-                        {authStore.isAuth ? (
-                            <>
-                                {isAdmin && (
+                            <div className={styles.mobileNavSection}>
+                                {(!authStore.isAuth || !isAdmin) && (
                                     <>
-                                        <Link to="/words" className={styles.link} onClick={closeMenu}>Словарь</Link>
-                                        <Link to="/admin/learning" className={styles.link} onClick={closeMenu}>Материал</Link>
-                                        <Link to="/admin/users" className={styles.link} onClick={closeMenu}>Пользователи</Link>
+                                        <Link to="/translate" className={styles.mobileNavLink} onClick={closeMenu}>Переводчик</Link>
+                                        <Link to="/scanner" className={styles.mobileNavLink} onClick={closeMenu}>Сканер</Link>
                                     </>
                                 )}
 
-                            </>
-                        ) : (
-                            <>
-                                <Link to="/login" className={styles.link} onClick={closeMenu}>Вход</Link>
-                                <Link to="/register" className={styles.btnRegister} onClick={closeMenu}>Регистрация</Link>
-                            </>
-                        )}
-                    </div>
-                </div>
-            </nav>
+                                {authStore.isAuth && !isAdmin && (
+                                    <>
+                                        <Link to="/dictionary" className={styles.mobileNavLink} onClick={closeMenu}>Словарь</Link>
+                                        <Link to="/courses" className={styles.mobileNavLink} onClick={closeMenu}>Материал</Link>
+                                        <Link to="/achievements" className={styles.mobileNavLink} onClick={closeMenu}>Достижения</Link>
+                                        {isAuthor && <Link to="/author/learning" className={styles.mobileNavLink} onClick={closeMenu}>Авторство</Link>}
+                                        <Link to="/friends" className={styles.mobileNavLink} onClick={closeMenu}>Друзья</Link>
+                                        <Link to="/chats" className={`${styles.mobileNavLink} ${styles.mobileChatLink}`} onClick={closeMenu}>
+                                            Чаты
+                                            {chatStore.unreadTotal > 0 && <span className={styles.chatBadge}>{chatStore.unreadTotal}</span>}
+                                        </Link>
+                                    </>
+                                )}
 
-            {settingsOverlay && typeof document !== 'undefined'
-                ? createPortal(settingsOverlay, document.body)
-                : settingsOverlay}
-        </>
+                                {isAdmin && (
+                                    <>
+                                        <Link to="/words" className={styles.mobileNavLink} onClick={closeMenu}>Словарь</Link>
+                                        <Link to="/admin/learning" className={styles.mobileNavLink} onClick={closeMenu}>Материал</Link>
+                                        <Link to="/admin/users" className={styles.mobileNavLink} onClick={closeMenu}>Пользователи</Link>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
+        </nav>
     );
 });
 

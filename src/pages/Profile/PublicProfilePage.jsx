@@ -63,6 +63,7 @@ const PublicProfilePage = () => {
         if (!value) return;
         try {
             await navigator.clipboard.writeText(value);
+            uiStore.showCopyToast('Скопировано в буфер обмена');
         } catch {
             // Ignore clipboard permission errors.
         }
@@ -261,16 +262,16 @@ const PublicProfilePage = () => {
             description: 'Общее количество уникальных слов, добавленных в словарь.'
         },
         {
-            key: 'totalPoints',
-            displayValue: String(profile.totalPoints || 0),
-            label: 'Всего очков',
-            description: 'Сумма очков, которые пользователь получил за учебную активность.'
+            key: 'achievementsCount',
+            displayValue: String(Array.isArray(profile.achievements) ? profile.achievements.length : 0),
+            label: 'Достижений',
+            description: 'Количество открытых достижений.'
         },
         {
             key: 'coins',
-            displayValue: String(profile.coins || 0),
-            label: 'Монеты',
-            description: 'Игровая валюта для покупки одежды персонажа.'
+            displayValue: String(Number.isFinite(profile.coins) ? profile.coins : 0),
+            label: 'Монет',
+            description: 'Текущее количество монет, заработанных за учебную активность и достижения.'
         },
         {
             key: 'discipline',
@@ -286,60 +287,98 @@ const PublicProfilePage = () => {
         }
     ];
 
+    const totalPoints = Number(profile.totalPoints) || 0;
+    const level = Math.floor(totalPoints / 10) + 1;
     const statByKey = Object.fromEntries(stats.map((s) => [s.key, s]));
     const statRows = [
         ['streak', 'wordsWeek', 'wordsTotal'],
-        ['totalPoints', 'coins'],
+        ['achievementsCount', 'coins'],
         ['discipline', 'motivation']
     ];
+    const profileAccentColor = profile.profileAccentColor || '';
+    const isDarkTheme = typeof document !== 'undefined' && document.documentElement.getAttribute('data-theme') === 'dark';
+    const headerTopBg = (() => {
+        if (!profileAccentColor) return 'var(--color-bg-soft)';
+        const hex = profileAccentColor.replace('#', '');
+        if (hex.length !== 6) return profileAccentColor;
+        const num = parseInt(hex, 16);
+        const r = (num >> 16) & 255;
+        const g = (num >> 8) & 255;
+        const b = num & 255;
+        const delta = isDarkTheme ? 28 : -18;
+        const clamp = (v) => Math.max(0, Math.min(255, v + delta));
+        const toHex = (v) => clamp(v).toString(16).padStart(2, '0');
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    })();
+    const headerTopTextColor = (() => {
+        if (!profileAccentColor) return 'var(--color-text)';
+        const hex = headerTopBg.replace('#', '');
+        if (hex.length !== 6) return '#111111';
+        const num = parseInt(hex, 16);
+        const r = (num >> 16) & 255;
+        const g = (num >> 8) & 255;
+        const b = num & 255;
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        return luminance > 0.58 ? '#111111' : '#ffffff';
+    })();
 
     return (
         <div className={profileStyles.container}>
             <div className={profileStyles.header}>
-                <div className={profileStyles.avatarRow}>
-                    <div className={profileStyles.avatarCircle}>
-                        {avatarSrc && !avatarLoadFailed ? (
-                            <img
-                                src={avatarSrc}
-                                alt="Аватар"
-                                className={profileStyles.avatarImage}
-                                onError={() => setAvatarLoadFailed(true)}
-                            />
-                        ) : (
-                            <span className={profileStyles.avatarInitials}>{initials}</span>
+                <div className={profileStyles.headerSplit}>
+                    <div
+                        className={profileStyles.headerTop}
+                        style={{ backgroundColor: headerTopBg, color: headerTopTextColor, '--profile-top-text': headerTopTextColor }}
+                    >
+                        <div className={profileStyles.avatarRow}>
+                            <div className={profileStyles.avatarCircle}>
+                                {avatarSrc && !avatarLoadFailed ? (
+                                    <img
+                                        src={avatarSrc}
+                                        alt="Аватар"
+                                        className={profileStyles.avatarImage}
+                                        onError={() => setAvatarLoadFailed(true)}
+                                    />
+                                ) : (
+                                    <span className={profileStyles.avatarInitials}>{initials}</span>
+                                )}
+                            </div>
+                        </div>
+
+                        <h1 className={profileStyles.fullName}>{profile.firstName} {profile.lastName}</h1>
+                        <button type="button" className={profileStyles.usernameBtn} onClick={onCopyUsername}>
+                            @{profile.username}
+                        </button>
+                        <div className={profileStyles.rank}>Уровень: {level}</div>
+                    </div>
+
+                    <div className={profileStyles.headerBottom}>
+                        {!isAdminViewer && profile.relationStatus !== 'self' && (
+                            <div className={styles.friendActionsRow}>
+                                <button
+                                    type="button"
+                                    className={styles.chatActionBtn}
+                                    onClick={onStartChat}
+                                    disabled={isChatActionLoading}
+                                >
+                                    {isChatActionLoading ? '...' : 'Чат'}
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`${styles.friendActionBtn} ${profile.relationStatus === 'friend' ? styles.friendActionDanger : ''}`}
+                                    onClick={onFriendAction}
+                                    disabled={isFriendActionLoading}
+                                >
+                                    {isFriendActionLoading && '...'}
+                                    {!isFriendActionLoading && profile.relationStatus === 'none' && 'Добавить в друзья'}
+                                    {!isFriendActionLoading && profile.relationStatus === 'pending_outgoing' && 'Отменить заявку'}
+                                    {!isFriendActionLoading && profile.relationStatus === 'pending_incoming' && 'Принять заявку'}
+                                    {!isFriendActionLoading && profile.relationStatus === 'friend' && 'Удалить из друзей'}
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>
-
-                <h1 className={profileStyles.fullName}>{profile.firstName} {profile.lastName}</h1>
-                <button type="button" className={profileStyles.usernameBtn} onClick={onCopyUsername}>
-                    @{profile.username}
-                </button>
-                <div className={profileStyles.rank}>Ранг: {profile.rank}</div>
-                {!isAdminViewer && profile.relationStatus !== 'self' && (
-                    <div className={styles.friendActionsRow}>
-                        <button
-                            type="button"
-                            className={styles.chatActionBtn}
-                            onClick={onStartChat}
-                            disabled={isChatActionLoading}
-                        >
-                            {isChatActionLoading ? '...' : 'Чат'}
-                        </button>
-                        <button
-                            type="button"
-                            className={`${styles.friendActionBtn} ${profile.relationStatus === 'friend' ? styles.friendActionDanger : ''}`}
-                            onClick={onFriendAction}
-                            disabled={isFriendActionLoading}
-                        >
-                            {isFriendActionLoading && '...'}
-                            {!isFriendActionLoading && profile.relationStatus === 'none' && 'Добавить в друзья'}
-                            {!isFriendActionLoading && profile.relationStatus === 'pending_outgoing' && 'Отменить заявку'}
-                            {!isFriendActionLoading && profile.relationStatus === 'pending_incoming' && 'Принять заявку'}
-                            {!isFriendActionLoading && profile.relationStatus === 'friend' && 'Удалить из друзей'}
-                        </button>
-                    </div>
-                )}
             </div>
 
             <div className={profileStyles.statsRows}>
@@ -365,22 +404,6 @@ const PublicProfilePage = () => {
                         })}
                     </div>
                 ))}
-            </div>
-
-            <div className={profileStyles.achievementsCard}>
-                <h3>Достижения</h3>
-                <div className={profileStyles.achList}>
-                    {Array.isArray(profile.achievements) && profile.achievements.length > 0 ? (
-                        profile.achievements.map((ach, i) => (
-                            <div key={`${ach}-${i}`} className={profileStyles.achItem}>
-                                <div className={profileStyles.bullet}></div>
-                                <span>{ach}</span>
-                            </div>
-                        ))
-                    ) : (
-                        <p className={styles.empty}>Список достижений пуст</p>
-                    )}
-                </div>
             </div>
 
             <CharacterPreviewCard customization={profile.characterCustomization} />

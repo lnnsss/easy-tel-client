@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Profile.module.css';
@@ -10,6 +10,7 @@ const UserProfile = ({ user }) => {
     const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [activeStat, setActiveStat] = useState(null);
+    const [profileAccentColor, setProfileAccentColor] = useState(user.profileAccentColor || '');
     const [nowTs] = useState(() => Date.now());
     const [form, setForm] = useState({
         firstName: user.firstName || '',
@@ -17,10 +18,18 @@ const UserProfile = ({ user }) => {
         username: user.username || ''
     });
 
+    useEffect(() => {
+        setProfileAccentColor(user.profileAccentColor || '');
+    }, [user.profileAccentColor]);
+
     const wordsTotal = user.dictionary?.length || 0;
     const totalPoints = Number.isFinite(user.totalPoints) ? user.totalPoints : wordsTotal;
     const coins = Number.isFinite(user.coins) ? user.coins : totalPoints;
     const analytics = user.analytics || null;
+    const level = Math.floor(totalPoints / 10) + 1;
+    const currentLevelBasePoints = Math.floor(totalPoints / 10) * 10;
+    const pointsToNextLevel = Math.max(0, currentLevelBasePoints + 10 - totalPoints);
+    const levelProgressPercent = Math.max(0, Math.min(100, ((totalPoints - currentLevelBasePoints) / 10) * 100));
     const wordsWeek = useMemo(() => {
         const weekAgo = nowTs - 7 * 24 * 60 * 60 * 1000;
         return (user.dictionary || []).filter((entry) => {
@@ -71,11 +80,14 @@ const UserProfile = ({ user }) => {
 
     const onSaveProfile = async (e) => {
         e.preventDefault();
-        const res = await authStore.updateProfile({
+        const payload = {
             firstName: form.firstName,
             lastName: form.lastName,
             username: form.username
-        });
+        };
+        const normalizedAccent = String(profileAccentColor || '').trim();
+        if (normalizedAccent) payload.profileAccentColor = normalizedAccent;
+        const res = await authStore.updateProfile(payload);
 
         if (res.success) {
             setIsEditing(false);
@@ -108,6 +120,7 @@ const UserProfile = ({ user }) => {
         if (!value) return;
         try {
             await navigator.clipboard.writeText(value);
+            uiStore.showCopyToast('Скопировано в буфер обмена');
         } catch {
             // Ignore clipboard permission errors.
         }
@@ -133,16 +146,16 @@ const UserProfile = ({ user }) => {
             description: 'Общее количество уникальных слов, которые вы добавили в личный словарь.'
         },
         {
-            key: 'totalPoints',
-            displayValue: String(totalPoints),
-            label: 'Всего очков',
-            description: 'Сумма очков за активность: сканирование слов и обучение в курсах.'
+            key: 'achievementsCount',
+            displayValue: String((Array.isArray(user.userAchievements) ? user.userAchievements.filter((item) => item?.unlockedAt).length : 0) || (Array.isArray(user.achievements) ? user.achievements.length : 0)),
+            label: 'Достижений',
+            description: 'Количество открытых достижений.'
         },
         {
             key: 'coins',
             displayValue: String(coins),
-            label: 'Монеты',
-            description: 'Игровая валюта для покупки одежды персонажа. Очки при покупке не списываются.'
+            label: 'Монет',
+            description: 'Текущее количество монет, заработанных за учебную активность и достижения.'
         },
         {
             key: 'discipline',
@@ -161,9 +174,34 @@ const UserProfile = ({ user }) => {
     const statByKey = Object.fromEntries(stats.map((s) => [s.key, s]));
     const statRows = [
         ['streak', 'wordsWeek', 'wordsTotal'],
-        ['totalPoints', 'coins'],
+        ['achievementsCount', 'coins'],
         ['discipline', 'motivation']
     ];
+    const isDarkTheme = typeof document !== 'undefined' && document.documentElement.getAttribute('data-theme') === 'dark';
+    const headerTopBg = useMemo(() => {
+        if (!profileAccentColor) return 'var(--color-bg-soft)';
+        const hex = profileAccentColor.replace('#', '');
+        if (hex.length !== 6) return profileAccentColor;
+        const num = parseInt(hex, 16);
+        const r = (num >> 16) & 255;
+        const g = (num >> 8) & 255;
+        const b = num & 255;
+        const delta = isDarkTheme ? 28 : -18;
+        const clamp = (v) => Math.max(0, Math.min(255, v + delta));
+        const toHex = (v) => clamp(v).toString(16).padStart(2, '0');
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    }, [profileAccentColor, isDarkTheme]);
+    const headerTopTextColor = useMemo(() => {
+        if (!profileAccentColor) return 'var(--color-text)';
+        const hex = headerTopBg.replace('#', '');
+        if (hex.length !== 6) return '#111111';
+        const num = parseInt(hex, 16);
+        const r = (num >> 16) & 255;
+        const g = (num >> 8) & 255;
+        const b = num & 255;
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        return luminance > 0.58 ? '#111111' : '#ffffff';
+    }, [headerTopBg]);
 
     return (
         <>
@@ -175,51 +213,76 @@ const UserProfile = ({ user }) => {
             )}
 
             <div className={styles.header}>
-                <div className={styles.avatarRow}>
-                    <div className={styles.avatarCircle}>
-                        {avatarSrc && !avatarLoadFailed ? (
-                            <img
-                                src={avatarSrc}
-                                alt="Аватар"
-                                className={styles.avatarImage}
-                                onError={() => setAvatarLoadFailed(true)}
-                            />
-                        ) : (
-                            <span className={styles.avatarInitials}>{initials}</span>
-                        )}
+                <div className={styles.headerSplit}>
+                    <div
+                        className={styles.headerTop}
+                        style={{ backgroundColor: headerTopBg, color: headerTopTextColor, '--profile-top-text': headerTopTextColor }}
+                    >
+                        <div className={styles.avatarRow}>
+                            <div className={styles.avatarCircle}>
+                                {avatarSrc && !avatarLoadFailed ? (
+                                    <img
+                                        src={avatarSrc}
+                                        alt="Аватар"
+                                        className={styles.avatarImage}
+                                        onError={() => setAvatarLoadFailed(true)}
+                                    />
+                                ) : (
+                                    <span className={styles.avatarInitials}>{initials}</span>
+                                )}
+                            </div>
+                        </div>
+                        <h1 className={styles.fullName}>{user.firstName} {user.lastName}</h1>
+                        <button type="button" className={styles.usernameBtn} onClick={onCopyUsername}>
+                            @{user.username}
+                        </button>
+                        <div className={styles.rank}>Уровень: {level}</div>
                     </div>
-                </div>
 
-                <h1 className={styles.fullName}>{user.firstName} {user.lastName}</h1>
-                <button type="button" className={styles.usernameBtn} onClick={onCopyUsername}>
-                    @{user.username}
-                </button>
-                <div className={styles.rank}>Ранг: {user.rank}</div>
+                    <div className={styles.headerBottom}>
+                        <div className={styles.levelProgressWrap}>
+                            <div className={styles.levelProgressLabel}>До нового уровня: {pointsToNextLevel} очков</div>
+                            <div className={styles.levelProgressBar}>
+                                <div className={styles.levelProgressFill} style={{ width: `${levelProgressPercent}%` }} />
+                            </div>
+                        </div>
 
-                <div className={styles.controlsStack}>
-                    <div className={styles.profileActions}>
-                        <button
-                            className={styles.editBtn}
-                            type="button"
-                            onClick={() => {
-                                setIsEditing(!isEditing);
-                                setForm({
-                                    firstName: user.firstName || '',
-                                    lastName: user.lastName || '',
-                                    username: user.username || ''
-                                });
-                            }}
-                        >
-                            {isEditing ? 'Отмена' : 'Редактировать профиль'}
-                        </button>
-                        <button className={styles.logoutBtn} type="button" onClick={onLogout}>
-                            Выйти
-                        </button>
+                        <div className={styles.controlsStack}>
+                            <div className={styles.profileActions}>
+                                <button
+                                    className={styles.editBtn}
+                                    type="button"
+                                    onClick={() => {
+                                        setIsEditing(!isEditing);
+                                        setForm({
+                                            firstName: user.firstName || '',
+                                            lastName: user.lastName || '',
+                                            username: user.username || ''
+                                        });
+                                    }}
+                                >
+                                    {isEditing ? 'Отмена' : 'Редактировать профиль'}
+                                </button>
+                                <button className={styles.logoutBtn} type="button" onClick={onLogout}>
+                                    Выйти
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {isEditing && (
                     <form className={styles.editForm} onSubmit={onSaveProfile}>
+                        <label className={styles.colorPickerBlock}>
+                            <span className={styles.colorPickerText}>Сменить цвет блока профиля</span>
+                            <input
+                                type="color"
+                                value={profileAccentColor || '#dff7e8'}
+                                onChange={(e) => setProfileAccentColor(e.target.value)}
+                                className={styles.colorPickerInput}
+                                aria-label="Цвет верхнего блока профиля"
+                            />
+                        </label>
                         <div className={styles.editGrid}>
                             <input
                                 value={form.firstName}
@@ -274,22 +337,6 @@ const UserProfile = ({ user }) => {
                         })}
                     </div>
                 ))}
-            </div>
-
-            <div className={styles.achievementsCard}>
-                <h3>Достижения</h3>
-                <div className={styles.achList}>
-                    {user.achievements && user.achievements.length > 0 ? (
-                        user.achievements.map((ach, i) => (
-                            <div key={i} className={styles.achItem}>
-                                <div className={styles.bullet}></div>
-                                <span>{ach}</span>
-                            </div>
-                        ))
-                    ) : (
-                        <p className={styles.empty}>Список достижений пуст</p>
-                    )}
-                </div>
             </div>
 
             <CharacterPreviewCard customization={user.characterCustomization} editable />

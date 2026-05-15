@@ -137,6 +137,9 @@
 .panelHead {
     padding: 14px 16px;
     border-bottom: 1px solid var(--color-border-soft);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .panelHead h3 {
@@ -183,6 +186,7 @@
     border-radius: 14px;
     padding: 10px 12px;
     line-height: 1.4;
+    position: relative;
 }
 
 .message p {
@@ -245,7 +249,7 @@
 
 .composeRow {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr auto auto;
     gap: 8px;
 }
 
@@ -265,6 +269,277 @@
     padding: 10px 14px;
     cursor: pointer;
     font-weight: 700;
+    min-height: 42px;
+}
+
+.voiceBtn {
+    width: 42px;
+    height: 100%;
+    min-height: 42px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+.voiceBtn svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+.voiceBtnRecording {
+    border-color: #8c8f95;
+    color: #5f6368;
+    background: #eef0f2;
+}
+
+.voicePlayer {
+    width: min(280px, 100%);
+    height: 34px;
+}
+
+.recordingBar {
+    margin-top: 4px;
+    min-height: 28px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.recordingDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #8f949c;
+    animation: pulseRec 1.2s ease-in-out infinite;
+}
+
+.recordingWaves {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 18px;
+    flex: 1;
+}
+
+.recordingWaves span {
+    width: 3px;
+    height: 100%;
+    border-radius: 999px;
+    background: #8f949c;
+    transform-origin: center bottom;
+    transition: transform 120ms ease;
+    animation: waveIdle 1s ease-in-out infinite;
+}
+
+.recordingWaves span:nth-child(2) { animation-delay: 0.08s; }
+.recordingWaves span:nth-child(3) { animation-delay: 0.16s; }
+.recordingWaves span:nth-child(4) { animation-delay: 0.24s; }
+.recordingWaves span:nth-child(5) { animation-delay: 0.32s; }
+
+@keyframes pulseRec {
+    0% { opacity: 0.5; transform: scale(0.92); }
+    50% { opacity: 1; transform: scale(1.08); }
+    100% { opacity: 0.5; transform: scale(0.92); }
+}
+
+@keyframes waveIdle {
+    0% { opacity: 0.55; }
+    50% { opacity: 1; }
+    100% { opacity: 0.55; }
+}
+
+.recordingTime {
+    color: #6d727a;
+    font-size: 0.82rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.voicePreview {
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.voiceMessagePlayer {
+    width: min(340px, 100%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.voiceUnreadDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: #8b8f96;
+    opacity: 0.9;
+}
+
+.voiceNativeHidden {
+    display: none;
+}
+
+.voicePlayBtn {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.16);
+    color: inherit;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    cursor: pointer;
+}
+
+.voicePlayBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.voicePlayBtn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.voiceBars {
+    flex: 1;
+    min-width: 130px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 22px;
+}
+
+.voiceBars span {
+    width: 4px;
+    height: 10px;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.6;
+}
+
+.voiceBarsActive span {
+    animation: voiceBarsMove 0.9s ease-in-out infinite;
+}
+
+.voiceBarsActive span:nth-child(2) { animation-delay: 0.08s; }
+.voiceBarsActive span:nth-child(3) { animation-delay: 0.16s; }
+.voiceBarsActive span:nth-child(4) { animation-delay: 0.24s; }
+.voiceBarsActive span:nth-child(5) { animation-delay: 0.32s; }
+.voiceBarsActive span:nth-child(6) { animation-delay: 0.4s; }
+
+@keyframes voiceBarsMove {
+    0% { transform: scaleY(0.55); opacity: 0.45; }
+    50% { transform: scaleY(1.5); opacity: 0.95; }
+    100% { transform: scaleY(0.55); opacity: 0.45; }
+}
+
+.voicePreviewActions {
+    display: flex;
+    gap: 8px;
+}
+
+.voiceDeleteBtn,
+.voiceSendBtn {
+    border-radius: 9px;
+    min-height: 34px;
+    padding: 7px 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.voiceDeleteBtn {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+.voiceSendBtn {
+    border: 0;
+    background: var(--color-primary);
+    color: var(--c-black);
+}
+
+.chatMenuWrap {
+    position: relative;
+}
+
+.chatMenuBtn {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.chatMenuPopover {
+    position: absolute;
+    right: 0;
+    top: 40px;
+    z-index: 20;
+    border: 1px solid var(--color-border-soft);
+    border-radius: 10px;
+    background: var(--color-bg);
+    box-shadow: var(--shadow-sm);
+    padding: 6px;
+}
+
+.chatMenuPopover button {
+    border: 0;
+    background: transparent;
+    color: var(--color-error);
+    cursor: pointer;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.chatMenuPopover button:hover {
+    background: var(--color-bg-soft);
+}
+
+.messageInlineMenu {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 6px);
+    z-index: 15;
+    border: 1px solid var(--color-border-soft);
+    border-radius: 10px;
+    background: var(--color-bg);
+    box-shadow: var(--shadow-sm);
+    padding: 6px;
+}
+
+.messageInlineMenu button {
+    border: 0;
+    background: transparent;
+    color: var(--color-error);
+    cursor: pointer;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.messageInlineMenu button:hover {
+    background: var(--color-bg-soft);
 }
 
 .placeholder,

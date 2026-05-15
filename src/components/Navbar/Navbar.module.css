@@ -84,6 +84,73 @@
     display: none;
 }
 
+.mobileOverlay,
+.mobileDropdown {
+    display: none;
+}
+
+.mobileSettingsSection,
+.mobileNavSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mobileMenuItem,
+.mobileLanguageRow {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-muted);
+    color: var(--color-text-alt);
+    border-radius: 12px;
+    padding: 12px;
+    box-sizing: border-box;
+}
+
+.mobileMenuItem {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.mobileNavLink {
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--color-text-alt);
+    padding: 10px 0;
+    border-radius: 10px;
+}
+.mobileNavLink:hover,
+.mobileNavLink:focus-visible {
+    color: var(--color-primary);
+    background: var(--color-bg-muted);
+}
+
+.mobileChatLink {
+    gap: 6px;
+}
+
+.mobileLanguageRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.mobileDivider {
+    height: 1px;
+    background: var(--color-border);
+    margin: 10px 0;
+}
+
 .authBtns {
     display: inline-flex;
     align-items: center;
@@ -297,6 +364,72 @@
     transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
+.referralBtn {
+    width: 100%;
+    border: 1px solid #9ed843;
+    background: #b6ff53;
+    color: #12210a;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    font-weight: 700;
+    cursor: pointer;
+    text-align: left;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.referralBtn:hover,
+.referralBtn:focus-visible {
+    transform: translateY(-1px);
+    filter: saturate(1.03);
+}
+
+.referralHelpWrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.referralHelp {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.88);
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.referralTooltip {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 8px);
+    width: 230px;
+    border-radius: 10px;
+    padding: 8px 10px;
+    background: rgba(16, 16, 16, 0.92);
+    color: #fff;
+    font-size: 0.74rem;
+    line-height: 1.35;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.referralHelpWrap:hover .referralTooltip,
+.referralHelpWrap:focus-within .referralTooltip {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 .settingsItem:hover,
 .settingsItem:focus-visible {
     transform: translateY(-1px);
@@ -389,72 +522,59 @@
         display: none;
     }
 
-    .burger {
-        display: flex;
-        margin-left: 10px;
-    }
-
-    .links {
-        display: flex;
-        position: fixed;
-        top: 70px;
-        left: 0;
-        width: 100%;
-        height: auto;
-        background: var(--color-bg);
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
-        gap: var(--space-4);
-        padding: var(--space-7) var(--space-5);
-        transform: translateY(-120%);
-        transition: transform 0.3s ease-in-out, opacity 0.3s;
-        opacity: 0;
-        z-index: 999;
-        box-shadow: 0 10px 15px rgba(0,0,0,0.05);
-        box-sizing: border-box;
-    }
-
-    .linksActive {
-        transform: translateY(0);
-        opacity: 1;
-    }
-
-    .links .link,
-    .links .btnRegister,
-    .links .navUserControls {
-        font-size: 1.1rem;
-        width: 100%;
-        max-width: 350px;
-        text-align: center;
-        box-sizing: border-box;
-    }
-
-    .links .link {
-        justify-content: center;
-    }
-
     .authBtns {
         display: none;
     }
 
-    .links .navUserControls {
-        justify-content: center;
-        margin-left: 0;
+    .mobileOverlay {
+        display: block;
+        position: fixed;
+        inset: 70px 0 0 0;
+        background: rgba(0, 0, 0, 0.08);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+        z-index: 995;
     }
 
-    .links .profileAvatarBtn,
-    .links .settingsBtn {
-        width: 46px;
-        height: 46px;
+    .mobileOverlayActive {
+        opacity: 1;
+        pointer-events: auto;
     }
 
-    .settingsOverlay {
-        padding-top: 86px;
+    .mobileDropdown {
+        display: block;
+        position: fixed;
+        top: 78px;
+        left: 12px;
+        right: 12px;
+        background: var(--color-bg);
+        border: 1px solid var(--color-border-soft);
+        border-radius: 16px;
+        box-shadow: 0 18px 38px rgba(0, 0, 0, 0.16);
+        padding: 12px;
+        transform: translateY(-14px);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.24s ease, opacity 0.24s ease;
+        z-index: 1001;
+        max-height: calc(100vh - 92px);
+        overflow-y: auto;
     }
 
-    .settingsModal {
-        width: min(320px, calc(100vw - 24px));
+    .mobileDropdownActive {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
     }
+}
 
+
+.mobileThemeRow { justify-content: space-between; text-align: left; }
+.referralBtnMobile {
+    justify-content: space-between;
+    border-color: #9ed843;
+    background: #b6ff53;
+    color: #12210a;
+    font-weight: 700;
 }

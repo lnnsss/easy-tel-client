@@ -14,6 +14,7 @@ import GoogleAuthCallbackPage from '../pages/Auth/GoogleAuthCallbackPage';
 import ProfilePage from '../pages/Profile/ProfilePage';
 import PublicProfilePage from '../pages/Profile/PublicProfilePage';
 import DictionaryPage from '../pages/DictionaryPage/DictionaryPage';
+import DictionaryAssessmentPage from '../pages/DictionaryAssessmentPage/DictionaryAssessmentPage';
 import FriendsPage from '../pages/FriendsPage/FriendsPage';
 import ChatsPage from '../pages/ChatsPage/ChatsPage';
 import TranslatePage from '../pages/TranslatePage/TranslatePage';
@@ -31,6 +32,7 @@ import AuthorLearningCoursePage from '../pages/Author/AuthorLearningCoursePage';
 import AuthorCourseEditorPage from '../pages/Author/AuthorCourseEditorPage';
 import AuthorTopicEditorPage from '../pages/Author/AuthorTopicEditorPage';
 import CharacterPage from '../pages/CharacterPage/CharacterPage';
+import AchievementsPage from '../pages/AchievementsPage/AchievementsPage';
 
 const AppRouter = observer(() => {
     const { authStore } = useStores();
@@ -92,8 +94,16 @@ const AppRouter = observer(() => {
                 element={authStore.isAuth && !isAdmin ? <DictionaryPage /> : <Navigate to="/" />}
             />
             <Route
+                path="/dictionary/assessment"
+                element={authStore.isAuth && !isAdmin ? <DictionaryAssessmentPage /> : <Navigate to="/" />}
+            />
+            <Route
                 path="/character"
                 element={authStore.isAuth && !isAdmin ? <CharacterPage /> : <Navigate to="/" />}
+            />
+            <Route
+                path="/achievements"
+                element={authStore.isAuth && !isAdmin ? <AchievementsPage /> : <Navigate to="/" />}
             />
 
             <Route

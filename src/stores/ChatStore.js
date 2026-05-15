@@ -67,6 +67,14 @@ class ChatStore {
                 this.unreadTotal = this.chats.reduce((sum, chat) => sum + (Number(chat.unreadCount) || 0), 0);
             }
         });
+
+        this.socket.on('chat:message_deleted', ({ conversationId, messageId }) => {
+            this.removeMessageLocally(conversationId, messageId);
+        });
+
+        this.socket.on('chat:conversation_deleted', ({ conversationId }) => {
+            this.removeConversationLocally(conversationId);
+        });
     }
 
     disconnectSocket() {
@@ -180,6 +188,79 @@ class ChatStore {
         }
     }
 
+    async sendVoiceMessage(conversationId, audioBlob, durationSec = null) {
+        if (!conversationId || !audioBlob) return;
+        this.isSending = true;
+        try {
+            const formData = new FormData();
+            const ext = String(audioBlob.type || '').includes('ogg') ? 'ogg' : 'webm';
+            formData.append('voice', audioBlob, `voice-${Date.now()}.${ext}`);
+            if (Number.isFinite(Number(durationSec))) {
+                formData.append('durationSec', String(Math.max(0, Number(durationSec))));
+            }
+            const { data } = await $api.post(`/chats/${conversationId}/voice`, formData);
+            return data?.message || null;
+        } finally {
+            runInAction(() => {
+                this.isSending = false;
+            });
+        }
+    }
+
+    async markVoiceListened(conversationId, messageId) {
+        if (!conversationId || !messageId) return;
+        await $api.post(`/chats/${conversationId}/messages/${messageId}/listened`);
+        const key = String(conversationId);
+        const list = this.messagesByConversation.get(key) || [];
+        const me = String(authStore.user?._id || '');
+        this.messagesByConversation.set(key, list.map((item) => {
+            if (String(item._id) !== String(messageId)) return item;
+            const listenedBy = Array.isArray(item.listenedBy) ? item.listenedBy.map(String) : [];
+            return listenedBy.includes(me) ? item : { ...item, listenedBy: [...listenedBy, me] };
+        }));
+    }
+
+    async deleteMessage(conversationId, messageId) {
+        if (!conversationId || !messageId) return;
+        await $api.delete(`/chats/${conversationId}/messages/${messageId}`);
+        this.removeMessageLocally(conversationId, messageId);
+    }
+
+    async deleteConversation(conversationId) {
+        if (!conversationId) return;
+        await $api.delete(`/chats/${conversationId}`);
+        this.removeConversationLocally(conversationId);
+    }
+
+    removeMessageLocally(conversationId, messageId) {
+        const cid = String(conversationId || '');
+        const mid = String(messageId || '');
+        const existing = this.messagesByConversation.get(cid) || [];
+        const next = existing.filter((item) => String(item._id) !== mid);
+        this.messagesByConversation.set(cid, next);
+        const last = next[next.length - 1] || null;
+        this.chats = this.chats.map((chat) => (
+            String(chat._id) === cid
+                ? {
+                    ...chat,
+                    lastMessageText: last ? (last.messageType === 'voice' ? 'Голосовое сообщение' : last.text) : '',
+                    lastMessageAt: last?.createdAt || chat.updatedAt
+                }
+                : chat
+        ));
+    }
+
+    removeConversationLocally(conversationId) {
+        const cid = String(conversationId || '');
+        this.chats = this.chats.filter((chat) => String(chat._id) !== cid);
+        this.messagesByConversation.delete(cid);
+        this.hasMoreByConversation.delete(cid);
+        if (String(this.activeConversationId) === cid) {
+            this.activeConversationId = '';
+        }
+        this.unreadTotal = this.chats.reduce((sum, chat) => sum + (Number(chat.unreadCount) || 0), 0);
+    }
+
     upsertIncomingMessage(message) {
         if (!message?._id || !message?.conversationId) return;
 
@@ -197,7 +278,7 @@ class ChatStore {
             String(chat._id) === conversationId
                 ? {
                     ...chat,
-                    lastMessageText: message.text,
+                    lastMessageText: message.messageType === 'voice' ? 'Голосовое сообщение' : message.text,
                     lastMessageAt: message.createdAt
                 }
                 : chat

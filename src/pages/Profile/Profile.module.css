@@ -43,12 +43,38 @@
 
 .header {
     background: var(--color-bg);
-    padding: var(--space-7);
+    padding: 0;
     border-radius: 24px;
-    text-align: center;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     margin-bottom: var(--space-5);
     box-sizing: border-box;
+    overflow: hidden;
+}
+
+.headerSplit {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.headerTop,
+.headerBottom {
+    padding: var(--space-5);
+    box-sizing: border-box;
+}
+
+.headerTop {
+    text-align: center;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid var(--color-border-soft);
+}
+
+.headerBottom {
+    background: transparent;
+    border-top: 1px solid var(--color-border-soft);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 .avatarRow {
@@ -112,7 +138,7 @@
 .fullName {
     font-size: clamp(1.4rem, 6vw, 2.2rem);
     margin-bottom: var(--space-3);
-    color: var(--color-text);
+    color: var(--profile-top-text, var(--color-text));
     word-wrap: break-word;
     overflow-wrap: break-word;
     line-height: 1.2;
@@ -124,7 +150,7 @@
     align-items: center;
     border: none;
     background: transparent;
-    color: var(--color-text-muted);
+    color: var(--profile-top-text, var(--color-text-muted));
     margin-bottom: var(--space-1);
     font-size: 0.95rem;
     cursor: pointer;
@@ -138,7 +164,35 @@
     text-shadow: 0 0 12px rgba(155, 232, 79, 0.42);
 }
 
-.rank { font-weight: bold; color: var(--color-primary); font-size: 1.1rem; }
+.rank { font-weight: bold; color: var(--profile-top-text, var(--color-primary)); font-size: 1.1rem; }
+
+.levelProgressWrap {
+    margin-top: var(--space-1);
+    width: 100%;
+}
+
+.levelProgressLabel {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+.levelProgressBar {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--color-bg-muted);
+    border: 1px solid var(--color-border-soft);
+}
+
+.levelProgressFill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #8ee94a 0%, #4ac97e 100%);
+    transition: width 0.3s ease;
+}
 
 .controlsStack {
     margin-top: var(--space-4);
@@ -156,8 +210,8 @@
 }
 
 .editBtn {
-    border: none;
-    background: var(--color-bg-muted);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-soft);
     color: var(--color-text-alt);
     padding: var(--space-3) var(--space-4);
     border-radius: 10px;
@@ -167,8 +221,8 @@
 }
 
 .logoutBtn {
-    border: none;
-    background: var(--color-bg-muted);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-soft);
     color: var(--color-error);
     padding: var(--space-3) var(--space-4);
     border-radius: 10px;
@@ -177,11 +231,48 @@
     width: 100%;
 }
 
+.editBtn:hover,
+.editBtn:focus-visible,
+.logoutBtn:hover,
+.logoutBtn:focus-visible {
+    border-color: var(--color-primary);
+    background: var(--color-bg);
+}
+
 .editForm {
     margin-top: var(--space-4);
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+}
+
+.colorPickerBlock {
+    position: relative;
+    width: 100%;
+    min-height: 46px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    box-sizing: border-box;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-soft);
+}
+
+.colorPickerText {
+    position: relative;
+    z-index: 1;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.colorPickerInput {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
 }
 
 .editGrid {
@@ -420,7 +511,6 @@
 @media (max-width: 600px) {
     .statsRowThree,
     .statsRowTwo { grid-template-columns: 1fr; }
-    .header { padding: var(--space-6) var(--space-4); }
     .container { margin: var(--space-5) auto; }
     .editGrid { grid-template-columns: 1fr; }
     .editMetaRow { grid-template-columns: 1fr; }

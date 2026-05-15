@@ -11,7 +11,7 @@ export const CHARACTER_ASSETS = {
     backgrounds: ['__theme__', 'Шаляпин.png', 'Очпочмак.png', 'Сююмбике.png', 'Чаша.png', 'Кулшариф.png', 'Чак-чак.png']
 };
 
-export const ITEM_PRICE_COINS = 5;
+export const ITEM_PRICE_COINS = 10;
 export const PAID_CATEGORIES = ['shoes', 'bottom', 'top', 'headdress', 'background'];
 export const FREE_ITEMS_WHITELIST = {
     shoes: ['Базовая.png'],
