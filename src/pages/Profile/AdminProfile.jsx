@@ -14,7 +14,7 @@ const AdminProfile = ({ user }) => {
 
     return (
         <div className={styles.adminContainer}>
-            <div className={styles.header}>
+            <div className={`${styles.header} ${styles.adminHeader}`}>
                 <h1 className={styles.fullName}>{user.firstName} {user.lastName}</h1>
                 <div className={styles.adminBadge}>Администратор</div>
             </div>

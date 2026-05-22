@@ -1,19 +1,26 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CHARACTER_DEFAULTS } from '../../constants/characterAssets';
+import { CHARACTER_ASSETS, CHARACTER_DEFAULTS, CHARACTER_FILE_ALIASES } from '../../constants/characterAssets';
 import styles from './CharacterPreviewCard.module.css';
 
 const normalizeConfig = (raw = {}) => {
     const safe = { ...CHARACTER_DEFAULTS, ...(raw || {}) };
 
+    const normalizeFile = (value, allowed, fallback) => {
+        const candidateRaw = String(value || '').trim();
+        const candidate = CHARACTER_FILE_ALIASES[candidateRaw] || candidateRaw;
+        if (allowed.includes(candidate)) return candidate;
+        return fallback;
+    };
+
     return {
         gender: safe.gender === 'female' ? 'female' : 'male',
-        characterFile: String(safe.characterFile || CHARACTER_DEFAULTS.characterFile).trim(),
-        shoesFile: String(safe.shoesFile || CHARACTER_DEFAULTS.shoesFile).trim(),
-        bottomFile: String(safe.bottomFile || CHARACTER_DEFAULTS.bottomFile).trim(),
-        topFile: String(safe.topFile || CHARACTER_DEFAULTS.topFile).trim(),
-        headdressFile: String(safe.headdressFile || CHARACTER_DEFAULTS.headdressFile).trim(),
-        backgroundFile: String(safe.backgroundFile || CHARACTER_DEFAULTS.backgroundFile).trim()
+        characterFile: normalizeFile(safe.characterFile, CHARACTER_ASSETS.characters, CHARACTER_DEFAULTS.characterFile),
+        shoesFile: normalizeFile(safe.shoesFile, CHARACTER_ASSETS.shoes, CHARACTER_DEFAULTS.shoesFile),
+        bottomFile: normalizeFile(safe.bottomFile, CHARACTER_ASSETS.bottom, CHARACTER_DEFAULTS.bottomFile),
+        topFile: normalizeFile(safe.topFile, CHARACTER_ASSETS.top, CHARACTER_DEFAULTS.topFile),
+        headdressFile: normalizeFile(safe.headdressFile, CHARACTER_ASSETS.headdress, CHARACTER_DEFAULTS.headdressFile),
+        backgroundFile: normalizeFile(safe.backgroundFile, CHARACTER_ASSETS.backgrounds, CHARACTER_DEFAULTS.backgroundFile)
     };
 };
 

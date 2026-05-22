@@ -91,6 +91,26 @@ export default class CourseService {
         return $api.patch(`/admin/learning/courses/${courseId}/review`, payload);
     }
 
+    static async getAdminDailyRewardsConfig() {
+        return $api.get('/admin/learning/daily-rewards');
+    }
+
+    static async updateAdminDailyRewardsConfig(days) {
+        return $api.put('/admin/learning/daily-rewards', { days });
+    }
+
+    static async getDailyRewards() {
+        return $api.get('/rewards/daily');
+    }
+
+    static async claimDailyReward() {
+        return $api.post('/rewards/daily/claim');
+    }
+
+    static async markDailyRewardModalSeen() {
+        return $api.post('/rewards/daily/modal-seen');
+    }
+
     static async getAuthorRequest() {
         return $api.get('/author/requests/me');
     }

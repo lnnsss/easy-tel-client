@@ -10,12 +10,6 @@ const STATUS_OPTIONS = [
     { value: 'draft', label: 'Черновик' }
 ];
 
-const PINNED_MODE_OPTIONS = [
-    { value: 'dismiss_once', label: 'Одноразовая (скрыть крестиком навсегда)' },
-    { value: 'persistent', label: 'Постоянная (всегда показывать)' },
-    { value: 'confirm_hide', label: 'С подтверждением скрытия' }
-];
-
 const statusLabel = (value) => (value === 'published' ? 'Опубликован' : 'Черновик');
 const reviewLabel = (value) => {
     if (value === 'pending_review') return 'На модерации';
@@ -51,12 +45,6 @@ const AdminLearningPage = () => {
     const [categoryName, setCategoryName] = useState('');
     const [editingCategoryId, setEditingCategoryId] = useState('');
     const [editingCategoryName, setEditingCategoryName] = useState('');
-    const [pinForm, setPinForm] = useState({
-        courseId: '',
-        enabled: false,
-        text: '',
-        mode: 'persistent'
-    });
 
     const [filterCategoryId, setFilterCategoryId] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
@@ -124,21 +112,6 @@ const AdminLearningPage = () => {
         loadAll();
     }, []);
 
-    useEffect(() => {
-        const pinnedCourse = courses.find((course) => course.isPinnedHome);
-        if (pinnedCourse) {
-            setPinForm({
-                courseId: pinnedCourse._id,
-                enabled: true,
-                text: pinnedCourse.pinnedHomeText || '',
-                mode: pinnedCourse.pinnedHomeMode || 'persistent'
-            });
-            return;
-        }
-
-        setPinForm((prev) => ({ ...prev, enabled: false, text: '', mode: 'persistent' }));
-    }, [courses]);
-
     const createCategory = async (e) => {
         e.preventDefault();
         try {
@@ -147,51 +120,6 @@ const AdminLearningPage = () => {
             await loadAll();
         } catch (err) {
             setError(err.response?.data?.message || 'Ошибка создания категории');
-        }
-    };
-
-    const togglePinnedCourse = async () => {
-        const nextEnabled = !pinForm.enabled;
-        try {
-            if (!nextEnabled) {
-                const currentPinned = courses.find((course) => course.isPinnedHome);
-                if (currentPinned) {
-                    await CourseService.updateAdminCourse(currentPinned._id, {
-                        isPinnedHome: false,
-                        pinnedHomeText: ''
-                    });
-                }
-
-                uiStore.showModal({
-                    title: 'Готово',
-                    message: 'Закрепление отключено.',
-                    variant: 'success',
-                    secondaryLabel: 'Закрыть'
-                });
-                await loadAll();
-                return;
-            }
-
-            if (!pinForm.courseId) {
-                setError('Выберите курс для закрепления');
-                return;
-            }
-
-            await CourseService.updateAdminCourse(pinForm.courseId, {
-                isPinnedHome: true,
-                pinnedHomeText: pinForm.text.trim(),
-                pinnedHomeMode: pinForm.mode
-            });
-
-            uiStore.showModal({
-                title: 'Готово',
-                message: 'Закрепление включено.',
-                variant: 'success',
-                secondaryLabel: 'Закрыть'
-            });
-            await loadAll();
-        } catch (err) {
-            setError(err.response?.data?.message || 'Ошибка сохранения закрепленного курса');
         }
     };
 
@@ -371,50 +299,6 @@ const AdminLearningPage = () => {
                             )}
                         </div>
                     ))}
-                </div>
-            </section>
-
-            <section className={styles.card}>
-                <h3>Закрепленный курс на главной</h3>
-                <div className={styles.createCourseForm}>
-                    <label className={styles.fieldGroup}>
-                        <span>Курс</span>
-                        <select
-                            value={pinForm.courseId}
-                            onChange={(e) => setPinForm((prev) => ({ ...prev, courseId: e.target.value }))}
-                        >
-                            <option value="">Выберите курс</option>
-                            {courses.map((course) => (
-                                <option key={course._id} value={course._id}>{course.title}</option>
-                            ))}
-                        </select>
-                    </label>
-                    <label className={styles.fieldGroup}>
-                        <span>Текст плашки</span>
-                        <input
-                            value={pinForm.text}
-                            onChange={(e) => setPinForm((prev) => ({ ...prev, text: e.target.value }))}
-                            placeholder="Текст плашки на главной"
-                        />
-                    </label>
-                    <label className={styles.fieldGroup}>
-                        <span>Режим</span>
-                        <select
-                            value={pinForm.mode}
-                            onChange={(e) => setPinForm((prev) => ({ ...prev, mode: e.target.value }))}
-                        >
-                            {PINNED_MODE_OPTIONS.map((item) => (
-                                <option key={item.value} value={item.value}>{item.label}</option>
-                            ))}
-                        </select>
-                    </label>
-                    <button
-                        type="button"
-                        onClick={togglePinnedCourse}
-                        className={`${styles.pinnedToggleButton} ${pinForm.enabled ? styles.pinnedToggleActive : styles.pinnedToggleInactive}`}
-                    >
-                        {pinForm.enabled ? 'Активно' : 'Активировать'}
-                    </button>
                 </div>
             </section>
 

@@ -7,6 +7,7 @@ import Navbar from './components/Navbar/Navbar';
 import AppModal from './components/AppModal/AppModal';
 import Footer from './components/Footer/Footer';
 import AchievementToast from './components/AchievementToast/AchievementToast';
+import CourseService from './services/CourseService';
 
 const App = observer(() => {
     const { authStore, uiStore } = useStores();
@@ -17,6 +18,7 @@ const App = observer(() => {
     const [activeAchievement, setActiveAchievement] = React.useState(null);
     const [isAchievementClosing, setIsAchievementClosing] = React.useState(false);
     const [copyToastClosing, setCopyToastClosing] = React.useState(false);
+    const dailyRewardPromptedRef = useRef('');
     const knownRoutePatterns = [
         '/',
         '/translate',
@@ -48,6 +50,7 @@ const App = observer(() => {
         '/author/learning/courses/:courseId/topics/new',
         '/author/learning/courses/:courseId/topics/:topicId/edit',
         '/admin/users',
+        '/admin/misc',
         '/words',
         '/admin'
     ];
@@ -87,6 +90,67 @@ const App = observer(() => {
             }
         });
     }, [authStore.user?.authorRequestNotice?._id]);
+
+    useEffect(() => {
+        const loadDailyRewardModal = async () => {
+            if (!authStore.isAuth) return;
+            if (authStore.user?.role === 'admin') return;
+            if (uiStore.modal.isOpen) return;
+
+            const userId = String(authStore.user?._id || '');
+            if (!userId || dailyRewardPromptedRef.current === userId) return;
+
+            try {
+                const { data } = await CourseService.getDailyRewards();
+                if (!data?.shouldShowLoginModalToday || data?.progress?.isCompleted) {
+                    dailyRewardPromptedRef.current = userId;
+                    return;
+                }
+
+                await CourseService.markDailyRewardModalSeen();
+
+                const day = data.progress?.currentDay;
+                const reward = data.currentReward || { coins: 0, studyPoints: 0 };
+                dailyRewardPromptedRef.current = userId;
+                const rewardParts = [];
+                if ((Number(reward.coins) || 0) > 0) rewardParts.push(`${reward.coins} монет`);
+                if ((Number(reward.studyPoints) || 0) > 0) rewardParts.push(`${reward.studyPoints} опыта`);
+                if (!rewardParts.length) rewardParts.push('без бонусов');
+                const message = day <= 1
+                    ? `Вы впервые на платформе! Ваша награда на сегодня: ${rewardParts.join(', ')}.`
+                    : `Вы посещаете платформу ${day} дней подряд! Ваша награда на сегодня: ${rewardParts.join(', ')}.`;
+
+                uiStore.showModal({
+                    title: 'Награда за вход',
+                    message,
+                    disableClose: true,
+                    variant: 'success',
+                    primaryLabel: 'Забрать',
+                    secondaryLabel: '',
+                    onPrimary: async () => {
+                        try {
+                            const claimRes = await CourseService.claimDailyReward();
+                            authStore.applyRewardBalances(claimRes.data?.balances || {});
+                            uiStore.closeModal();
+                        } catch (e) {
+                            uiStore.showModal({
+                                title: 'Не удалось забрать награду',
+                                message: e.response?.data?.message || 'Попробуйте еще раз',
+                                variant: 'error',
+                                secondaryLabel: 'Закрыть'
+                            });
+                        }
+                    },
+                    onSecondary: () => uiStore.closeModal()
+                });
+            } catch (e) {
+                dailyRewardPromptedRef.current = userId;
+                console.error('daily rewards modal error', e);
+            }
+        };
+
+        loadDailyRewardModal();
+    }, [authStore.isAuth, authStore.user?._id, authStore.user?.role, uiStore, uiStore.modal.isOpen]);
 
 
     useEffect(() => {
@@ -176,7 +240,9 @@ const App = observer(() => {
                 isOpen={uiStore.modal.isOpen}
                 title={uiStore.modal.title}
                 message={uiStore.modal.message}
+                content={uiStore.modal.content}
                 variant={uiStore.modal.variant}
+                disableClose={uiStore.modal.disableClose}
                 primaryLabel={uiStore.modal.primaryLabel || 'В словарь'}
                 secondaryLabel={uiStore.modal.secondaryLabel || 'Закрыть'}
                 onPrimary={uiStore.modal.onPrimary || (uiStore.modal.primaryRoute ? () => {

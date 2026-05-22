@@ -5,6 +5,8 @@ const AppModal = ({
     isOpen,
     title,
     message,
+    content,
+    disableClose = false,
     variant = 'info',
     onClose,
     onPrimary,
@@ -13,13 +15,15 @@ const AppModal = ({
     secondaryLabel = 'Закрыть'
 }) => {
     if (!isOpen) return null;
+    const hasSecondary = Boolean(secondaryLabel);
+    const isSingleAction = !onPrimary || !hasSecondary;
 
     return (
-        <div className={styles.overlay} onClick={onClose}>
+        <div className={styles.overlay} onClick={disableClose ? undefined : onClose}>
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                <h3 className={`${styles.title} ${styles[variant] || ''}`}>{title}</h3>
-                <p className={styles.message}>{message}</p>
-                <div className={`${styles.actions} ${!onPrimary ? styles.actionsSingle : ''}`}>
+                <h3 className={styles.title}>{title}</h3>
+                {content || <p className={styles.message}>{message}</p>}
+                <div className={`${styles.actions} ${isSingleAction ? styles.actionsSingle : ''}`}>
                     {onPrimary && (
                         <button
                             className={`${styles.primaryBtn} ${variant === 'error' ? styles.primaryDanger : ''}`}
@@ -28,9 +32,11 @@ const AppModal = ({
                             {primaryLabel}
                         </button>
                     )}
-                    <button className={styles.closeBtn} onClick={onSecondary || onClose}>
-                        {secondaryLabel}
-                    </button>
+                    {hasSecondary && (
+                        <button className={styles.closeBtn} onClick={onSecondary || onClose}>
+                            {secondaryLabel}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

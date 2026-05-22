@@ -33,6 +33,7 @@
 .title {
     margin: 0 0 10px;
     font-size: 1.2rem;
+    color: var(--color-text);
 }
 
 .message {
@@ -40,18 +41,6 @@
     color: var(--color-text-neutral-3);
     line-height: 1.45;
     white-space: pre-line;
-}
-
-.success {
-    color: var(--color-primary-strong);
-}
-
-.error {
-    color: var(--color-danger);
-}
-
-.info {
-    color: var(--color-info-soft);
 }
 
 .actions {

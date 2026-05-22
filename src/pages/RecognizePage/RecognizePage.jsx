@@ -53,12 +53,14 @@ const RecognizePage = observer(() => {
 
     // ПРОВЕРКА: есть ли уже это слово у пользователя
     // Проверяем по ID слова в массиве словаря пользователя
-    const isAlreadyInDictionary = authStore.user?.dictionary?.some(item => {
+    const isAlreadyInDictionary = authStore.user?.dictionary?.some((item) => {
+        if (!item) return false;
         // Если словарь содержит объекты (после populate) или просто ID UserWord
         // Обычно мы проверяем wordId, полученный от ИИ, со списком слов пользователя
         // Если бэкенд возвращает в профиле массив объектов { word: 'id' }, то:
-        const wordIdInDict = typeof item.word === 'object' ? item.word._id : item.word;
-        return wordIdInDict === recognizeStore.result?.id;
+        const rawWord = item.word ?? item;
+        const wordIdInDict = typeof rawWord === 'object' ? rawWord?._id : rawWord;
+        return String(wordIdInDict || '') === String(recognizeStore.result?.id || '');
     });
 
     const hasResult = Boolean(recognizeStore.result);

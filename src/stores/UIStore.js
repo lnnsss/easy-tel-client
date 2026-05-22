@@ -11,6 +11,8 @@ class UIStore {
         isOpen: false,
         title: '',
         message: '',
+        content: null,
+        disableClose: false,
         variant: 'info',
         primaryLabel: '',
         secondaryLabel: 'Закрыть',
@@ -26,6 +28,8 @@ class UIStore {
     showModal({
         title,
         message,
+        content = null,
+        disableClose = false,
         variant = 'info',
         primaryLabel = '',
         secondaryLabel = 'Закрыть',
@@ -37,6 +41,8 @@ class UIStore {
             isOpen: true,
             title,
             message,
+            content,
+            disableClose,
             variant,
             primaryLabel,
             secondaryLabel,
@@ -62,7 +68,9 @@ class UIStore {
     closeModal() {
         this.modal = {
             ...this.modal,
-            isOpen: false
+            isOpen: false,
+            content: null,
+            disableClose: false
         };
     }
 

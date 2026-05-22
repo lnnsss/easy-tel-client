@@ -289,6 +289,16 @@ class AuthStore {
         }
     }
 
+    applyRewardBalances(balances = {}) {
+        if (!this.user) return;
+        const nextCoins = Number(balances.coins);
+        const nextStudyPoints = Number(balances.studyPoints);
+        const nextTotalPoints = Number(balances.totalPoints);
+        this.user.coins = Number.isFinite(nextCoins) ? nextCoins : (Number(this.user.coins) || 0);
+        this.user.studyPoints = Number.isFinite(nextStudyPoints) ? nextStudyPoints : (Number(this.user.studyPoints) || 0);
+        this.user.totalPoints = Number.isFinite(nextTotalPoints) ? nextTotalPoints : (Number(this.user.totalPoints) || 0);
+    }
+
     logout() {
         this.clearAuthRetry();
         this.user = null;

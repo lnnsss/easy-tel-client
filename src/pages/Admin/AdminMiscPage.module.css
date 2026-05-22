@@ -1,0 +1,134 @@
+.page {
+    max-width: 1220px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+}
+
+.card {
+    margin-top: 12px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border, #dce2e8);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.card h3 {
+    margin: 0;
+}
+
+.error {
+    color: var(--color-error, #b00020);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fieldGroup > span {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.card input,
+.card select,
+.card button {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 8px;
+}
+
+.card input,
+.card select {
+    border: 1px solid var(--color-border, #c9d2dc);
+    background: var(--color-bg);
+    color: var(--color-text);
+    padding: 8px;
+}
+
+.card button {
+    border: 0;
+    background: var(--color-primary);
+    color: var(--c-black);
+    padding: 10px 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.card button:disabled {
+    background: var(--color-bg-muted, #e9ecef);
+    color: var(--color-text-muted, #6f7882);
+    cursor: not-allowed;
+}
+
+.pinnedToggleButton {
+    width: 100% !important;
+}
+
+.pinnedToggleActive {
+    background: var(--color-primary) !important;
+    color: var(--c-black) !important;
+}
+
+.pinnedToggleInactive {
+    background: var(--color-bg-muted, #e9ecef) !important;
+    color: var(--color-text-muted, #6f7882) !important;
+    border: 1px solid var(--color-border, #dce2e8) !important;
+}
+
+.rewardsGrid {
+    display: grid;
+    gap: 10px;
+}
+
+.rewardRow {
+    border: 1px solid var(--color-border, #dce2e8);
+    border-radius: 10px;
+    padding: 8px 10px;
+    display: grid;
+    grid-template-columns: 1fr 170px 170px;
+    gap: 10px;
+    align-items: center;
+    min-height: 56px;
+}
+
+.dayTitle {
+    text-align: left;
+    justify-self: start;
+    font-size: 0.98rem;
+}
+
+.rewardField {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.rewardField span {
+    white-space: nowrap;
+}
+
+.rewardField input {
+    height: 34px;
+    padding: 6px 8px;
+}
+
+@media (max-width: 900px) {
+    .rewardRow {
+        grid-template-columns: 1fr;
+    }
+}

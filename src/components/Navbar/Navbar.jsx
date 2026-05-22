@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Navbar.module.css';
+import CourseService from '../../services/CourseService';
 
 const Navbar = observer(() => {
     const { authStore, chatStore, uiStore } = useStores();
@@ -15,6 +16,9 @@ const Navbar = observer(() => {
     const [theme, setTheme] = useState(() => (
         document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
     ));
+    const [dailyRewardsState, setDailyRewardsState] = useState(null);
+    const [isRewardsLoading, setIsRewardsLoading] = useState(false);
+    const [isRewardsModalOpen, setIsRewardsModalOpen] = useState(false);
 
     const closeMenu = () => {
         setIsMobileDropdownOpen(false);
@@ -125,6 +129,46 @@ const Navbar = observer(() => {
         }
     };
 
+    const loadDailyRewardsState = async () => {
+        if (!authStore.isAuth || isAdmin) return;
+        try {
+            setIsRewardsLoading(true);
+            const { data } = await CourseService.getDailyRewards();
+            setDailyRewardsState(data || null);
+        } catch (e) {
+            console.error('loadDailyRewardsState error', e);
+        } finally {
+            setIsRewardsLoading(false);
+        }
+    };
+
+    const onOpenDailyRewards = async () => {
+        let data = dailyRewardsState;
+        if (!data) {
+            try {
+                setIsRewardsLoading(true);
+                const response = await CourseService.getDailyRewards();
+                data = response.data || null;
+                setDailyRewardsState(data);
+            } catch (e) {
+                console.error('onOpenDailyRewards error', e);
+            } finally {
+                setIsRewardsLoading(false);
+            }
+        }
+        if (!data || data.progress?.isCompleted) return;
+        setIsRewardsModalOpen(true);
+    };
+
+    useEffect(() => {
+        if (!authStore.isAuth || isAdmin) {
+            setDailyRewardsState(null);
+            setIsRewardsModalOpen(false);
+            return;
+        }
+        loadDailyRewardsState();
+    }, [authStore.isAuth, authStore.user?._id, isAdmin]);
+
     return (
         <nav className={styles.navbar}>
             <div className={styles.container}>
@@ -161,6 +205,7 @@ const Navbar = observer(() => {
                             <Link to="/words" className={styles.link} onClick={closeMenu}>Словарь</Link>
                             <Link to="/admin/learning" className={styles.link} onClick={closeMenu}>Материал</Link>
                             <Link to="/admin/users" className={styles.link} onClick={closeMenu}>Пользователи</Link>
+                            <Link to="/admin/misc" className={styles.link} onClick={closeMenu}>Остальное</Link>
                         </>
                     )}
                 </div>
@@ -237,6 +282,25 @@ const Navbar = observer(() => {
 
                                     <div className={styles.settingsList}>
                                         {!isAdmin && (
+                                            !dailyRewardsState?.progress?.isCompleted && (
+                                                <button
+                                                    type="button"
+                                                    className={styles.referralBtn}
+                                                    onClick={onOpenDailyRewards}
+                                                    disabled={isRewardsLoading}
+                                                >
+                                                    <span>Награды 7 дней</span>
+                                                    <span className={styles.referralHelpWrap}>
+                                                        <span className={styles.referralHelp}>?</span>
+                                                        <span className={styles.referralTooltip}>
+                                                            Ежедневные награды за первые 7 дней входа на платформу
+                                                        </span>
+                                                    </span>
+                                                </button>
+                                            )
+                                        )}
+
+                                        {!isAdmin && (
                                             <button type="button" className={styles.referralBtn} onClick={onCopyReferralLink}>
                                                 <span>Рефералка</span>
                                                 <span className={styles.referralHelpWrap}>
@@ -295,6 +359,20 @@ const Navbar = observer(() => {
                         <div className={`${styles.mobileOverlay} ${isMobileDropdownOpen ? styles.mobileOverlayActive : ''}`} onClick={closeMenu} />
                         <div className={`${styles.mobileDropdown} ${isMobileDropdownOpen ? styles.mobileDropdownActive : ''}`}>
                             <div className={styles.mobileSettingsSection}>
+                                {!isAdmin && (
+                                    !dailyRewardsState?.progress?.isCompleted && (
+                                        <button type="button" className={`${styles.mobileMenuItem} ${styles.referralBtnMobile}`} onClick={onOpenDailyRewards} disabled={isRewardsLoading}>
+                                            <span>Награды 7 дней</span>
+                                            <span className={styles.referralHelpWrap}>
+                                                <span className={styles.referralHelp}>?</span>
+                                                <span className={styles.referralTooltip}>
+                                                    Ежедневные награды за первые 7 дней входа на платформу
+                                                </span>
+                                            </span>
+                                        </button>
+                                    )
+                                )}
+
                                 {!isAdmin && (
                                     <button type="button" className={`${styles.mobileMenuItem} ${styles.referralBtnMobile}`} onClick={onCopyReferralLink}>
                                         <span>Рефералка</span>
@@ -384,11 +462,44 @@ const Navbar = observer(() => {
                                         <Link to="/words" className={styles.mobileNavLink} onClick={closeMenu}>Словарь</Link>
                                         <Link to="/admin/learning" className={styles.mobileNavLink} onClick={closeMenu}>Материал</Link>
                                         <Link to="/admin/users" className={styles.mobileNavLink} onClick={closeMenu}>Пользователи</Link>
+                                        <Link to="/admin/misc" className={styles.mobileNavLink} onClick={closeMenu}>Остальное</Link>
                                     </>
                                 )}
                             </div>
                         </div>
                     </>
+                )}
+
+                {isRewardsModalOpen && createPortal(
+                    <div className={styles.rewardsModalOverlay} onClick={() => setIsRewardsModalOpen(false)}>
+                        <div className={styles.rewardsModalCard} onClick={(e) => e.stopPropagation()}>
+                            <h3 className={styles.rewardsModalTitle}>Награды 7 дней</h3>
+                            <div className={styles.rewardsGrid}>
+                                {(dailyRewardsState?.rewards || []).map((item) => {
+                                    const parts = [];
+                                    if ((Number(item.coins) || 0) > 0) parts.push(`${item.coins} монет`);
+                                    if ((Number(item.studyPoints) || 0) > 0) parts.push(`${item.studyPoints} опыта`);
+                                    if (!parts.length) parts.push('Нет награды');
+                                    const isClaimed = item.status === 'claimed';
+                                    return (
+                                        <div
+                                            key={item.dayNumber}
+                                            className={`${styles.rewardsDayCard} ${isClaimed ? styles.rewardsDayClaimed : ''}`}
+                                        >
+                                            <div className={styles.rewardsDayTitle}>День {item.dayNumber}</div>
+                                            <div className={`${styles.rewardsDayReward} ${isClaimed ? styles.rewardsDayRewardClaimed : ''}`}>
+                                                {parts.join(' · ')}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <button type="button" className={styles.rewardsModalCloseBtn} onClick={() => setIsRewardsModalOpen(false)}>
+                                Закрыть
+                            </button>
+                        </div>
+                    </div>,
+                    document.body
                 )}
             </div>
         </nav>

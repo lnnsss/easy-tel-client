@@ -26,6 +26,7 @@ import AdminLearningCoursePage from '../pages/Admin/AdminLearningCoursePage';
 import AdminTopicEditorPage from '../pages/Admin/AdminTopicEditorPage';
 import AdminCourseEditorPage from '../pages/Admin/AdminCourseEditorPage';
 import AdminUsersPage from '../pages/Admin/AdminUsersPage';
+import AdminMiscPage from '../pages/Admin/AdminMiscPage';
 import NotFoundPage from '../pages/NotFoundPage/NotFoundPage';
 import AuthorLearningPage from '../pages/Author/AuthorLearningPage';
 import AuthorLearningCoursePage from '../pages/Author/AuthorLearningCoursePage';
@@ -173,6 +174,10 @@ const AppRouter = observer(() => {
             <Route
                 path="/admin/users"
                 element={isAdmin ? <AdminUsersPage /> : <Navigate to="/" />}
+            />
+            <Route
+                path="/admin/misc"
+                element={isAdmin ? <AdminMiscPage /> : <Navigate to="/" />}
             />
 
             <Route
