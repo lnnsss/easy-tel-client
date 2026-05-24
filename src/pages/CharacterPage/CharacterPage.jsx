@@ -45,7 +45,9 @@ const normalizeConfig = (raw = {}, assets = CHARACTER_ASSETS, defaults = CHARACT
 
 const nextInList = (list, current, dir = 1) => {
     if (!Array.isArray(list) || list.length === 0) return current;
-    const idx = Math.max(0, list.indexOf(current));
+    const rawIdx = list.indexOf(current);
+    if (rawIdx < 0) return dir >= 0 ? list[0] : list[list.length - 1];
+    const idx = Math.max(0, rawIdx);
     const nextIdx = (idx + dir + list.length) % list.length;
     return list[nextIdx];
 };
@@ -113,7 +115,7 @@ const CharacterPage = observer(() => {
     const shoesSrc = `/customize/shoes/${config.shoesFile}`;
     const bottomSrc = `/customize/bottom/${config.bottomFile}`;
     const topSrc = `/customize/top/${config.topFile}`;
-    const headdressSrc = `/customize/headdress/${config.headdressFile}`;
+    const headdressSrc = config.headdressFile ? `/customize/headdress/${config.headdressFile}` : '';
     const backgroundSrc = config.backgroundFile === '__theme__'
         ? ''
         : `/customize/backgrounds/${config.backgroundFile}`;
@@ -198,7 +200,9 @@ const CharacterPage = observer(() => {
 
         return (
             <div className={styles.group}>
-                <div className={styles.groupLabel}>{title}: {getFileLabel(file)}</div>
+                <div className={styles.groupLabel}>
+                    {title}: {file ? getFileLabel(file) : (category === 'headdress' ? 'Без головного убора' : '')}
+                </div>
                 <div className={styles.controlsRow}>
                     <div className={styles.rowBtns}>
                         <button type="button" onClick={() => onCycle(field, list, -1)}>◀</button>
@@ -234,7 +238,14 @@ const CharacterPage = observer(() => {
                         <img key={`shoes-${layerKeys.shoesFile}-${config.shoesFile}`} src={shoesSrc} alt="Обувь" className={`${styles.layer} ${styles.layerFade}`} />
                         <img key={`bottom-${layerKeys.bottomFile}-${config.bottomFile}`} src={bottomSrc} alt="Штаны" className={`${styles.layer} ${styles.layerFade}`} />
                         <img key={`top-${layerKeys.topFile}-${config.topFile}`} src={topSrc} alt="Верхняя одежда" className={`${styles.layer} ${styles.layerFade}`} />
-                        <img key={`head-${layerKeys.headdressFile}-${config.headdressFile}`} src={headdressSrc} alt="Головной убор" className={`${styles.layer} ${styles.layerFade}`} />
+                        {headdressSrc && (
+                            <img
+                                key={`head-${layerKeys.headdressFile}-${config.headdressFile}`}
+                                src={headdressSrc}
+                                alt="Головной убор"
+                                className={`${styles.layer} ${styles.layerFade}`}
+                            />
+                        )}
                     </div>
                 </div>
 

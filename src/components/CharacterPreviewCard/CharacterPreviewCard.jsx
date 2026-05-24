@@ -61,7 +61,7 @@ const CharacterPreviewCard = ({ customization, editable = false }) => {
                 <img src={shoesSrc} alt="Обувь" className={styles.layer} />
                 <img src={bottomSrc} alt="Штаны" className={styles.layer} />
                 <img src={topSrc} alt="Верхняя одежда" className={styles.layer} />
-                <img src={headdressSrc} alt="Головной убор" className={styles.layer} />
+                {config.headdressFile && <img src={headdressSrc} alt="Головной убор" className={styles.layer} />}
             </div>
         </div>
     );
