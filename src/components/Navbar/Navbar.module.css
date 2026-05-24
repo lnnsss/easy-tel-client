@@ -134,6 +134,12 @@
     background: var(--color-bg-muted);
 }
 
+.mobileAiChatLink {
+    color: var(--color-primary);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
 .mobileChatLink {
     gap: 6px;
 }
@@ -192,6 +198,17 @@
 .link:hover,
 .link:focus-visible {
     color: var(--color-primary);
+}
+
+.aiChatLink {
+    color: var(--color-primary);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.aiChatLink:hover,
+.aiChatLink:focus-visible {
+    color: var(--color-primary-hover);
 }
 
 .chatLink {
@@ -624,7 +641,7 @@
     color: #1f3a10;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1040px) {
     .centerNav {
         display: none;
     }

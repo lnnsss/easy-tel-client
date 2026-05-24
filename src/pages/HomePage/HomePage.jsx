@@ -115,6 +115,7 @@ const HomePage = observer(() => {
 
     const practiceRoute = !authStore.isAuth ? '/login' : '/scanner';
     const theoryRoute = !authStore.isAuth ? '/login' : '/courses';
+    const aiChatRoute = !authStore.isAuth ? '/login' : '/ai-chat';
 
     return (
         <div className={styles.page}>
@@ -159,11 +160,14 @@ const HomePage = observer(() => {
                         </p>
 
                         <div className={styles.ctaRow}>
-                            <Link to={practiceRoute} className={`${styles.mainBtn} ${styles.mainBtnPrimary}`}>
+                            <Link to={practiceRoute} className={`${styles.mainBtn} ${styles.mainBtnSecondary}`}>
                                 Сканер
                             </Link>
                             <Link to={theoryRoute} className={`${styles.mainBtn} ${styles.mainBtnSecondary}`}>
                                 Материал
+                            </Link>
+                            <Link to={aiChatRoute} className={`${styles.mainBtn} ${styles.mainBtnPrimary} ${styles.mainBtnAi}`}>
+                                AI чат-бот
                             </Link>
                         </div>
                     </section>

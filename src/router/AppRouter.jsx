@@ -34,6 +34,7 @@ import AuthorCourseEditorPage from '../pages/Author/AuthorCourseEditorPage';
 import AuthorTopicEditorPage from '../pages/Author/AuthorTopicEditorPage';
 import CharacterPage from '../pages/CharacterPage/CharacterPage';
 import AchievementsPage from '../pages/AchievementsPage/AchievementsPage';
+import AiChatPage from '../pages/AiChatPage/AiChatPage';
 
 const AppRouter = observer(() => {
     const { authStore } = useStores();
@@ -115,6 +116,10 @@ const AppRouter = observer(() => {
             <Route
                 path="/chats"
                 element={authStore.isAuth && !isAdmin ? <ChatsPage /> : <Navigate to="/" />}
+            />
+            <Route
+                path="/ai-chat"
+                element={authStore.isAuth && !isAdmin ? <AiChatPage /> : <Navigate to="/" />}
             />
 
             <Route

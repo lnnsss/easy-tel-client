@@ -292,6 +292,42 @@ body {
     flex: 1 0 auto;
 }
 
+.floating-ai-button {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 1200;
+    width: 58px;
+    height: 58px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(
+        100deg,
+        #bfff42 0%,
+        #43ff9f 30%,
+        #59e86d 62%,
+        #8bff3f 100%
+    );
+    background-size: 360% 100%;
+    color: var(--c-black);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+    animation: floatingAiGradient 2.2s linear infinite;
+}
+
+.floating-ai-button:hover,
+.floating-ai-button:focus-visible {
+    filter: brightness(1.04);
+}
+
+@keyframes floatingAiGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
 .app-page-shell {
     width: 100%;
     max-width: var(--container-xl) !important;

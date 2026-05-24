@@ -37,6 +37,7 @@ const App = observer(() => {
         '/achievements',
         '/friends',
         '/chats',
+        '/ai-chat',
         '/courses',
         '/courses/:courseId',
         '/admin/learning',
@@ -56,6 +57,7 @@ const App = observer(() => {
     ];
     const isKnownRoute = knownRoutePatterns.some((pattern) => Boolean(matchPath({ path: pattern, end: true }, location.pathname)));
     const hideFooter = hideNavbar || !isKnownRoute;
+    const shouldShowFloatingAiButton = authStore.isAuth && authStore.user?.role !== 'admin' && !hideNavbar;
 
     useEffect(() => {
         // Проверяем токен при загрузке вкладки
@@ -228,6 +230,16 @@ const App = observer(() => {
             <main className="app-main">
                 <AppRouter />
             </main>
+            {shouldShowFloatingAiButton && (
+                <button
+                    type="button"
+                    className="floating-ai-button"
+                    onClick={() => navigate('/ai-chat')}
+                    aria-label="Открыть AI чат-бот Аиша"
+                >
+                    AI
+                </button>
+            )}
             {!hideFooter && <Footer />}
             {activeAchievement && <AchievementToast item={activeAchievement} isClosing={isAchievementClosing} />}
             {uiStore.copyToast.isOpen && (

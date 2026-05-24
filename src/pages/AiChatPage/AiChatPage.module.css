@@ -1,0 +1,142 @@
+.page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+}
+
+.chatCard {
+    margin-top: 12px;
+    border: 1px solid var(--color-border-soft);
+    border-radius: 16px;
+    background: var(--color-bg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.messages {
+    min-height: 420px;
+    max-height: 68vh;
+    overflow: auto;
+    background: var(--color-bg-soft);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.messageRow {
+    display: flex;
+    animation: bubbleIn 0.22s ease;
+}
+
+.mine {
+    justify-content: flex-end;
+}
+
+.assistant {
+    justify-content: flex-start;
+}
+
+.bubble {
+    max-width: min(76%, 680px);
+    border-radius: 14px;
+    padding: 10px 12px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.mine .bubble {
+    background: var(--color-primary);
+    color: var(--c-black);
+}
+
+.assistant .bubble {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-soft);
+    color: var(--color-text);
+}
+
+.typing {
+    opacity: 0.85;
+    animation: typingPulse 1s ease-in-out infinite;
+}
+
+.form {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 8px;
+    padding: 10px;
+    border-top: 1px solid var(--color-border-soft);
+}
+
+.form input {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-bg);
+    color: var(--color-text);
+    padding: 10px 12px;
+}
+
+.form button {
+    border: 0;
+    border-radius: 10px;
+    background: var(--color-primary);
+    color: var(--c-black);
+    padding: 10px 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.newChatButton {
+    background: var(--c-white);
+    color: var(--c-black);
+    border: 1px solid var(--color-border);
+}
+
+:global([data-theme='dark']) .newChatButton {
+    background: var(--c-black);
+    color: var(--c-white);
+    border: 1px solid var(--color-border);
+}
+
+.error {
+    margin: 0;
+    padding: 0 12px 12px;
+    color: var(--color-error, #b00020);
+}
+
+@keyframes bubbleIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes typingPulse {
+    0%, 100% {
+        opacity: 0.55;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 800px) {
+    .bubble {
+        max-width: 90%;
+    }
+
+    .form {
+        grid-template-columns: 1fr;
+    }
+}

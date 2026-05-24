@@ -179,8 +179,11 @@ const Navbar = observer(() => {
                 </div>
 
                 <div className={styles.centerNav}>
-                    {(!authStore.isAuth || !isAdmin) && (
+                    {!isAdmin && (
                         <>
+                            {authStore.isAuth && (
+                                <Link to="/ai-chat" className={`${styles.link} ${styles.aiChatLink}`} onClick={closeMenu}>AI чат-бот</Link>
+                            )}
                             <Link to="/translate" className={styles.link} onClick={closeMenu}>Переводчик</Link>
                             <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>
                         </>
@@ -237,7 +240,7 @@ const Navbar = observer(() => {
                                 aria-label="Настройки и меню"
                                 aria-expanded={isMobileDropdownOpen || isDesktopSettingsOpen}
                                 onClick={() => {
-                                    if (window.innerWidth <= 768) {
+                                    if (window.innerWidth <= 1040) {
                                         setIsMobileDropdownOpen((prev) => !prev);
                                         return;
                                     }
@@ -272,7 +275,7 @@ const Navbar = observer(() => {
 
                 {authStore.isAuth && (
                     <>
-                        {isDesktopSettingsOpen && window.innerWidth > 768 && createPortal(
+                        {isDesktopSettingsOpen && window.innerWidth > 1040 && createPortal(
                             <div className={styles.settingsOverlay} onClick={closeMenu}>
                                 <div className={styles.settingsModal} onClick={(e) => e.stopPropagation()}>
                                     <div className={styles.settingsHead}>
@@ -436,8 +439,11 @@ const Navbar = observer(() => {
                             <div className={styles.mobileDivider} />
 
                             <div className={styles.mobileNavSection}>
-                                {(!authStore.isAuth || !isAdmin) && (
+                                {!isAdmin && (
                                     <>
+                                        {authStore.isAuth && (
+                                            <Link to="/ai-chat" className={`${styles.mobileNavLink} ${styles.mobileAiChatLink}`} onClick={closeMenu}>AI чат-бот</Link>
+                                        )}
                                         <Link to="/translate" className={styles.mobileNavLink} onClick={closeMenu}>Переводчик</Link>
                                         <Link to="/scanner" className={styles.mobileNavLink} onClick={closeMenu}>Сканер</Link>
                                     </>
