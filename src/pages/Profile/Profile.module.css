@@ -104,7 +104,7 @@
 }
 
 .avatarInitials {
-    color: var(--color-primary-strong);
+    color: #ffffff;
     font-weight: 800;
     font-size: 2.2rem;
 }
@@ -266,6 +266,8 @@
     z-index: 1;
     font-weight: 700;
     color: var(--color-text);
+    text-align: center;
+    width: 100%;
 }
 
 .colorPickerInput {
@@ -520,6 +522,13 @@
     .statsRowThree,
     .statsRowTwo { grid-template-columns: 1fr; }
     .container { margin: var(--space-5) auto; }
+    .profileActions { grid-template-columns: 1fr; }
+    .editBtn,
+    .logoutBtn { width: 100%; }
+    .editForm {
+        padding: 0 var(--space-5) var(--space-5);
+        box-sizing: border-box;
+    }
     .editGrid { grid-template-columns: 1fr; }
     .editMetaRow { grid-template-columns: 1fr; }
 }

@@ -324,7 +324,7 @@
 }
 
 .rankingAvatarFallback {
-    color: var(--color-primary-strong);
+    color: #ffffff;
     font-weight: 800;
     font-size: 0.78rem;
 }
@@ -427,6 +427,15 @@
     gap: 20px;
 }
 
+@media (max-width: 920px) {
+    .features {
+        grid-template-columns: 1fr;
+    }
+    .featureCard {
+        width: 100%;
+    }
+}
+
 .featureCard {
     background: var(--color-bg);
     padding: 20px;
@@ -473,12 +482,17 @@
     .rankingWrapper { padding: 14px; }
     .rankingIdentity { gap: 10px; margin-left: 8px; }
     .rankingAvatar { width: 34px; height: 34px; }
+    .rankingRight { display: none; }
+    .rankingItem { padding: 14px 16px; }
     .ctaRow {
         grid-template-columns: 1fr;
         width: 100%;
     }
     .mainBtnAi {
         grid-column: auto;
+        justify-self: center;
+        width: 100%;
+        max-width: 320px;
     }
     .mainBtn {
         width: 100%;

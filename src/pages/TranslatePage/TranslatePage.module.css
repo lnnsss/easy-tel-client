@@ -281,16 +281,20 @@
 
 @media (max-width: 900px) {
     .headersRow {
-        grid-template-columns: 1fr;
-        gap: 8px;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 6px;
     }
 
     .langTitle {
-        text-align: left;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        min-width: 0;
     }
 
     .swapBtn {
-        justify-self: start;
+        width: 30px;
+        height: 30px;
+        font-size: 0.95rem;
     }
 
     .controls {

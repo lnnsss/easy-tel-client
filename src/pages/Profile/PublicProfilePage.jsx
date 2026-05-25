@@ -272,18 +272,6 @@ const PublicProfilePage = () => {
             displayValue: String(Number.isFinite(profile.coins) ? profile.coins : 0),
             label: 'Монет',
             description: 'Текущее количество монет, заработанных за учебную активность и достижения.'
-        },
-        {
-            key: 'discipline',
-            displayValue: `${profile?.analytics?.discipline?.score ?? 0}/100`,
-            label: 'Дисциплина',
-            description: 'Оценка регулярности занятий и стабильности учебной активности.'
-        },
-        {
-            key: 'motivation',
-            displayValue: `${profile?.analytics?.motivation?.score ?? 0}/100`,
-            label: 'Мотивация',
-            description: 'Оценка вовлеченности в учебу: насколько активно пользователь продолжает прогресс.'
         }
     ];
 
@@ -292,8 +280,7 @@ const PublicProfilePage = () => {
     const statByKey = Object.fromEntries(stats.map((s) => [s.key, s]));
     const statRows = [
         ['streak', 'wordsWeek', 'wordsTotal'],
-        ['achievementsCount', 'coins'],
-        ['discipline', 'motivation']
+        ['achievementsCount', 'coins']
     ];
     const profileAccentColor = profile.profileAccentColor || '';
     const isDarkTheme = typeof document !== 'undefined' && document.documentElement.getAttribute('data-theme') === 'dark';
@@ -331,7 +318,10 @@ const PublicProfilePage = () => {
                         style={{ backgroundColor: headerTopBg, color: headerTopTextColor, '--profile-top-text': headerTopTextColor }}
                     >
                         <div className={profileStyles.avatarRow}>
-                            <div className={profileStyles.avatarCircle}>
+                            <div
+                                className={profileStyles.avatarCircle}
+                                style={!avatarSrc && profile.avatarAccentColor ? { backgroundColor: profile.avatarAccentColor } : undefined}
+                            >
                                 {avatarSrc && !avatarLoadFailed ? (
                                     <img
                                         src={avatarSrc}

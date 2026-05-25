@@ -305,6 +305,9 @@ const TranslatePage = () => {
 
         if (isPlaying) {
             stopAudio();
+            if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
             return;
         }
 
@@ -316,7 +319,24 @@ const TranslatePage = () => {
                 // no-op: пометка для читаемости, что первый клик прошел через свежую загрузку
             }
         } catch (e) {
-            setError(e?.response?.data?.message || 'Не удалось озвучить перевод');
+            try {
+                if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                    utterance.lang = 'tt-RU';
+                    utterance.onend = () => setIsPlaying(false);
+                    utterance.onerror = () => {
+                        setIsPlaying(false);
+                        setError(e?.response?.data?.message || 'Не удалось озвучить перевод');
+                    };
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(utterance);
+                    setIsPlaying(true);
+                } else {
+                    setError(e?.response?.data?.message || 'Не удалось озвучить перевод');
+                }
+            } catch {
+                setError(e?.response?.data?.message || 'Не удалось озвучить перевод');
+            }
         } finally {
             setTtsLoading(false);
         }

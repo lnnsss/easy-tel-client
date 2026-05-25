@@ -358,6 +358,24 @@ body {
     font-size: 0.98rem !important;
 }
 
+@media (max-width: 768px) {
+    .app-page-top {
+        justify-content: center;
+        align-items: center;
+    }
+
+    .app-page-top > div:first-child,
+    .app-page-top > .app-page-title {
+        width: 100%;
+        text-align: center;
+    }
+
+    .app-page-top .app-page-title,
+    .app-page-top .app-page-subtitle {
+        text-align: center;
+    }
+}
+
 a,
 button,
 input,

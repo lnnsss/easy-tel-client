@@ -82,7 +82,7 @@
     display: grid;
     place-items: center;
     font-weight: 700;
-    color: var(--color-primary-strong);
+    color: #ffffff;
     flex-shrink: 0;
 }
 
@@ -144,25 +144,6 @@
     gap: 16px;
 }
 
-.rankRow {
-    display: grid;
-    grid-template-columns: 40px 1fr auto;
-    gap: 8px;
-    align-items: center;
-    padding: 10px;
-    border-radius: 12px;
-    background: var(--color-bg-soft);
-    transition: transform 0.16s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-    border: 1px solid transparent;
-}
-
-.rankRow:hover {
-    transform: translateY(-1px);
-    border-color: var(--color-primary);
-    background: var(--color-bg);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-}
-
 .empty {
     margin: 4px 0 0;
     color: var(--color-text-muted);
@@ -172,7 +153,7 @@
     margin-top: 10px;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 8px;
 }
 
@@ -328,6 +309,23 @@
 }
 
 @media (max-width: 800px) {
+    .container {
+        padding: 20px 14px 30px;
+    }
+
+    .card {
+        border-radius: 18px;
+        padding: 14px;
+    }
+
+    .card h2 {
+        font-size: 1.02rem;
+    }
+
+    .list {
+        gap: 12px;
+    }
+
     .gridTwo {
         grid-template-columns: 1fr;
     }
@@ -335,10 +333,45 @@
     .userRow {
         flex-direction: column;
         align-items: stretch;
+        gap: 10px;
+        padding: 12px;
+        border: 1px solid var(--color-border-soft);
+        border-radius: 14px;
+        background: linear-gradient(180deg, var(--color-bg-soft) 0%, var(--color-bg) 100%);
     }
 
     .rowActions {
         justify-content: flex-start;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .rowActions button {
+        width: 100%;
+        min-height: 40px;
+        border-radius: 10px;
+    }
+
+    .userMeta strong {
+        font-size: 0.98rem;
+    }
+
+    .userMeta span {
+        font-size: 0.82rem;
+    }
+
+    .searchInput {
+        border-radius: 12px;
+    }
+
+    .pagination {
+        margin-top: 12px;
+    }
+
+    .pagination button {
+        min-width: 38px;
+        min-height: 34px;
     }
 
     .publishRow {
@@ -348,5 +381,38 @@
 
     .primaryAction {
         width: 100%;
+    }
+
+    .modalOverlay {
+        padding: 10px;
+        align-items: center;
+    }
+
+    .modal {
+        width: 100%;
+        max-height: 88svh;
+        border-radius: 16px;
+        padding: 14px;
+    }
+
+    .modalForm {
+        gap: 12px;
+    }
+
+    .modalForm select,
+    .modalForm input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .myRequestCard {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .ghostAction {
+        width: 100%;
+        min-height: 40px;
     }
 }

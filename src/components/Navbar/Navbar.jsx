@@ -184,8 +184,12 @@ const Navbar = observer(() => {
                             {authStore.isAuth && (
                                 <Link to="/ai-chat" className={`${styles.link} ${styles.aiChatLink}`} onClick={closeMenu}>AI чат-бот</Link>
                             )}
-                            <Link to="/translate" className={styles.link} onClick={closeMenu}>Переводчик</Link>
-                            <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>
+                            {authStore.isAuth && (
+                                <>
+                                    <Link to="/translate" className={styles.link} onClick={closeMenu}>Переводчик</Link>
+                                    <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>
+                                </>
+                            )}
                         </>
                     )}
 
@@ -193,7 +197,6 @@ const Navbar = observer(() => {
                         <>
                             <Link to="/dictionary" className={styles.link} onClick={closeMenu}>Словарь</Link>
                             <Link to="/courses" className={styles.link} onClick={closeMenu}>Материал</Link>
-                            <Link to="/achievements" className={styles.link} onClick={closeMenu}>Достижения</Link>
                             {isAuthor && <Link to="/author/learning" className={styles.link} onClick={closeMenu}>Авторство</Link>}
                             <Link to="/friends" className={styles.link} onClick={closeMenu}>Друзья</Link>
                             <Link to="/chats" className={`${styles.link} ${styles.chatLink}`} onClick={closeMenu}>
@@ -219,6 +222,7 @@ const Navbar = observer(() => {
                             <Link
                                 to={profileRoute}
                                 className={styles.profileAvatarBtn}
+                                style={!profileAvatarSrc && authStore.user?.avatarAccentColor ? { backgroundColor: authStore.user.avatarAccentColor } : undefined}
                                 onClick={closeMenu}
                                 aria-label="Личный кабинет"
                             >
@@ -266,10 +270,13 @@ const Navbar = observer(() => {
                             </button>
                         </div>
                     ) : (
-                        <div className={styles.authBtns}>
-                            <Link to="/login" className={styles.link} onClick={closeMenu}>Вход</Link>
-                            <Link to="/register" className={styles.btnRegister} onClick={closeMenu}>Регистрация</Link>
-                        </div>
+                        <>
+                            <div className={styles.authBtns}>
+                                <Link to="/login" className={styles.link} onClick={closeMenu}>Вход</Link>
+                                <Link to="/register" className={styles.btnRegister} onClick={closeMenu}>Регистрация</Link>
+                            </div>
+                            <Link to="/login" className={styles.mobileLoginBtn} onClick={closeMenu}>Вход</Link>
+                        </>
                     )}
                 </div>
 
@@ -312,6 +319,19 @@ const Navbar = observer(() => {
                                                         Вы получите 10 монет, если кто-то зарегистрируется по вашей ссылке
                                                     </span>
                                                 </span>
+                                            </button>
+                                        )}
+
+                                        {!isAdmin && (
+                                            <button
+                                                type="button"
+                                                className={styles.settingsItem}
+                                                onClick={() => {
+                                                    closeMenu();
+                                                    navigate('/achievements');
+                                                }}
+                                            >
+                                                <span>Достижения</span>
                                             </button>
                                         )}
 
@@ -394,6 +414,19 @@ const Navbar = observer(() => {
                                         className={styles.mobileMenuItem}
                                         onClick={() => {
                                             closeMenu();
+                                            navigate('/achievements');
+                                        }}
+                                    >
+                                        Достижения
+                                    </button>
+                                )}
+
+                                {!isAdmin && (
+                                    <button
+                                        type="button"
+                                        className={styles.mobileMenuItem}
+                                        onClick={() => {
+                                            closeMenu();
                                             navigate('/character');
                                         }}
                                     >
@@ -431,9 +464,6 @@ const Navbar = observer(() => {
                                     </div>
                                 </div>
 
-                                <button type="button" className={`${styles.mobileMenuItem} ${styles.settingsLogout}`} onClick={onLogoutConfirm}>
-                                    Выйти
-                                </button>
                             </div>
 
                             <div className={styles.mobileDivider} />
@@ -444,8 +474,12 @@ const Navbar = observer(() => {
                                         {authStore.isAuth && (
                                             <Link to="/ai-chat" className={`${styles.mobileNavLink} ${styles.mobileAiChatLink}`} onClick={closeMenu}>AI чат-бот</Link>
                                         )}
-                                        <Link to="/translate" className={styles.mobileNavLink} onClick={closeMenu}>Переводчик</Link>
-                                        <Link to="/scanner" className={styles.mobileNavLink} onClick={closeMenu}>Сканер</Link>
+                                        {authStore.isAuth && (
+                                            <>
+                                                <Link to="/translate" className={styles.mobileNavLink} onClick={closeMenu}>Переводчик</Link>
+                                                <Link to="/scanner" className={styles.mobileNavLink} onClick={closeMenu}>Сканер</Link>
+                                            </>
+                                        )}
                                     </>
                                 )}
 
@@ -453,7 +487,6 @@ const Navbar = observer(() => {
                                     <>
                                         <Link to="/dictionary" className={styles.mobileNavLink} onClick={closeMenu}>Словарь</Link>
                                         <Link to="/courses" className={styles.mobileNavLink} onClick={closeMenu}>Материал</Link>
-                                        <Link to="/achievements" className={styles.mobileNavLink} onClick={closeMenu}>Достижения</Link>
                                         {isAuthor && <Link to="/author/learning" className={styles.mobileNavLink} onClick={closeMenu}>Авторство</Link>}
                                         <Link to="/friends" className={styles.mobileNavLink} onClick={closeMenu}>Друзья</Link>
                                         <Link to="/chats" className={`${styles.mobileNavLink} ${styles.mobileChatLink}`} onClick={closeMenu}>
@@ -472,6 +505,12 @@ const Navbar = observer(() => {
                                     </>
                                 )}
                             </div>
+
+                            <div className={styles.mobileDivider} />
+
+                            <button type="button" className={`${styles.mobileMenuItem} ${styles.settingsLogout}`} onClick={onLogoutConfirm}>
+                                Выйти
+                            </button>
                         </div>
                     </>
                 )}

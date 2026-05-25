@@ -13,7 +13,6 @@ const FriendsPage = observer(() => {
     const [friendsPage, setFriendsPage] = useState(1);
     const [incomingPage, setIncomingPage] = useState(1);
     const [outgoingPage, setOutgoingPage] = useState(1);
-    const [rankingPage, setRankingPage] = useState(1);
     const [companionPage, setCompanionPage] = useState(1);
     const [isCompanionModalOpen, setIsCompanionModalOpen] = useState(false);
     const [companionPurpose, setCompanionPurpose] = useState('speech_practice');
@@ -33,10 +32,6 @@ const FriendsPage = observer(() => {
     }, [socialStore, outgoingPage]);
 
     useEffect(() => {
-        socialStore.loadFriendRanking(rankingPage, 10);
-    }, [socialStore, rankingPage]);
-
-    useEffect(() => {
         if (isCompanionModalOpen) {
             socialStore.loadCompanionRequests(companionPage, 10);
         }
@@ -44,7 +39,7 @@ const FriendsPage = observer(() => {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            socialStore.searchUsers(query, searchPage, 20);
+            socialStore.searchUsers(query, searchPage, 10);
         }, 350);
         return () => clearTimeout(timer);
     }, [query, searchPage, socialStore]);
@@ -152,7 +147,7 @@ const FriendsPage = observer(() => {
                     disabled={pagination.page <= 1}
                     onClick={() => onPageChange(pagination.page - 1)}
                 >
-                    Назад
+                    ←
                 </button>
                 <span>{pagination.page} / {pagination.totalPages}</span>
                 <button
@@ -160,7 +155,7 @@ const FriendsPage = observer(() => {
                     disabled={pagination.page >= pagination.totalPages}
                     onClick={() => onPageChange(pagination.page + 1)}
                 >
-                    Вперед
+                    →
                 </button>
             </div>
         );
@@ -172,6 +167,97 @@ const FriendsPage = observer(() => {
             <div className="app-page-top">
                 <h1 className={`${styles.title} app-page-title`}>Друзья</h1>
             </div>
+
+            <section className={styles.card}>
+                <h2>Друзья</h2>
+                <div className={styles.list}>
+                    {(socialStore.friends || []).map((friend) => (
+                        <div key={friend._id} className={styles.userRow}>
+                            <Link to={`/u/${encodeURIComponent(friend.username)}`} className={styles.userLeft}>
+                                <AppAvatar
+                                    src={getAvatarSrc(friend.avatarUrl)}
+                                    fullName={`${friend.firstName || ''} ${friend.lastName || ''}`.trim()}
+                                    className={styles.avatar}
+                                    style={!friend.avatarUrl && friend.avatarAccentColor ? { backgroundColor: friend.avatarAccentColor } : undefined}
+                                />
+                                <div className={styles.userMeta}>
+                                    <strong>{friend.firstName} {friend.lastName}</strong>
+                                    <span>{friend.totalPoints || 0} очков</span>
+                                </div>
+                            </Link>
+                            <div className={styles.rowActions}>
+                                <button type="button" onClick={() => onStartChat(friend._id)}>Чат</button>
+                                <button type="button" className={styles.ghost} onClick={() => onRemoveFriend(friend._id)}>Удалить</button>
+                            </div>
+                        </div>
+                    ))}
+                    {!socialStore.isLoadingFriends && !(socialStore.friends || []).length && (
+                        <p className={styles.empty}>Пока нет друзей</p>
+                    )}
+                </div>
+                {renderPagination(socialStore.friendsPagination, setFriendsPage)}
+            </section>
+
+            <section className={styles.gridTwo}>
+                <div className={styles.card}>
+                    <h2>Входящие заявки</h2>
+                    <div className={styles.list}>
+                        {(socialStore.incomingRequests || []).map((item) => (
+                            <div key={item._id} className={styles.userRow}>
+                                <div className={styles.userLeft}>
+                                    <AppAvatar
+                                        src={getAvatarSrc(item.from.avatarUrl)}
+                                        fullName={`${item.from.firstName || ''} ${item.from.lastName || ''}`.trim()}
+                                        className={styles.avatar}
+                                        style={!item.from.avatarUrl && item.from.avatarAccentColor ? { backgroundColor: item.from.avatarAccentColor } : undefined}
+                                    />
+                                    <div className={styles.userMeta}>
+                                        <strong>{item.from.firstName} {item.from.lastName}</strong>
+                                        <span>@{item.from.username}</span>
+                                    </div>
+                                </div>
+                                <div className={styles.rowActions}>
+                                    <button type="button" onClick={() => onAcceptRequest(item._id)}>Принять</button>
+                                    <button type="button" className={styles.ghost} onClick={() => socialStore.declineRequest(item._id)}>Отклонить</button>
+                                </div>
+                            </div>
+                        ))}
+                        {!socialStore.isLoadingRequests && !(socialStore.incomingRequests || []).length && (
+                            <p className={styles.empty}>Нет входящих заявок</p>
+                        )}
+                    </div>
+                    {renderPagination(socialStore.incomingPagination, setIncomingPage)}
+                </div>
+
+                <div className={styles.card}>
+                    <h2>Исходящие заявки</h2>
+                    <div className={styles.list}>
+                        {(socialStore.outgoingRequests || []).map((item) => (
+                            <div key={item._id} className={styles.userRow}>
+                                <Link to={`/u/${encodeURIComponent(item.to.username)}`} className={styles.userLeft}>
+                                    <AppAvatar
+                                        src={getAvatarSrc(item.to.avatarUrl)}
+                                        fullName={`${item.to.firstName || ''} ${item.to.lastName || ''}`.trim()}
+                                        className={styles.avatar}
+                                        style={!item.to.avatarUrl && item.to.avatarAccentColor ? { backgroundColor: item.to.avatarAccentColor } : undefined}
+                                    />
+                                    <div className={styles.userMeta}>
+                                        <strong>{item.to.firstName} {item.to.lastName}</strong>
+                                        <span>@{item.to.username}</span>
+                                    </div>
+                                </Link>
+                                <div className={styles.rowActions}>
+                                    <button type="button" className={styles.ghost} onClick={() => onCancelRequest(item._id)}>Отменить</button>
+                                </div>
+                            </div>
+                        ))}
+                        {!socialStore.isLoadingRequests && !(socialStore.outgoingRequests || []).length && (
+                            <p className={styles.empty}>Нет исходящих заявок</p>
+                        )}
+                    </div>
+                    {renderPagination(socialStore.outgoingPagination, setOutgoingPage)}
+                </div>
+            </section>
 
             <div className={styles.findCompanionWrap}>
                 <button
@@ -202,6 +288,7 @@ const FriendsPage = observer(() => {
                                     src={getAvatarSrc(user.avatarUrl)}
                                     fullName={`${user.firstName || ''} ${user.lastName || ''}`.trim()}
                                     className={styles.avatar}
+                                    style={!user.avatarUrl && user.avatarAccentColor ? { backgroundColor: user.avatarAccentColor } : undefined}
                                 />
                                 <div className={styles.userMeta}>
                                     <strong>{user.firstName} {user.lastName}</strong>
@@ -230,113 +317,6 @@ const FriendsPage = observer(() => {
                     )}
                 </div>
                 {renderPagination(socialStore.searchPagination, setSearchPage)}
-            </section>
-
-            <section className={styles.gridTwo}>
-                <div className={styles.card}>
-                    <h2>Друзья</h2>
-                    <div className={styles.list}>
-                        {(socialStore.friends || []).map((friend) => (
-                            <div key={friend._id} className={styles.userRow}>
-                                <Link to={`/u/${encodeURIComponent(friend.username)}`} className={styles.userLeft}>
-                                    <AppAvatar
-                                        src={getAvatarSrc(friend.avatarUrl)}
-                                        fullName={`${friend.firstName || ''} ${friend.lastName || ''}`.trim()}
-                                        className={styles.avatar}
-                                    />
-                                    <div className={styles.userMeta}>
-                                        <strong>{friend.firstName} {friend.lastName}</strong>
-                                        <span>{friend.totalPoints || 0} очков</span>
-                                    </div>
-                                </Link>
-                                <div className={styles.rowActions}>
-                                    <button type="button" onClick={() => onStartChat(friend._id)}>Чат</button>
-                                    <button type="button" className={styles.ghost} onClick={() => onRemoveFriend(friend._id)}>Удалить</button>
-                                </div>
-                            </div>
-                        ))}
-                        {!socialStore.isLoadingFriends && !(socialStore.friends || []).length && (
-                            <p className={styles.empty}>Пока нет друзей</p>
-                        )}
-                    </div>
-                    {renderPagination(socialStore.friendsPagination, setFriendsPage)}
-                </div>
-
-                <div className={styles.card}>
-                    <h2>Входящие заявки</h2>
-                    <div className={styles.list}>
-                        {(socialStore.incomingRequests || []).map((item) => (
-                            <div key={item._id} className={styles.userRow}>
-                                <div className={styles.userLeft}>
-                                    <AppAvatar
-                                        src={getAvatarSrc(item.from.avatarUrl)}
-                                        fullName={`${item.from.firstName || ''} ${item.from.lastName || ''}`.trim()}
-                                        className={styles.avatar}
-                                    />
-                                    <div className={styles.userMeta}>
-                                        <strong>{item.from.firstName} {item.from.lastName}</strong>
-                                        <span>@{item.from.username}</span>
-                                    </div>
-                                </div>
-                                <div className={styles.rowActions}>
-                                    <button type="button" onClick={() => onAcceptRequest(item._id)}>Принять</button>
-                                    <button type="button" className={styles.ghost} onClick={() => socialStore.declineRequest(item._id)}>Отклонить</button>
-                                </div>
-                            </div>
-                        ))}
-                        {!socialStore.isLoadingRequests && !(socialStore.incomingRequests || []).length && (
-                            <p className={styles.empty}>Нет входящих заявок</p>
-                        )}
-                    </div>
-                    {renderPagination(socialStore.incomingPagination, setIncomingPage)}
-                </div>
-            </section>
-
-            <section className={styles.gridTwo}>
-                <div className={styles.card}>
-                    <h2>Исходящие заявки</h2>
-                    <div className={styles.list}>
-                        {(socialStore.outgoingRequests || []).map((item) => (
-                            <div key={item._id} className={styles.userRow}>
-                                <Link to={`/u/${encodeURIComponent(item.to.username)}`} className={styles.userLeft}>
-                                    <AppAvatar
-                                        src={getAvatarSrc(item.to.avatarUrl)}
-                                        fullName={`${item.to.firstName || ''} ${item.to.lastName || ''}`.trim()}
-                                        className={styles.avatar}
-                                    />
-                                    <div className={styles.userMeta}>
-                                        <strong>{item.to.firstName} {item.to.lastName}</strong>
-                                        <span>@{item.to.username}</span>
-                                    </div>
-                                </Link>
-                                <div className={styles.rowActions}>
-                                    <button type="button" className={styles.ghost} onClick={() => onCancelRequest(item._id)}>Отменить</button>
-                                </div>
-                            </div>
-                        ))}
-                        {!socialStore.isLoadingRequests && !(socialStore.outgoingRequests || []).length && (
-                            <p className={styles.empty}>Нет исходящих заявок</p>
-                        )}
-                    </div>
-                    {renderPagination(socialStore.outgoingPagination, setOutgoingPage)}
-                </div>
-
-                <div className={styles.card}>
-                    <h2>Рейтинг друзей</h2>
-                    <div className={styles.list}>
-                        {(socialStore.friendRanking || []).map((user, index) => (
-                            <div key={user._id} className={styles.rankRow}>
-                                <span>#{index + 1}</span>
-                                <span>{user.firstName} {user.lastName}</span>
-                                <strong>{user.totalPoints || 0}</strong>
-                            </div>
-                        ))}
-                        {!socialStore.isLoadingRanking && !(socialStore.friendRanking || []).length && (
-                            <p className={styles.empty}>Рейтинг друзей пока пуст</p>
-                        )}
-                    </div>
-                    {renderPagination(socialStore.rankingPagination, setRankingPage)}
-                </div>
             </section>
         </div>
         {isCompanionModalOpen && (
@@ -396,6 +376,7 @@ const FriendsPage = observer(() => {
                                         src={getAvatarSrc(item.user.avatarUrl)}
                                         fullName={`${item.user.firstName || ''} ${item.user.lastName || ''}`.trim()}
                                         className={styles.avatar}
+                                        style={!item.user.avatarUrl && item.user.avatarAccentColor ? { backgroundColor: item.user.avatarAccentColor } : undefined}
                                     />
                                     <div className={styles.userMeta}>
                                         <strong>{item.user.firstName} {item.user.lastName}</strong>

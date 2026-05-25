@@ -155,8 +155,8 @@ const HomePage = observer(() => {
                     <section className={styles.hero}>
                         <h1 className={styles.title}>Easy<span>Tel</span></h1>
                         <p className={styles.description}>
-                            EasyTel — это платформа для изучения татарского языка, где мы объединили
-                            искусственный интеллект, компьютерное зрение и структурированный учебный материал.
+                            Платформа для изучения татарского языка, <br/>где объединены
+                            искусственный интеллект, компьютерное зрение <br/>и структурированный учебный материал.
                         </p>
 
                         <div className={styles.ctaRow}>
@@ -242,6 +242,7 @@ const HomePage = observer(() => {
                                                     className={styles.rankingAvatar}
                                                     imgClassName={styles.rankingAvatarImg}
                                                     fallbackClassName={styles.rankingAvatarFallback}
+                                                    style={!user.avatarUrl && user.avatarAccentColor ? { backgroundColor: user.avatarAccentColor } : undefined}
                                                 />
                                                 <span className={styles.fullName}>
                                                     {user.firstName} {user.lastName}

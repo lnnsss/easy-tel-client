@@ -240,6 +240,15 @@
     font-weight: bold;
 }
 
+.mobileLoginBtn {
+    display: none;
+    text-decoration: none;
+    color: var(--color-text-muted);
+    font-weight: 500;
+    padding: 0;
+    line-height: 1.1;
+}
+
 .navUserControls {
     display: flex;
     align-items: center;
@@ -276,7 +285,7 @@
 .profileAvatarFallback {
     font-size: 0.88rem;
     font-weight: 800;
-    color: var(--color-primary);
+    color: #ffffff;
     letter-spacing: 0.02em;
 }
 
@@ -648,6 +657,12 @@
 
     .authBtns {
         display: none;
+    }
+
+    .mobileLoginBtn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .mobileOverlay {

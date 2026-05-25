@@ -415,7 +415,7 @@ const ChatsPage = observer(() => {
                                 disabled={chatStore.chatsPagination.page <= 1}
                                 onClick={() => setChatPage((p) => Math.max(p - 1, 1))}
                             >
-                                Назад
+                                ←
                             </button>
                             <span>{chatStore.chatsPagination.page} / {chatStore.chatsPagination.totalPages}</span>
                             <button
@@ -423,7 +423,7 @@ const ChatsPage = observer(() => {
                                 disabled={chatStore.chatsPagination.page >= chatStore.chatsPagination.totalPages}
                                 onClick={() => setChatPage((p) => Math.min(p + 1, chatStore.chatsPagination.totalPages))}
                             >
-                                Вперед
+                                →
                             </button>
                         </div>
                     )}

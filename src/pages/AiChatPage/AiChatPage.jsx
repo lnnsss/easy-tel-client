@@ -39,6 +39,7 @@ const AiChatPage = () => {
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState('');
     const listRef = useRef(null);
+    const streamTimerRef = useRef(null);
 
     const contextMessages = useMemo(() => {
         const normalized = messages.map((item) => ({ role: item.role, content: item.content }));
@@ -60,8 +61,20 @@ const AiChatPage = () => {
         scrollToBottom();
     }, []);
 
+    const clearStreamTimer = () => {
+        if (streamTimerRef.current) {
+            clearInterval(streamTimerRef.current);
+            streamTimerRef.current = null;
+        }
+    };
+
+    useEffect(() => {
+        return () => clearStreamTimer();
+    }, []);
+
     const onStartNewChat = () => {
         if (isSending) return;
+        clearStreamTimer();
         setDraft('');
         setError('');
         setMessages([buildAssistantGreeting()]);
@@ -80,6 +93,7 @@ const AiChatPage = () => {
 
         setDraft('');
         setError('');
+        clearStreamTimer();
         setIsSending(true);
         setMessages((prev) => [...prev, userMessage]);
         scrollToBottom();
@@ -96,18 +110,37 @@ const AiChatPage = () => {
                 throw new Error('Пустой ответ от AI');
             }
 
+            const assistantMessageId = `assistant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+            const words = assistantText.split(/\s+/).filter(Boolean);
+            let currentWord = 0;
+
             setMessages((prev) => [
                 ...prev,
                 {
-                    id: `assistant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+                    id: assistantMessageId,
                     role: 'assistant',
-                    content: assistantText
+                    content: ''
                 }
             ]);
             scrollToBottom();
+
+            streamTimerRef.current = setInterval(() => {
+                currentWord += 1;
+                const nextChunk = words.slice(0, currentWord).join(' ');
+
+                setMessages((prev) => prev.map((item) => (
+                    item.id === assistantMessageId ? { ...item, content: nextChunk } : item
+                )));
+                scrollToBottom();
+
+                if (currentWord >= words.length) {
+                    clearStreamTimer();
+                    setIsSending(false);
+                }
+            }, 80);
         } catch (err) {
+            clearStreamTimer();
             setError(err.response?.data?.message || err.message || 'Ошибка AI чата');
-        } finally {
             setIsSending(false);
         }
     };
@@ -133,7 +166,13 @@ const AiChatPage = () => {
                     ))}
                     {isSending && (
                         <div className={`${styles.messageRow} ${styles.assistant}`}>
-                            <div className={`${styles.bubble} ${styles.typing}`}>Аиша печатает...</div>
+                            <div className={`${styles.bubble} ${styles.typingDotsBubble}`}>
+                                <span className={styles.typingDots}>
+                                    <span />
+                                    <span />
+                                    <span />
+                                </span>
+                            </div>
                         </div>
                     )}
                 </div>

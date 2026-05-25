@@ -57,7 +57,10 @@ const App = observer(() => {
     ];
     const isKnownRoute = knownRoutePatterns.some((pattern) => Boolean(matchPath({ path: pattern, end: true }, location.pathname)));
     const hideFooter = hideNavbar || !isKnownRoute;
-    const shouldShowFloatingAiButton = authStore.isAuth && authStore.user?.role !== 'admin' && !hideNavbar;
+    const shouldShowFloatingAiButton = authStore.isAuth
+        && authStore.user?.role !== 'admin'
+        && !hideNavbar
+        && location.pathname !== '/ai-chat';
 
     useEffect(() => {
         // Проверяем токен при загрузке вкладки

@@ -12,7 +12,7 @@ class SocialStore {
     companionRequests = [];
     myCompanionRequest = null;
 
-    searchPagination = { ...DEFAULT_PAGINATION, limit: 20 };
+    searchPagination = { ...DEFAULT_PAGINATION, limit: 10 };
     friendsPagination = { ...DEFAULT_PAGINATION };
     incomingPagination = { ...DEFAULT_PAGINATION };
     outgoingPagination = { ...DEFAULT_PAGINATION };
@@ -31,7 +31,7 @@ class SocialStore {
         makeAutoObservable(this);
     }
 
-    async searchUsers(q = '', page = 1, limit = 20) {
+    async searchUsers(q = '', page = 1, limit = 10) {
         this.isLoadingSearch = true;
         this.searchQuery = q;
         try {

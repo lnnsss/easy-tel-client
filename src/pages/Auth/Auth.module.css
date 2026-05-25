@@ -123,6 +123,10 @@
     .formPane {
         padding: 24px 14px;
         background: transparent;
+        min-height: 100vh;
+        min-height: 100svh;
+        align-items: center;
+        justify-content: center;
     }
 
     .splitCard {

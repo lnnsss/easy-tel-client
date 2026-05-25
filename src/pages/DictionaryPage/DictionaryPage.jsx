@@ -24,11 +24,12 @@ const DictionaryPage = observer(() => {
     const navigate = useNavigate();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false);
     const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(false);
+    const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
+    const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState('cards');
+    const [isMobileView, setIsMobileView] = useState(false);
     const [openedWordId, setOpenedWordId] = useState(null);
     const [openedTableWordId, setOpenedTableWordId] = useState(null);
     const [ttsLoadingKey, setTtsLoadingKey] = useState(null);
@@ -50,33 +51,60 @@ const DictionaryPage = observer(() => {
     });
     const [assessmentLoading, setAssessmentLoading] = useState(false);
 
-    const loadDictionaryPage = async (nextPage, mode = 'replace') => {
-        const isAppend = mode === 'append';
-        if (isAppend) setLoadingMore(true);
-        else setLoading(true);
+    const loadDictionaryPage = async (nextPage, query = '') => {
+        setLoading(true);
 
         try {
             const { data } = await $api.get('/dictionary', {
                 params: {
                     page: nextPage,
-                    limit: 20
+                    limit: 9,
+                    q: query || undefined
                 }
             });
             const nextItems = Array.isArray(data?.items) ? data.items : (Array.isArray(data) ? data : []);
-            setItems((prev) => (isAppend ? [...prev, ...nextItems] : nextItems));
+            setItems(nextItems);
             setPage(Number(data?.currentPage) || nextPage);
-            setHasMore(Boolean(data?.hasMore));
+            setTotalPages(Number(data?.totalPages) || 1);
             setTotalItems(Number(data?.totalItems) || nextItems.length);
         } catch (err) {
             console.error(err);
+            setItems([]);
+            setPage(1);
+            setTotalPages(1);
+            setTotalItems(0);
         } finally {
-            if (isAppend) setLoadingMore(false);
-            else setLoading(false);
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        loadDictionaryPage(1, 'replace');
+        const timer = setTimeout(() => {
+            setOpenedWordId(null);
+            setOpenedTableWordId(null);
+            loadDictionaryPage(1, searchQuery);
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    useEffect(() => {
+        loadDictionaryPage(1, '');
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return undefined;
+        const media = window.matchMedia('(max-width: 760px)');
+        const applyMobileMode = (event) => {
+            const mobile = Boolean(event.matches);
+            setIsMobileView(mobile);
+            if (mobile) {
+                setViewMode('cards');
+            }
+        };
+        applyMobileMode(media);
+        media.addEventListener('change', applyMobileMode);
+        return () => media.removeEventListener('change', applyMobileMode);
     }, []);
 
     const loadAssessmentStatus = async () => {
@@ -160,9 +188,14 @@ const DictionaryPage = observer(() => {
         const cleanText = String(text || '').trim();
         if (!cleanText) return;
 
-        if (ttsPlayingKey === targetKey && audioObj) {
-            audioObj.pause();
-            audioObj.currentTime = 0;
+        if (ttsPlayingKey === targetKey) {
+            if (audioObj) {
+                audioObj.pause();
+                audioObj.currentTime = 0;
+            }
+            if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
             setTtsPlayingKey(null);
             return;
         }
@@ -208,7 +241,24 @@ const DictionaryPage = observer(() => {
         } catch (err) {
             const browserBlocked = err?.name === 'NotAllowedError';
             if (!browserBlocked) {
-                setTtsError(err?.response?.data?.message || 'Не удалось озвучить слово');
+                try {
+                    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(cleanText);
+                        utterance.lang = 'tt-RU';
+                        utterance.onend = () => setTtsPlayingKey(null);
+                        utterance.onerror = () => {
+                            setTtsPlayingKey(null);
+                            setTtsError(err?.response?.data?.message || 'Не удалось озвучить слово');
+                        };
+                        window.speechSynthesis.cancel();
+                        window.speechSynthesis.speak(utterance);
+                        setTtsPlayingKey(targetKey);
+                    } else {
+                        setTtsError(err?.response?.data?.message || 'Не удалось озвучить слово');
+                    }
+                } catch {
+                    setTtsError(err?.response?.data?.message || 'Не удалось озвучить слово');
+                }
             }
         } finally {
             setTtsLoadingKey(null);
@@ -264,35 +314,46 @@ const DictionaryPage = observer(() => {
                             Самый высокий уровень: B2.
                         </div>
                     </div>
-                    <div className={styles.viewSwitch}>
-                    <button
-                        className={`${styles.switchBtn} ${viewMode === 'table' ? styles.switchBtnActive : ''}`}
-                        onClick={() => setViewMode('table')}
-                        aria-label="Режим таблицы"
-                        type="button"
-                    >
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <rect x="3" y="4" width="18" height="16" rx="2"></rect>
-                            <path d="M3 10h18M9 4v16M15 4v16"></path>
-                        </svg>
-                        <span>Таблица</span>
-                    </button>
-                    <button
-                        className={`${styles.switchBtn} ${viewMode === 'cards' ? styles.switchBtnActive : ''}`}
-                        onClick={() => setViewMode('cards')}
-                        aria-label="Режим карточек"
-                        type="button"
-                    >
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <rect x="3" y="4" width="8" height="7" rx="1.5"></rect>
-                            <rect x="13" y="4" width="8" height="7" rx="1.5"></rect>
-                            <rect x="3" y="13" width="8" height="7" rx="1.5"></rect>
-                            <rect x="13" y="13" width="8" height="7" rx="1.5"></rect>
-                        </svg>
-                        <span>Блоки</span>
-                    </button>
-                    </div>
+                    {!isMobileView && (
+                        <div className={styles.viewSwitch}>
+                            <button
+                                className={`${styles.switchBtn} ${viewMode === 'table' ? styles.switchBtnActive : ''}`}
+                                onClick={() => setViewMode('table')}
+                                aria-label="Режим таблицы"
+                                type="button"
+                            >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                                    <path d="M3 10h18M9 4v16M15 4v16"></path>
+                                </svg>
+                                <span>Таблица</span>
+                            </button>
+                            <button
+                                className={`${styles.switchBtn} ${viewMode === 'cards' ? styles.switchBtnActive : ''}`}
+                                onClick={() => setViewMode('cards')}
+                                aria-label="Режим карточек"
+                                type="button"
+                            >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="4" width="8" height="7" rx="1.5"></rect>
+                                    <rect x="13" y="4" width="8" height="7" rx="1.5"></rect>
+                                    <rect x="3" y="13" width="8" height="7" rx="1.5"></rect>
+                                    <rect x="13" y="13" width="8" height="7" rx="1.5"></rect>
+                                </svg>
+                                <span>Блоки</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
+            </div>
+            <div className={styles.searchRow}>
+                <input
+                    type="text"
+                    className={styles.searchInput}
+                    placeholder="Поиск по русскому, татарскому или английскому слову"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
             </div>
             {ttsError && <p className={styles.ttsError}>{ttsError}</p>}
 
@@ -300,7 +361,7 @@ const DictionaryPage = observer(() => {
                 <div className={styles.empty}>
                     <p>Вы еще не добавили ни одного слова в словарь.</p>
                 </div>
-            ) : viewMode === 'cards' ? (
+            ) : (isMobileView || viewMode === 'cards') ? (
                 <div className={styles.grid}>
                     {items.map(item => {
                         const isOpened = openedWordId === item._id;
@@ -577,15 +638,24 @@ const DictionaryPage = observer(() => {
                 </div>
             )}
 
-            {hasMore && (
-                <div className={styles.loadMoreWrap}>
+            {totalPages > 1 && (
+                <div className={styles.paginationWrap}>
                     <button
                         type="button"
-                        className={styles.loadMoreBtn}
-                        onClick={() => loadDictionaryPage(page + 1, 'append')}
-                        disabled={loadingMore}
+                        className={styles.paginationBtn}
+                        onClick={() => loadDictionaryPage(page - 1, searchQuery)}
+                        disabled={loading || page <= 1}
                     >
-                        {loadingMore ? 'Загрузка...' : 'Загрузить еще'}
+                        ←
+                    </button>
+                    <span className={styles.paginationInfo}>{page} / {totalPages}</span>
+                    <button
+                        type="button"
+                        className={styles.paginationBtn}
+                        onClick={() => loadDictionaryPage(page + 1, searchQuery)}
+                        disabled={loading || page >= totalPages}
+                    >
+                        →
                     </button>
                 </div>
             )}

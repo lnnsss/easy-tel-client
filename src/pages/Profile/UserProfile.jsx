@@ -156,26 +156,13 @@ const UserProfile = ({ user }) => {
             displayValue: String(coins),
             label: 'Монет',
             description: 'Текущее количество монет, заработанных за учебную активность и достижения.'
-        },
-        {
-            key: 'discipline',
-            displayValue: `${analytics?.discipline?.score ?? 0}/100`,
-            label: 'Дисциплина',
-            description: 'Оценка регулярности занятий и стабильности учебной активности.'
-        },
-        {
-            key: 'motivation',
-            displayValue: `${analytics?.motivation?.score ?? 0}/100`,
-            label: 'Мотивация',
-            description: 'Оценка вовлеченности в учебу: насколько активно вы продолжаете прогресс.'
         }
     ];
 
     const statByKey = Object.fromEntries(stats.map((s) => [s.key, s]));
     const statRows = [
         ['streak', 'wordsWeek', 'wordsTotal'],
-        ['achievementsCount', 'coins'],
-        ['discipline', 'motivation']
+        ['achievementsCount', 'coins']
     ];
     const isDarkTheme = typeof document !== 'undefined' && document.documentElement.getAttribute('data-theme') === 'dark';
     const headerTopBg = useMemo(() => {
@@ -219,7 +206,10 @@ const UserProfile = ({ user }) => {
                         style={{ backgroundColor: headerTopBg, color: headerTopTextColor, '--profile-top-text': headerTopTextColor }}
                     >
                         <div className={styles.avatarRow}>
-                            <div className={styles.avatarCircle}>
+                            <div
+                                className={styles.avatarCircle}
+                                style={!avatarSrc && user.avatarAccentColor ? { backgroundColor: user.avatarAccentColor } : undefined}
+                            >
                                 {avatarSrc && !avatarLoadFailed ? (
                                     <img
                                         src={avatarSrc}
