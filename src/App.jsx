@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { matchPath, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useStores } from './stores/StoreContext';
 import AppRouter from './router/AppRouter';
 import Navbar from './components/Navbar/Navbar';
@@ -10,6 +11,7 @@ import AchievementToast from './components/AchievementToast/AchievementToast';
 import CourseService from './services/CourseService';
 
 const App = observer(() => {
+    const { t } = useTranslation();
     const { authStore, uiStore } = useStores();
     const navigate = useNavigate();
     const location = useLocation();
@@ -81,14 +83,14 @@ const App = observer(() => {
 
         const isApproved = notice.status === 'approved';
         uiStore.showModal({
-            title: isApproved ? 'Роль автора одобрена' : 'Решение по заявке автора',
+            title: isApproved ? t('app.modals.author_approved_title') : t('app.modals.author_decision_title'),
             message: isApproved
-                ? 'Поздравляем! Вам выдана роль автора курсов.'
+                ? t('app.modals.author_approved_message')
                 : (notice.adminComment
-                    ? `Заявка отклонена.\nКомментарий администратора: ${notice.adminComment}`
-                    : 'Заявка отклонена. Вы можете подать новую заявку в любое время.'),
+                    ? `${t('app.modals.author_rejected_with_comment')}\n${t('app.modals.admin_comment')}: ${notice.adminComment}`
+                    : t('app.modals.author_rejected_message')),
             variant: isApproved ? 'success' : 'info',
-            secondaryLabel: 'Закрыть',
+            secondaryLabel: t('common.close'),
             onSecondary: async () => {
                 uiStore.closeModal();
                 await authStore.markAuthorRequestSeen(notice._id);
@@ -118,19 +120,19 @@ const App = observer(() => {
                 const reward = data.currentReward || { coins: 0, studyPoints: 0 };
                 dailyRewardPromptedRef.current = userId;
                 const rewardParts = [];
-                if ((Number(reward.coins) || 0) > 0) rewardParts.push(`${reward.coins} монет`);
-                if ((Number(reward.studyPoints) || 0) > 0) rewardParts.push(`${reward.studyPoints} опыта`);
-                if (!rewardParts.length) rewardParts.push('без бонусов');
+                if ((Number(reward.coins) || 0) > 0) rewardParts.push(`${reward.coins} ${t('navbar.rewards_modal.coins')}`);
+                if ((Number(reward.studyPoints) || 0) > 0) rewardParts.push(`${reward.studyPoints} ${t('navbar.rewards_modal.xp')}`);
+                if (!rewardParts.length) rewardParts.push(t('app.modals.no_bonus'));
                 const message = day <= 1
-                    ? `Вы впервые на платформе! Ваша награда на сегодня: ${rewardParts.join(', ')}.`
-                    : `Вы посещаете платформу ${day} дней подряд! Ваша награда на сегодня: ${rewardParts.join(', ')}.`;
+                    ? `${t('app.modals.first_day_reward')} ${rewardParts.join(', ')}.`
+                    : `${t('app.modals.streak_reward_prefix', { day })} ${rewardParts.join(', ')}.`;
 
                 uiStore.showModal({
-                    title: 'Награда за вход',
+                    title: t('app.modals.login_reward_title'),
                     message,
                     disableClose: true,
                     variant: 'success',
-                    primaryLabel: 'Забрать',
+                    primaryLabel: t('app.modals.claim'),
                     secondaryLabel: '',
                     onPrimary: async () => {
                         try {
@@ -139,10 +141,10 @@ const App = observer(() => {
                             uiStore.closeModal();
                         } catch (e) {
                             uiStore.showModal({
-                                title: 'Не удалось забрать награду',
-                                message: e.response?.data?.message || 'Попробуйте еще раз',
+                                title: t('app.modals.claim_failed_title'),
+                                message: e.response?.data?.message || t('app.modals.try_again'),
                                 variant: 'error',
-                                secondaryLabel: 'Закрыть'
+                                secondaryLabel: t('common.close')
                             });
                         }
                     },
@@ -177,7 +179,7 @@ const App = observer(() => {
         setIsAchievementClosing(false);
         setActiveAchievement({
             ...next,
-            title: `Новое достижение: ${next.title}`
+            title: `${t('app.achievement.new_prefix')} ${next.title}`
         });
     }, [activeAchievement, uiStore, uiStore.achievementQueue.length]);
 
@@ -210,7 +212,7 @@ const App = observer(() => {
 
     // Если приложение проверяет токен в данный момент
     if (authStore.isLoading && !authStore.isAuth && localStorage.getItem('token')) {
-        return <div style={{textAlign: 'center', marginTop: '50px'}}>Загрузка сессии...</div>;
+        return <div style={{textAlign: 'center', marginTop: '50px'}}>{t('app.loading_session')}</div>;
     }
 
     return (
@@ -227,7 +229,7 @@ const App = observer(() => {
                         borderBottom: '1px solid #f0e1a6'
                     }}
                 >
-                    Восстанавливаем соединение с сервером...
+                    {t('app.reconnecting')}
                 </div>
             )}
             <main className="app-main">
@@ -238,7 +240,7 @@ const App = observer(() => {
                     type="button"
                     className="floating-ai-button"
                     onClick={() => navigate('/ai-chat')}
-                    aria-label="Открыть AI чат-бот Аиша"
+                    aria-label={t('pages.ai_chat.title')}
                 >
                     AI
                 </button>
@@ -258,8 +260,8 @@ const App = observer(() => {
                 content={uiStore.modal.content}
                 variant={uiStore.modal.variant}
                 disableClose={uiStore.modal.disableClose}
-                primaryLabel={uiStore.modal.primaryLabel || 'В словарь'}
-                secondaryLabel={uiStore.modal.secondaryLabel || 'Закрыть'}
+                primaryLabel={uiStore.modal.primaryLabel || t('common.to_dictionary')}
+                secondaryLabel={uiStore.modal.secondaryLabel || t('common.close')}
                 onPrimary={uiStore.modal.onPrimary || (uiStore.modal.primaryRoute ? () => {
                     navigate(uiStore.modal.primaryRoute);
                     uiStore.closeModal();

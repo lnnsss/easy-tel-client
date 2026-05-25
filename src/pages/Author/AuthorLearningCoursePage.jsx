@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import CourseService from '../../services/CourseService';
 import { useStores } from '../../stores/StoreContext';
 import { getTopicBlockValidationErrors, hasTopicBlockValidationErrors } from '../../utils/topicContent';
@@ -17,6 +18,7 @@ const moveItem = (items, fromIndex, toIndex) => {
 };
 
 const AuthorLearningCoursePage = () => {
+    const { t } = useTranslation();
     const { uiStore } = useStores();
     const navigate = useNavigate();
     const { courseId } = useParams();
@@ -253,7 +255,7 @@ const AuthorLearningCoursePage = () => {
             <div className="app-page-top">
                 <div>
                     <Link to="/author/learning" className={styles.back}>← К моим курсам</Link>
-                    <h1 className="app-page-title">{course?.title || 'Курс'}</h1>
+                    <h1 className="app-page-title">{course?.title || t('pages.course.fallback_title')}</h1>
                     {course?.description && <p className="app-page-subtitle">{course.description}</p>}
                 </div>
             </div>
@@ -332,11 +334,11 @@ const AuthorLearningCoursePage = () => {
                                 <small>{statusLabel(topic.status)}</small>
                             </div>
                             <div className={styles.topicActions}>
-                                <button type="button" disabled={editingBlocked} onClick={() => navigate(`/author/learning/courses/${courseId}/topics/${topic._id}/edit`)}>Редактировать</button>
+                                <button type="button" disabled={editingBlocked} onClick={() => navigate(`/author/learning/courses/${courseId}/topics/${topic._id}/edit`)}>{t('common.actions.edit')}</button>
                                 <button type="button" disabled={editingBlocked} onClick={() => toggleTopicStatus(topic)}>
-                                    {topic.status === 'published' ? 'В черновик' : 'Опубликовать'}
+                                    {topic.status === 'published' ? t('common.actions.to_draft') : t('common.actions.publish')}
                                 </button>
-                                <button type="button" disabled={editingBlocked} onClick={() => removeTopic(topic._id)}>Удалить</button>
+                                <button type="button" disabled={editingBlocked} onClick={() => removeTopic(topic._id)}>{t('common.actions.delete')}</button>
                             </div>
                         </div>
                     ))}
@@ -347,7 +349,7 @@ const AuthorLearningCoursePage = () => {
                     className={styles.newTopicButton}
                     onClick={() => navigate(`/author/learning/courses/${courseId}/topics/new`)}
                 >
-                    Новая тема
+                    {t('common.actions.new_topic')}
                 </button>
             </section>
         </div>

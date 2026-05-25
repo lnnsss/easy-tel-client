@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Auth.module.css';
 
@@ -12,6 +13,7 @@ const PASSWORD_ALLOWED_REGEX = /^[A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]+
 const PASSWORD_COMPLEXITY_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/;
 
 const RegisterPage = observer(() => {
+    const { t } = useTranslation();
     const { authStore } = useStores();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -37,47 +39,47 @@ const RegisterPage = observer(() => {
         const lastName = form.lastName.trim();
 
         if (form.password !== form.confirmPassword) {
-            setError('Пароли не совпадают');
+            setError(t('auth.register.errors.password_mismatch'));
             return;
         }
 
         if (!NAME_REGEX.test(firstName) || !NAME_REGEX.test(lastName)) {
-            setError('Имя и фамилия должны содержать только буквы');
+            setError(t('auth.register.errors.name_letters_only'));
             return;
         }
 
         if (firstName.length < 3 || lastName.length < 3) {
-            setError('Имя и фамилия должны содержать минимум 3 символа');
+            setError(t('auth.register.errors.name_min_len'));
             return;
         }
 
         if (!EMAIL_REGEX.test(email)) {
-            setError('Некорректный email');
+            setError(t('auth.register.errors.invalid_email'));
             return;
         }
 
         if (username.length < 3) {
-            setError('Username должен содержать минимум 3 символа');
+            setError(t('auth.register.errors.username_min_len'));
             return;
         }
 
         if (!USERNAME_ALLOWED_REGEX.test(username) || !USERNAME_HAS_LETTER_REGEX.test(username)) {
-            setError('Username: только английские буквы и цифры, минимум одна буква');
+            setError(t('auth.register.errors.username_rule'));
             return;
         }
 
         if (form.password.length < 8) {
-            setError('Пароль должен содержать минимум 8 символов');
+            setError(t('auth.register.errors.password_min_len'));
             return;
         }
 
         if (!PASSWORD_ALLOWED_REGEX.test(form.password)) {
-            setError('Пароль может содержать только английские буквы, цифры и спецсимволы');
+            setError(t('auth.register.errors.password_allowed'));
             return;
         }
 
         if (!PASSWORD_COMPLEXITY_REGEX.test(form.password)) {
-            setError('Пароль должен содержать заглавные/строчные буквы, цифру и спецсимвол');
+            setError(t('auth.register.errors.password_complexity'));
             return;
         }
 
@@ -102,12 +104,12 @@ const RegisterPage = observer(() => {
                 <div className={styles.visualPane} aria-hidden="true" />
                 <div className={styles.formPane}>
                     <form className={`${styles.card} ${styles.splitCard}`} onSubmit={onSubmit}>
-                        <h1>Регистрация в <Link to="/" className={styles.brand}>EasyTel</Link></h1>
+                        <h1>{t('auth.register.title')} <Link to="/" className={styles.brand}>EasyTel</Link></h1>
                         {error && <p className={styles.error}>{error}</p>}
 
                         <div className={styles.grid}>
                             <input
-                                placeholder="Имя"
+                                placeholder={t('auth.register.first_name')}
                                 value={form.firstName}
                                 onChange={e => {
                                     setForm({...form, firstName: e.target.value});
@@ -116,7 +118,7 @@ const RegisterPage = observer(() => {
                                 required
                             />
                             <input
-                                placeholder="Фамилия"
+                                placeholder={t('auth.register.last_name')}
                                 value={form.lastName}
                                 onChange={e => {
                                     setForm({...form, lastName: e.target.value});
@@ -126,7 +128,7 @@ const RegisterPage = observer(() => {
                             />
                         </div>
                         <input
-                            placeholder="Username"
+                            placeholder={t('auth.register.username')}
                             value={form.username}
                             onChange={e => {
                                 setForm({...form, username: e.target.value});
@@ -136,7 +138,7 @@ const RegisterPage = observer(() => {
                         />
                         <input
                             type="email"
-                            placeholder="Email"
+                            placeholder={t('auth.register.email')}
                             value={form.email}
                             onChange={e => {
                                 setForm({...form, email: e.target.value});
@@ -149,7 +151,7 @@ const RegisterPage = observer(() => {
                             <input
                                 className={styles.passwordInput}
                                 type={showPassword ? 'text' : 'password'}
-                                placeholder="Пароль"
+                                placeholder={t('auth.register.password')}
                                 value={form.password}
                                 onChange={e => {
                                     setForm({...form, password: e.target.value});
@@ -161,7 +163,7 @@ const RegisterPage = observer(() => {
                                 type="button"
                                 className={styles.togglePasswordBtn}
                                 onClick={() => setShowPassword(prev => !prev)}
-                                aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                                aria-label={showPassword ? t('auth.register.aria_hide_password') : t('auth.register.aria_show_password')}
                             >
                                 <svg
                                     className={styles.eyeIcon}
@@ -184,7 +186,7 @@ const RegisterPage = observer(() => {
                             <input
                                 className={styles.passwordInput}
                                 type={showConfirmPassword ? 'text' : 'password'}
-                                placeholder="Подтвердите пароль"
+                                placeholder={t('auth.register.confirm_password')}
                                 value={form.confirmPassword}
                                 onChange={e => {
                                     setForm({...form, confirmPassword: e.target.value});
@@ -196,7 +198,7 @@ const RegisterPage = observer(() => {
                                 type="button"
                                 className={styles.togglePasswordBtn}
                                 onClick={() => setShowConfirmPassword(prev => !prev)}
-                                aria-label={showConfirmPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                                aria-label={showConfirmPassword ? t('auth.register.aria_hide_password') : t('auth.register.aria_show_password')}
                             >
                                 <svg
                                     className={styles.eyeIcon}
@@ -216,9 +218,9 @@ const RegisterPage = observer(() => {
                         </div>
 
                         <button type="submit" className={styles.mainBtn} disabled={authStore.isLoading}>
-                            {authStore.isLoading ? 'Создаем аккаунт...' : 'Зарегистрироваться'}
+                            {authStore.isLoading ? t('auth.register.loading') : t('auth.register.submit')}
                         </button>
-                        <p className={styles.footerText}>Уже есть аккаунт? <Link to="/login">Войти</Link></p>
+                        <p className={styles.footerText}>{t('auth.register.login_prefix')} <Link to="/login">{t('auth.register.login_link')}</Link></p>
                     </form>
                 </div>
             </div>

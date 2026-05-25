@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import CourseService from '../../services/CourseService';
 import { useStores } from '../../stores/StoreContext';
 import styles from './AdminLearningPage.module.css';
@@ -36,6 +37,7 @@ const TrashIcon = () => (
 );
 
 const AdminLearningPage = () => {
+    const { t } = useTranslation();
     const { uiStore } = useStores();
     const navigate = useNavigate();
     const [categories, setCategories] = useState([]);
@@ -250,8 +252,8 @@ const AdminLearningPage = () => {
         <div className={`${styles.page} app-page-shell`}>
             <div className="app-page-top">
                 <div>
-                    <h1 className="app-page-title">Админ: материал</h1>
-                    <p className="app-page-subtitle">Управление категориями и курсами.</p>
+                    <h1 className="app-page-title">{t('pages.admin.materials_title')}</h1>
+                    <p className="app-page-subtitle">{t('pages.admin.materials_subtitle')}</p>
                 </div>
             </div>
             {error && <p className={styles.error}>{error}</p>}
@@ -266,7 +268,7 @@ const AdminLearningPage = () => {
                             placeholder="Новая категория"
                             required
                         />
-                        <button type="submit">Создать</button>
+                        <button type="submit">{t('common.actions.create')}</button>
                     </form>
                 </div>
                 <div className={styles.categoryGrid}>
@@ -370,7 +372,7 @@ const AdminLearningPage = () => {
                                     </button>
                                 </>
                             )}
-                            <button type="button" onClick={() => removeCourse(course._id)}>Удалить</button>
+                            <button type="button" onClick={() => removeCourse(course._id)}>{t('common.actions.delete')}</button>
                         </div>
                     </div>
                 ))}

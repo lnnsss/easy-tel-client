@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import CourseService from '../../services/CourseService';
 import { useStores } from '../../stores/StoreContext';
 import styles from './AdminMiscPage.module.css';
@@ -16,6 +17,7 @@ const DEFAULT_DAYS = Array.from({ length: 7 }, (_, idx) => ({
 }));
 
 const AdminMiscPage = () => {
+    const { t } = useTranslation();
     const { uiStore } = useStores();
     const [courses, setCourses] = useState([]);
     const [rewards, setRewards] = useState(DEFAULT_DAYS);
@@ -117,8 +119,8 @@ const AdminMiscPage = () => {
         <div className={`${styles.page} app-page-shell`}>
             <div className="app-page-top">
                 <div>
-                    <h1 className="app-page-title">Админ: остальное</h1>
-                    <p className="app-page-subtitle">Закрепление курса и ежедневные награды.</p>
+                    <h1 className="app-page-title">{t('pages.admin.misc_title')}</h1>
+                    <p className="app-page-subtitle">{t('pages.admin.misc_subtitle')}</p>
                 </div>
             </div>
             {error && <p className={styles.error}>{error}</p>}

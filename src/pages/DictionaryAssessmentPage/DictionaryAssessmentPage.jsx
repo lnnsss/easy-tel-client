@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import $api from '../../api/instance';
 import styles from './DictionaryAssessmentPage.module.css';
 
 const DictionaryAssessmentPage = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
@@ -73,7 +75,7 @@ const DictionaryAssessmentPage = () => {
         return (
             <div className={styles.center}>
                 <p>{error}</p>
-                <button type="button" className={styles.actionBtn} onClick={() => navigate('/dictionary')}>Вернуться в словарь</button>
+                <button type="button" className={styles.actionBtn} onClick={() => navigate('/dictionary')}>{t('common.actions.return_to_dictionary')}</button>
             </div>
         );
     }
@@ -85,7 +87,7 @@ const DictionaryAssessmentPage = () => {
                     <h1>Тест завершен</h1>
                     <p>Правильных ответов: <strong>{result.correctAnswers}/{result.totalQuestions}</strong></p>
                     <p>Ваш уровень на неделю: <strong>{result.level}</strong></p>
-                    <button type="button" className={styles.actionBtn} onClick={() => navigate('/dictionary')}>Вернуться в словарь</button>
+                    <button type="button" className={styles.actionBtn} onClick={() => navigate('/dictionary')}>{t('common.actions.return_to_dictionary')}</button>
                 </div>
             </div>
         );
@@ -118,14 +120,14 @@ const DictionaryAssessmentPage = () => {
                             })}
                         </div>
                         <div className={styles.actions}>
-                            <button type="button" className={styles.secondaryBtn} onClick={() => navigate('/dictionary')}>Выйти</button>
+                            <button type="button" className={styles.secondaryBtn} onClick={() => navigate('/dictionary')}>{t('common.actions.exit')}</button>
                             <button
                                 type="button"
                                 className={styles.actionBtn}
                                 disabled={selectedOption === undefined || submitting}
                                 onClick={onNext}
                             >
-                                {submitting ? 'Проверяем...' : (isLast ? 'Завершить тест' : 'Следующее слово')}
+                                {submitting ? t('common.actions.checking') : (isLast ? t('common.actions.finish_test') : t('common.actions.next_word'))}
                             </button>
                         </div>
                     </>

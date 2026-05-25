@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useStores } from '../../stores/StoreContext';
 import styles from './ChatsPage.module.css';
 
@@ -99,6 +100,7 @@ const VoiceMessagePlayer = ({ src, messageId, isUnlistened = false, onListened =
 };
 
 const ChatsPage = observer(() => {
+    const { t } = useTranslation();
     const { chatStore, authStore } = useStores();
     const [searchParams] = useSearchParams();
     const [message, setMessage] = useState('');
@@ -381,7 +383,7 @@ const ChatsPage = observer(() => {
     return (
         <div className="app-page-shell">
             <div className="app-page-top">
-                <h1 className="app-page-title">Чаты</h1>
+                <h1 className="app-page-title">{t('pages.chats.title')}</h1>
             </div>
             <div className={styles.container}>
                 <aside className={styles.sidebar}>
@@ -452,7 +454,7 @@ const ChatsPage = observer(() => {
                                     </button>
                                     {isChatMenuOpen && (
                                         <div className={styles.chatMenuPopover} onClick={(e) => e.stopPropagation()}>
-                                            <button type="button" onClick={onDeleteConversation}>Удалить чат</button>
+                                            <button type="button" onClick={onDeleteConversation}>{t('common.actions.delete_chat')}</button>
                                         </div>
                                     )}
                                 </div>
@@ -504,7 +506,7 @@ const ChatsPage = observer(() => {
                                                         className={styles.messageInlineMenu}
                                                         onClick={(e) => e.stopPropagation()}
                                                     >
-                                                        <button type="button" onClick={onDeleteMessage}>Удалить сообщение</button>
+                                                        <button type="button" onClick={onDeleteMessage}>{t('common.actions.delete_message')}</button>
                                                     </div>
                                                 )}
                                             </div>
@@ -536,7 +538,7 @@ const ChatsPage = observer(() => {
                                             maxLength={2000}
                                             disabled={isRecording}
                                         />
-                                        <button type="submit">Отправить</button>
+                                        <button type="submit">{t('common.actions.send')}</button>
                                         <button
                                             type="button"
                                             className={`${styles.voiceBtn} ${isRecording ? styles.voiceBtnRecording : ''}`}
@@ -571,8 +573,8 @@ const ChatsPage = observer(() => {
                                     <div className={styles.voicePreview}>
                                         <audio controls preload="metadata" src={recordingPreview.url} className={styles.voicePlayer} />
                                         <div className={styles.voicePreviewActions}>
-                                            <button type="button" className={styles.voiceDeleteBtn} onClick={removeRecordingPreview}>Удалить</button>
-                                            <button type="button" className={styles.voiceSendBtn} onClick={sendRecordingPreview}>Отправить</button>
+                                            <button type="button" className={styles.voiceDeleteBtn} onClick={removeRecordingPreview}>{t('common.actions.delete')}</button>
+                                            <button type="button" className={styles.voiceSendBtn} onClick={sendRecordingPreview}>{t('common.actions.send')}</button>
                                         </div>
                                     </div>
                                 )}

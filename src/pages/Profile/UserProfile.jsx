@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Profile.module.css';
 import CharacterPreviewCard from '../../components/CharacterPreviewCard/CharacterPreviewCard';
 
 const UserProfile = ({ user }) => {
+    const { t } = useTranslation();
     const { authStore, uiStore } = useStores();
     const navigate = useNavigate();
     const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
@@ -299,7 +301,7 @@ const UserProfile = ({ user }) => {
                                 <input type="file" accept="image/*" hidden onChange={onAvatarChange} />
                             </label>
                         </div>
-                        <button type="submit" className={styles.saveBtn}>Сохранить</button>
+                        <button type="submit" className={styles.saveBtn}>{t('common.actions.save')}</button>
                     </form>
                 )}
             </div>

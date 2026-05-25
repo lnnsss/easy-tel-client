@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import AdminService from '../../services/AdminService';
 import { useStores } from '../../stores/StoreContext';
 import styles from './AdminUsersPage.module.css';
@@ -53,6 +54,7 @@ const TEACHING_LEVEL_LABEL = {
 };
 
 const AdminUsersPage = () => {
+    const { t } = useTranslation();
     const { uiStore } = useStores();
     const [users, setUsers] = useState([]);
     const [search, setSearch] = useState('');
@@ -391,8 +393,8 @@ const AdminUsersPage = () => {
         <div className={`${styles.page} app-page-shell`}>
             <header className={`${styles.header} app-page-top`}>
                 <div>
-                    <h1 className="app-page-title">Админ: пользователи</h1>
-                    <p className="app-page-subtitle">Управление пользователями. Всего: <strong>{totalItems}</strong></p>
+                    <h1 className="app-page-title">{t('pages.admin.users_title')}</h1>
+                    <p className="app-page-subtitle">{t('pages.admin.users_subtitle')} <strong>{totalItems}</strong></p>
                 </div>
                 <input
                     type="text"

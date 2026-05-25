@@ -135,6 +135,27 @@
     gap: 10px;
 }
 
+.authorRequestOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1300;
+    background: rgba(15, 18, 24, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.authorRequestOverlay .authorRequestForm {
+    margin-top: 0;
+    width: min(760px, 100%);
+    max-height: min(88vh, 920px);
+    overflow: auto;
+    padding: 18px;
+    border-radius: 16px;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.28);
+}
+
 .authorRequestForm h3 {
     margin: 0;
 }
@@ -366,6 +387,19 @@
         grid-template-columns: 1fr;
     }
 
+    .authorRequestOverlay {
+        padding: 18px;
+        align-items: flex-start;
+    }
+
+    .authorRequestOverlay .authorRequestForm {
+        width: min(700px, 100%);
+        margin-top: 24px;
+        max-height: calc(100vh - 48px);
+        border-radius: 14px;
+        padding: 16px;
+    }
+
     .courseFooter {
         flex-direction: column;
         align-items: stretch;
@@ -378,5 +412,29 @@
 
     .courseDescription {
         display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .authorRequestOverlay {
+        padding: 10px;
+    }
+
+    .authorRequestOverlay .authorRequestForm {
+        width: 100%;
+        margin-top: 6px;
+        max-height: calc(100vh - 20px);
+        padding: 14px;
+        border-radius: 12px;
+    }
+
+    .authorRequestForm label {
+        font-size: 0.9rem;
+    }
+
+    .authorRequestForm input,
+    .authorRequestForm select,
+    .authorRequestForm textarea {
+        font-size: 16px;
     }
 }

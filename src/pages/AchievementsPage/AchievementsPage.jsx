@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import $api from '../../api/instance';
 import styles from './AchievementsPage.module.css';
 
@@ -9,6 +10,7 @@ const sortItems = (items, mode) => {
 };
 
 const AchievementsPage = () => {
+    const { t } = useTranslation();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [sortMode, setSortMode] = useState('completed');
@@ -34,7 +36,7 @@ const AchievementsPage = () => {
     return (
         <div className={`${styles.container} app-page-shell`}>
             <div className={`app-page-top ${styles.topRow}`}>
-                <h1 className="app-page-title">Достижения</h1>
+                <h1 className="app-page-title">{t('pages.achievements.title')}</h1>
                 <div className={styles.viewSwitch}>
                 <button
                     type="button"

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
+import { useTranslation } from 'react-i18next';
 import $api from '../../api/instance';
 import { useStores } from '../../stores/StoreContext';
 import AppAvatar from '../../components/AppAvatar/AppAvatar';
 import styles from './HomePage.module.css';
 
 const HomePage = observer(() => {
+    const { t } = useTranslation();
     const { authStore } = useStores();
     const isAdmin = authStore.user?.role === 'admin';
     const [ranking, setRanking] = useState([]);
@@ -144,7 +146,7 @@ const HomePage = observer(() => {
                                     type="button"
                                     className={styles.pinnedBannerClose}
                                     onClick={onClosePinnedBanner}
-                                    aria-label="Скрыть плашку"
+                                    aria-label={t('home.banner.close_aria')}
                                 >
                                     ×
                                 </button>
@@ -154,20 +156,17 @@ const HomePage = observer(() => {
 
                     <section className={styles.hero}>
                         <h1 className={styles.title}>Easy<span>Tel</span></h1>
-                        <p className={styles.description}>
-                            Платформа для изучения татарского языка, <br/>где объединены
-                            искусственный интеллект, компьютерное зрение <br/>и структурированный учебный материал.
-                        </p>
+                        <p className={styles.description}>{t('home.hero.description')}</p>
 
                         <div className={styles.ctaRow}>
                             <Link to={practiceRoute} className={`${styles.mainBtn} ${styles.mainBtnSecondary}`}>
-                                Сканер
+                                {t('home.hero.scanner')}
                             </Link>
                             <Link to={theoryRoute} className={`${styles.mainBtn} ${styles.mainBtnSecondary}`}>
-                                Материал
+                                {t('home.hero.materials')}
                             </Link>
                             <Link to={aiChatRoute} className={`${styles.mainBtn} ${styles.mainBtnPrimary} ${styles.mainBtnAi}`}>
-                                AI чат-бот
+                                {t('home.hero.ai_chat')}
                             </Link>
                         </div>
                     </section>
@@ -177,24 +176,21 @@ const HomePage = observer(() => {
             <div className={styles.container}>
             <section className={styles.features}>
                 <div className={styles.featureCard}>
-                    <h3>Интерактивность и мотивация</h3>
+                    <h3>{t('home.features.one.title')}</h3>
                     <p>
-                        Изучение строится через действие: сканируйте предметы, сразу получайте перевод и
-                        закрепляйте слова в игровой системе очков, прогресса и личных достижений.
+                        {t('home.features.one.text')}
                     </p>
                 </div>
                 <div className={styles.featureCard}>
-                    <h3>Качественный учебный материал</h3>
+                    <h3>{t('home.features.two.title')}</h3>
                     <p>
-                        Курсы собраны по темам и уровням сложности: от базовой лексики до устойчивых выражений.
-                        Материал помогает учить язык системно, а не фрагментами.
+                        {t('home.features.two.text')}
                     </p>
                 </div>
                 <div className={styles.featureCard}>
-                    <h3>Сохранение культурной ценности</h3>
+                    <h3>{t('home.features.three.title')}</h3>
                     <p>
-                        EasyTel поддерживает живой интерес к татарскому языку и помогает использовать его в
-                        повседневной жизни, сохраняя связь с культурой, историей и речевой традицией.
+                        {t('home.features.three.text')}
                     </p>
                 </div>
             </section>
@@ -202,7 +198,7 @@ const HomePage = observer(() => {
             <section className={styles.rankingWrapper}>
                 <div className={styles.rankingHeadRow}>
                     <h2 className={styles.rankingHeader}>
-                        {rankingMode === 'friends' ? 'Рейтинг среди друзей' : 'Глобальный рейтинг'}
+                        {rankingMode === 'friends' ? t('home.ranking.friends') : t('home.ranking.global')}
                     </h2>
                     {authStore.isAuth && !isAdmin && (
                         <div className={styles.rankingTabs}>
@@ -211,14 +207,14 @@ const HomePage = observer(() => {
                                 className={rankingMode === 'global' ? styles.rankingTabActive : styles.rankingTab}
                                 onClick={() => setRankingMode('global')}
                             >
-                                Общий
+                                {t('home.ranking.tab_global')}
                             </button>
                             <button
                                 type="button"
                                 className={rankingMode === 'friends' ? styles.rankingTabActive : styles.rankingTab}
                                 onClick={() => setRankingMode('friends')}
                             >
-                                Друзья
+                                {t('home.ranking.tab_friends')}
                             </button>
                         </div>
                     )}
@@ -251,7 +247,7 @@ const HomePage = observer(() => {
                                         </div>
                                         <div className={styles.rankingRight}>
                                             <span className={styles.wordBadge}>
-                                                {user.totalPoints ?? user.wordsCount} <span>очков</span>
+                                                {user.totalPoints ?? user.wordsCount} <span>{t('home.ranking.points')}</span>
                                             </span>
                                         </div>
                                     </div>
@@ -259,30 +255,30 @@ const HomePage = observer(() => {
                             );
                         })
                     ) : (
-                        !loading && <div className={styles.infoText}>В рейтинге пока нет участников</div>
+                        !loading && <div className={styles.infoText}>{t('home.ranking.empty')}</div>
                     )}
-                    {loading && <div className={styles.infoText}>Загрузка данных...</div>}
+                    {loading && <div className={styles.infoText}>{t('home.ranking.loading')}</div>}
                 </div>
             </section>
 
             {showDismissModal && (
                 <div className={styles.bannerModalOverlay} onClick={() => setShowDismissModal(false)}>
                     <div className={styles.bannerModal} onClick={(e) => e.stopPropagation()}>
-                        <h3>Скрыть плашку?</h3>
+                        <h3>{t('home.banner.dismiss_title')}</h3>
                         <label className={styles.bannerModalCheck}>
                             <input
                                 type="checkbox"
                                 checked={dontShowAgain}
                                 onChange={(e) => setDontShowAgain(e.target.checked)}
                             />
-                            Больше не показывать
+                            {t('home.banner.dismiss_checkbox')}
                         </label>
                         <div className={styles.bannerModalActions}>
                             <button type="button" className={styles.bannerModalCancel} onClick={() => setShowDismissModal(false)}>
-                                Отмена
+                                {t('home.banner.cancel')}
                             </button>
                             <button type="button" className={styles.bannerModalConfirm} onClick={confirmDismissBanner}>
-                                Скрыть
+                                {t('home.banner.hide')}
                             </button>
                         </div>
                     </div>

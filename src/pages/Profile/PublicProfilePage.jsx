@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import $api from '../../api/instance';
 import { useStores } from '../../stores/StoreContext';
 import profileStyles from './Profile.module.css';
@@ -7,6 +8,7 @@ import styles from './PublicProfilePage.module.css';
 import CharacterPreviewCard from '../../components/CharacterPreviewCard/CharacterPreviewCard';
 
 const PublicProfilePage = () => {
+    const { t } = useTranslation();
     const { chatStore, uiStore, authStore } = useStores();
     const { username } = useParams();
     const navigate = useNavigate();
@@ -210,7 +212,7 @@ const PublicProfilePage = () => {
                 <p>Возможно, профиль был удален или username изменился.</p>
                 <div className={styles.stateActions}>
                     <Link to="/" className={styles.primaryBtn}>На главную</Link>
-                    <button type="button" className={styles.secondaryBtn} onClick={() => navigate(-1)}>Назад</button>
+                    <button type="button" className={styles.secondaryBtn} onClick={() => navigate(-1)}>{t('common.actions.back')}</button>
                 </div>
             </div>
         );
@@ -223,7 +225,7 @@ const PublicProfilePage = () => {
                 <p>{error}</p>
                 <div className={styles.stateActions}>
                     <Link to="/" className={styles.primaryBtn}>На главную</Link>
-                    <button type="button" className={styles.secondaryBtn} onClick={() => navigate(-1)}>Назад</button>
+                    <button type="button" className={styles.secondaryBtn} onClick={() => navigate(-1)}>{t('common.actions.back')}</button>
                 </div>
             </div>
         );
@@ -236,7 +238,7 @@ const PublicProfilePage = () => {
                 <p>Возможно, профиль был удален или username изменился.</p>
                 <div className={styles.stateActions}>
                     <Link to="/" className={styles.primaryBtn}>На главную</Link>
-                    <button type="button" className={styles.secondaryBtn} onClick={() => navigate(-1)}>Назад</button>
+                    <button type="button" className={styles.secondaryBtn} onClick={() => navigate(-1)}>{t('common.actions.back')}</button>
                 </div>
             </div>
         );

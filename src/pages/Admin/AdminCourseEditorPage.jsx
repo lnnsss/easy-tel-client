@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import CourseService from '../../services/CourseService';
 import { useStores } from '../../stores/StoreContext';
 import styles from './AdminLearningPage.module.css';
@@ -13,6 +14,7 @@ const emptyCourse = {
 };
 
 const AdminCourseEditorPage = () => {
+    const { t } = useTranslation();
     const { uiStore } = useStores();
     const navigate = useNavigate();
     const [categories, setCategories] = useState([]);
@@ -94,7 +96,7 @@ const AdminCourseEditorPage = () => {
             <div className="app-page-top">
                 <div>
                     <Link to="/admin/learning" className={styles.back}>← К курсам</Link>
-                    <h1 className="app-page-title">Новый курс</h1>
+                    <h1 className="app-page-title">{t('pages.admin.new_course')}</h1>
                 </div>
             </div>
             {error ? <p className={styles.error}>{error}</p> : null}
@@ -149,8 +151,8 @@ const AdminCourseEditorPage = () => {
                     </label>
                 </div>
                 <div className={styles.equalActions}>
-                    <button type="submit" className={styles.successBtn} disabled={saving}>{saving ? 'Создаем...' : 'Создать курс'}</button>
-                    <button type="button" className={styles.ghostBtn} onClick={cancelCreate}>Отмена</button>
+                    <button type="submit" className={styles.successBtn} disabled={saving}>{saving ? 'Создаем...' : t('common.actions.create_course')}</button>
+                    <button type="button" className={styles.ghostBtn} onClick={cancelCreate}>{t('common.actions.cancel')}</button>
                 </div>
             </form>
         </div>

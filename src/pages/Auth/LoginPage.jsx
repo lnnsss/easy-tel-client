@@ -2,9 +2,11 @@ import {observer} from "mobx-react-lite";
 import {useStores} from "../../stores/StoreContext.js";
 import {useState} from "react";
 import {Link, useNavigate} from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import styles from "./Auth.module.css"
 
 const LoginPage = observer(() => {
+    const { t } = useTranslation();
     const { authStore } = useStores();
     const navigate = useNavigate();
     const [id, setId] = useState('');
@@ -30,10 +32,10 @@ const LoginPage = observer(() => {
                 <div className={styles.visualPane} aria-hidden="true" />
                 <div className={styles.formPane}>
                     <form className={`${styles.card} ${styles.splitCard}`} onSubmit={onLogin}>
-                        <h1>Вход в <Link to="/" className={styles.brand}>EasyTel</Link></h1>
+                        <h1>{t('auth.login.title')} <Link to="/" className={styles.brand}>EasyTel</Link></h1>
                         {err && <p className={styles.error}>{err}</p>}
                         <input
-                            placeholder="Email или Username"
+                            placeholder={t('auth.login.identifier')}
                             value={id}
                             onChange={e => {
                                 setId(e.target.value);
@@ -45,7 +47,7 @@ const LoginPage = observer(() => {
                             <input
                                 className={styles.passwordInput}
                                 type={showPassword ? 'text' : 'password'}
-                                placeholder="Пароль"
+                                placeholder={t('auth.login.password')}
                                 value={pass}
                                 onChange={e => {
                                     setPass(e.target.value);
@@ -57,7 +59,7 @@ const LoginPage = observer(() => {
                                 type="button"
                                 className={styles.togglePasswordBtn}
                                 onClick={() => setShowPassword((prev) => !prev)}
-                                aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                                aria-label={showPassword ? t('auth.login.aria_hide_password') : t('auth.login.aria_show_password')}
                             >
                                 <svg
                                     className={styles.eyeIcon}
@@ -76,13 +78,13 @@ const LoginPage = observer(() => {
                             </button>
                         </div>
                         <button className={styles.mainBtn} disabled={authStore.isLoading}>
-                            {authStore.isLoading ? 'Входим...' : 'Войти'}
+                            {authStore.isLoading ? t('auth.login.loading') : t('auth.login.submit')}
                         </button>
                         <button type="button" className={styles.googleBtn} onClick={onGoogleLogin}>
-                            Войти через Google
+                            {t('auth.login.google')}
                         </button>
-                        <p className={styles.footerText}>Забыли пароль? <Link to="/forgot-password">Сбросить</Link></p>
-                        <p className={styles.footerText}>Впервые здесь? <Link to="/register">Создать аккаунт</Link></p>
+                        <p className={styles.footerText}>{t('auth.login.forgot_prefix')} <Link to="/forgot-password">{t('auth.login.forgot_link')}</Link></p>
+                        <p className={styles.footerText}>{t('auth.login.register_prefix')} <Link to="/register">{t('auth.login.register_link')}</Link></p>
                     </form>
                 </div>
             </div>

@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Auth.module.css';
 
 const ForgotPasswordPage = observer(() => {
+    const { t } = useTranslation();
     const { authStore } = useStores();
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
@@ -23,23 +25,22 @@ const ForgotPasswordPage = observer(() => {
     return (
         <div className={styles.container}>
             <form className={styles.card} onSubmit={onSubmit}>
-                <h1>Сброс пароля</h1>
+                <h1>{t('auth.forgot.title')}</h1>
                 {error && <p className={styles.error}>{error}</p>}
                 {success && <p className={styles.success}>{success}</p>}
 
                 <input
                     type="email"
-                    placeholder="Ваш email"
+                    placeholder={t('auth.forgot.email')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                 />
-                <button className={styles.mainBtn} type="submit">Отправить ссылку</button>
-                <p className={styles.footerText}><Link to="/login">Вернуться ко входу</Link></p>
+                <button className={styles.mainBtn} type="submit">{t('auth.forgot.submit')}</button>
+                <p className={styles.footerText}><Link to="/login">{t('auth.forgot.back_login')}</Link></p>
             </form>
         </div>
     );
 });
 
 export default ForgotPasswordPage;
-

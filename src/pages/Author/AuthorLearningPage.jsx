@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import CourseService from '../../services/CourseService';
 import { useStores } from '../../stores/StoreContext';
 import styles from '../Admin/AdminLearningPage.module.css';
@@ -19,6 +20,7 @@ const reviewLabel = (value) => {
 };
 
 const AuthorLearningPage = () => {
+    const { t } = useTranslation();
     const { uiStore } = useStores();
     const navigate = useNavigate();
     const [categories, setCategories] = useState([]);
@@ -169,7 +171,7 @@ const AuthorLearningPage = () => {
         <div className={`${styles.page} app-page-shell`}>
             <div className="app-page-top">
                 <div>
-                    <h1 className="app-page-title">Курсы</h1>
+                    <h1 className="app-page-title">{t('pages.author.courses')}</h1>
                 </div>
             </div>
             {error && <p className={styles.error}>{error}</p>}

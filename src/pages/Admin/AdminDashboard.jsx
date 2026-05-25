@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import AdminService from '../../services/AdminService';
 import { useStores } from '../../stores/StoreContext';
 import styles from './AdminDashboard.module.css';
 
 const AdminDashboard = () => {
+    const { t } = useTranslation();
     const { uiStore } = useStores();
     const [words, setWords] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -129,8 +131,8 @@ const AdminDashboard = () => {
         <div className={`${styles.wrapper} app-page-shell`}>
             <header className={`${styles.header} app-page-top`}>
                 <div className={styles.titleArea}>
-                    <h1 className="app-page-title">Админ: словарь</h1>
-                    <p className="app-page-subtitle">Управление словарем.</p>
+                    <h1 className="app-page-title">{t('pages.admin.dictionary_title')}</h1>
+                    <p className="app-page-subtitle">{t('pages.admin.dictionary_subtitle')}</p>
                 </div>
                 <div className={styles.searchBar}>
                     <input
@@ -153,7 +155,7 @@ const AdminDashboard = () => {
                             <input placeholder="English" value={formData.nameEn} onChange={e => setFormData({ ...formData, nameEn: e.target.value })} required />
                             <input placeholder="Транскрипция" value={formData.transcription} onChange={e => setFormData({ ...formData, transcription: e.target.value })} />
                             <textarea placeholder="Описание" value={formData.descriptionRu} onChange={e => setFormData({ ...formData, descriptionRu: e.target.value })} />
-                            <button type="submit" className={styles.addBtn}>Создать слово</button>
+                            <button type="submit" className={styles.addBtn}>{t('common.actions.create')}</button>
                         </form>
                     </div>
                 </aside>
@@ -198,8 +200,8 @@ const AdminDashboard = () => {
                             <input value={editingWord.transcription} onChange={e => setEditingWord({...editingWord, transcription: e.target.value})} />
                             <textarea value={editingWord.descriptionRu} onChange={e => setEditingWord({...editingWord, descriptionRu: e.target.value})} />
                             <div className={styles.modalButtons}>
-                                <button type="button" onClick={() => setIsModalOpen(false)} className={styles.cancelBtn}>Отмена</button>
-                                <button type="submit" className={`${styles.addBtn} ${styles.modalSubmitBtn}`}>Сохранить</button>
+                                <button type="button" onClick={() => setIsModalOpen(false)} className={styles.cancelBtn}>{t('common.actions.cancel')}</button>
+                                <button type="submit" className={`${styles.addBtn} ${styles.modalSubmitBtn}`}>{t('common.actions.save')}</button>
                             </div>
                         </form>
                     </div>

@@ -1,0 +1,327 @@
+{
+  "navbar": {
+    "menu": {
+      "ai_chat": "AI чат-бот",
+      "translator": "Переводчик",
+      "scanner": "Сканер",
+      "dictionary": "Словарь",
+      "materials": "Материал",
+      "authoring": "Авторство",
+      "friends": "Друзья",
+      "chats": "Чаты",
+      "users": "Пользователи",
+      "misc": "Остальное"
+    },
+    "auth": {
+      "login": "Вход",
+      "register": "Регистрация"
+    },
+    "settings": {
+      "title": "Настройки",
+      "rewards7": "Награды 7 дней",
+      "referral": "Рефералка",
+      "achievements": "Достижения",
+      "character": "Персонаж",
+      "theme": "Тема",
+      "theme_dark": "Тёмная",
+      "theme_light": "Светлая",
+      "language": "Язык",
+      "logout": "Выйти",
+      "close": "Закрыть",
+      "logout_confirm_title": "Выйти из аккаунта?",
+      "logout_confirm_message": "Вы уверены, что хотите выйти?",
+      "logout_confirm_yes": "Выйти",
+      "logout_confirm_no": "Отмена",
+      "ref_unavailable_title": "Реферальная ссылка недоступна",
+      "ref_unavailable_message": "Попробуйте обновить страницу и открыть настройки снова.",
+      "copy_failed_title": "Не удалось скопировать",
+      "copy_failed_message": "Скопируйте ссылку вручную:",
+      "copy_toast": "Скопировано в буфер обмена",
+      "aria_profile": "Личный кабинет",
+      "aria_settings": "Настройки и меню",
+      "aria_close": "Закрыть",
+      "aria_language": "Язык интерфейса",
+      "ref_tooltip": "Вы получите 10 монет, если кто-то зарегистрируется по вашей ссылке",
+      "rewards_tooltip": "Ежедневные награды за первые 7 дней входа на платформу"
+    },
+    "rewards_modal": {
+      "title": "Награды 7 дней",
+      "day": "День",
+      "close": "Закрыть",
+      "no_reward": "Нет награды",
+      "coins": "монет",
+      "xp": "опыта"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Вход в",
+      "identifier": "Email или Username",
+      "password": "Пароль",
+      "submit": "Войти",
+      "loading": "Входим...",
+      "google": "Войти через Google",
+      "forgot_prefix": "Забыли пароль?",
+      "forgot_link": "Сбросить",
+      "register_prefix": "Впервые здесь?",
+      "register_link": "Создать аккаунт",
+      "aria_show_password": "Показать пароль",
+      "aria_hide_password": "Скрыть пароль"
+    },
+    "register": {
+      "title": "Регистрация в",
+      "first_name": "Имя",
+      "last_name": "Фамилия",
+      "username": "Username",
+      "email": "Email",
+      "password": "Пароль",
+      "confirm_password": "Подтвердите пароль",
+      "submit": "Зарегистрироваться",
+      "loading": "Создаем аккаунт...",
+      "login_prefix": "Уже есть аккаунт?",
+      "login_link": "Войти",
+      "aria_show_password": "Показать пароль",
+      "aria_hide_password": "Скрыть пароль",
+      "errors": {
+        "password_mismatch": "Пароли не совпадают",
+        "name_letters_only": "Имя и фамилия должны содержать только буквы",
+        "name_min_len": "Имя и фамилия должны содержать минимум 3 символа",
+        "invalid_email": "Некорректный email",
+        "username_min_len": "Username должен содержать минимум 3 символа",
+        "username_rule": "Username: только английские буквы и цифры, минимум одна буква",
+        "password_min_len": "Пароль должен содержать минимум 8 символов",
+        "password_allowed": "Пароль может содержать только английские буквы, цифры и спецсимволы",
+        "password_complexity": "Пароль должен содержать заглавные/строчные буквы, цифру и спецсимвол"
+      }
+    },
+    "forgot": {
+      "title": "Сброс пароля",
+      "email": "Ваш email",
+      "submit": "Отправить ссылку",
+      "back_login": "Вернуться ко входу"
+    },
+    "reset": {
+      "title": "Новый пароль",
+      "new_password": "Новый пароль",
+      "confirm_new_password": "Подтвердите новый пароль",
+      "submit": "Сбросить пароль",
+      "back_login": "Вернуться ко входу",
+      "errors": {
+        "missing_token": "Отсутствует токен сброса пароля",
+        "password_mismatch": "Пароли не совпадают",
+        "password_min_len": "Пароль должен содержать минимум 8 символов",
+        "password_allowed": "Пароль может содержать только английские буквы, цифры и спецсимволы",
+        "password_complexity": "Пароль должен содержать заглавные/строчные буквы, цифру и спецсимвол"
+      }
+    },
+    "verify": {
+      "title": "Подтверждение почты",
+      "code": "6-значный код",
+      "submit": "Подтвердить",
+      "resend": "Отправить код повторно",
+      "back_profile": "Вернуться в профиль",
+      "success_default": "Почта подтверждена",
+      "resend_default": "Новый код отправлен"
+    },
+    "google_callback": {
+      "title": "Вход через Google..."
+    }
+  },
+  "home": {
+    "hero": {
+      "description": "Платформа для изучения татарского языка, где объединены искусственный интеллект, компьютерное зрение и структурированный учебный материал.",
+      "scanner": "Сканер",
+      "materials": "Материал",
+      "ai_chat": "AI чат-бот"
+    },
+    "features": {
+      "one": {
+        "title": "Интерактивность и мотивация",
+        "text": "Изучение строится через действие: сканируйте предметы, сразу получайте перевод и закрепляйте слова в игровой системе очков, прогресса и личных достижений."
+      },
+      "two": {
+        "title": "Качественный учебный материал",
+        "text": "Курсы собраны по темам и уровням сложности: от базовой лексики до устойчивых выражений. Материал помогает учить язык системно, а не фрагментами."
+      },
+      "three": {
+        "title": "Сохранение культурной ценности",
+        "text": "EasyTel поддерживает живой интерес к татарскому языку и помогает использовать его в повседневной жизни, сохраняя связь с культурой, историей и речевой традицией."
+      }
+    },
+    "ranking": {
+      "global": "Глобальный рейтинг",
+      "friends": "Рейтинг среди друзей",
+      "tab_global": "Общий",
+      "tab_friends": "Друзья",
+      "points": "очков",
+      "empty": "В рейтинге пока нет участников",
+      "loading": "Загрузка данных..."
+    },
+    "banner": {
+      "close_aria": "Скрыть плашку",
+      "dismiss_title": "Скрыть плашку?",
+      "dismiss_checkbox": "Больше не показывать",
+      "cancel": "Отмена",
+      "hide": "Скрыть"
+    }
+  },
+  "common": {
+    "close": "Закрыть",
+    "to_dictionary": "В словарь",
+    "actions": {
+      "create": "Создать",
+      "create_course": "Создать курс",
+      "create_topic": "Создать тему",
+      "save": "Сохранить",
+      "save_topic": "Сохранить тему",
+      "cancel": "Отмена",
+      "delete": "Удалить",
+      "edit": "Редактировать",
+      "publish": "Опубликовать",
+      "to_draft": "В черновик",
+      "new_topic": "Новая тема",
+      "send": "Отправить",
+      "accept": "Принять",
+      "decline": "Отклонить",
+      "add": "Добавить",
+      "hide": "Скрыть",
+      "chat": "Чат",
+      "withdraw_request": "Отозвать заявку",
+      "publish_request": "Опубликовать заявку",
+      "back": "Назад",
+      "exit": "Выйти",
+      "return_to_dictionary": "Вернуться в словарь",
+      "next_word": "Следующее слово",
+      "finish_test": "Завершить тест",
+      "checking": "Проверяем...",
+      "delete_chat": "Удалить чат",
+      "delete_message": "Удалить сообщение"
+    }
+  },
+  "footer": {
+    "rights_reserved": "Все права защищены"
+  },
+  "app": {
+    "loading_session": "Загрузка сессии...",
+    "reconnecting": "Восстанавливаем соединение с сервером...",
+    "achievement": {
+      "new_prefix": "Новое достижение:"
+    },
+    "modals": {
+      "author_approved_title": "Роль автора одобрена",
+      "author_decision_title": "Решение по заявке автора",
+      "author_approved_message": "Поздравляем! Вам выдана роль автора курсов.",
+      "author_rejected_with_comment": "Заявка отклонена.",
+      "author_rejected_message": "Заявка отклонена. Вы можете подать новую заявку в любое время.",
+      "admin_comment": "Комментарий администратора",
+      "no_bonus": "без бонусов",
+      "first_day_reward": "Вы впервые на платформе! Ваша награда на сегодня:",
+      "streak_reward_prefix": "Вы посещаете платформу {{day}} дней подряд! Ваша награда на сегодня:",
+      "login_reward_title": "Награда за вход",
+      "claim": "Забрать",
+      "claim_failed_title": "Не удалось забрать награду",
+      "try_again": "Попробуйте еще раз"
+    }
+  },
+  "pages": {
+    "ai_chat": {
+      "title": "AI чат-бот Аиша",
+      "subtitle": "Практика татарского с ИИ-тьютором."
+    },
+    "friends": {
+      "title": "Друзья",
+      "modals": {
+        "send_request_title": "Отправить заявку?",
+        "send_request_message": "Отправить пользователю запрос в друзья?",
+        "accept_request_title": "Принять заявку?",
+        "accept_request_message": "Подтвердить дружбу с этим пользователем?",
+        "remove_friend_title": "Удалить из друзей?",
+        "remove_friend_message": "Пользователь будет удален из списка друзей.",
+        "cancel_request_title": "Отменить заявку?",
+        "cancel_request_message": "Заявка в друзья будет отменена.",
+        "companion_published_notice": "Заявка опубликована. Другие пользователи уже могут вас видеть.",
+        "companion_published_message": "Заявка на поиск собеседника опубликована",
+        "companion_withdrawn_notice": "Вы отозвали заявку на поиск собеседника."
+      }
+    },
+    "courses": {
+      "title": "Учебный материал",
+      "subtitle": "Выберите материал и проходите темы по порядку.",
+      "modals": {
+        "author_request_sent": "Ваша заявка на роль автора отправлена администратору.",
+        "confirm_submit_title": "Отправить заявку?",
+        "confirm_submit_message": "Подтвердите отправку заявки на роль автора."
+      }
+    },
+    "achievements": {
+      "title": "Достижения"
+    },
+    "translator": {
+      "title": "Переводчик"
+    },
+    "dictionary": {
+      "title": "Мои изученные слова",
+      "modals": {
+        "not_enough_words_title": "Недостаточно слов",
+        "not_enough_words_message": "Нужно изучить минимум {{count}} слов"
+      }
+    },
+    "chats": {
+      "title": "Чаты"
+    },
+    "course": {
+      "fallback_title": "Курс",
+      "modals": {
+        "quiz_failed_title": "Тест не пройден",
+        "quiz_failed_message": "Результат: {{score}}% (проходной: {{passing}}%). Попробуйте еще раз.",
+        "retry": "Повторить",
+        "quiz_done_title": "Тест завершен",
+        "quiz_done_next_message": "Отлично! {{score}}% правильных ответов. Следующая тема открыта.",
+        "continue": "Продолжить",
+        "course_done_title": "Курс завершен",
+        "course_done_message": "Результат теста: {{score}}%. Поздравляем, достижение начислено.",
+        "to_profile": "В профиль",
+        "result_message": "Результат: {{score}}%"
+      }
+    },
+    "author": {
+      "courses": "Курсы",
+      "new_course": "Новый курс",
+      "new_topic": "Новая тема",
+      "edit_topic": "Редактирование темы"
+    },
+    "admin": {
+      "new_course": "Новый курс",
+      "new_topic": "Новая тема",
+      "edit_topic": "Редактирование темы",
+      "users_title": "Админ: пользователи",
+      "users_subtitle": "Управление пользователями. Всего:",
+      "materials_title": "Админ: материал",
+      "materials_subtitle": "Управление категориями и курсами.",
+      "dictionary_title": "Админ: словарь",
+      "dictionary_subtitle": "Управление словарем.",
+      "misc_title": "Админ: остальное",
+      "misc_subtitle": "Закрепление курса и ежедневные награды."
+    }
+  },
+  "modals": {
+    "yes": "Да",
+    "no": "Нет",
+    "error": "Ошибка",
+    "done": "Готово",
+    "sent": "Отправлено",
+    "cancel": "Отмена",
+    "send": "Отправить",
+    "send_failed": "Не удалось отправить",
+    "action_failed": "Не удалось выполнить действие"
+  },
+  "editor": {
+    "blocks": {
+      "h2": "Заголовок",
+      "h3": "Подзаголовок",
+      "text": "Текст",
+      "image": "Картинка",
+      "spacer": "Отступ"
+    }
+  }
+}

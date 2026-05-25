@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TopicBlocksEditor from '../../components/TopicBlocksEditor/TopicBlocksEditor';
 import CourseService from '../../services/CourseService';
 import { useStores } from '../../stores/StoreContext';
@@ -37,6 +38,7 @@ const TrashIcon = () => (
 );
 
 const AuthorTopicEditorPage = () => {
+    const { t } = useTranslation();
     const { uiStore } = useStores();
     const navigate = useNavigate();
     const { courseId, topicId } = useParams();
@@ -263,7 +265,7 @@ const AuthorTopicEditorPage = () => {
             <div className="app-page-top">
                 <div>
                     <Link to={`/author/learning/courses/${courseId}`} className={styles.back}>← К курсу</Link>
-                    <h1 className="app-page-title">{isEditMode ? 'Редактирование темы' : 'Новая тема'}</h1>
+                    <h1 className="app-page-title">{isEditMode ? t('pages.author.edit_topic') : t('pages.author.new_topic')}</h1>
                     {course?.title ? <p className="app-page-subtitle">{course.title}</p> : null}
                 </div>
             </div>
@@ -354,8 +356,8 @@ const AuthorTopicEditorPage = () => {
                 />
 
                 <div className={styles.equalActions}>
-                    <button type="submit" className={styles.successBtn} disabled={saving || editingBlocked}>{saving ? 'Сохраняем...' : (isEditMode ? 'Сохранить тему' : 'Создать тему')}</button>
-                    <button type="button" className={styles.ghostBtn} onClick={cancelEditor}>Отмена</button>
+                    <button type="submit" className={styles.successBtn} disabled={saving || editingBlocked}>{saving ? 'Сохраняем...' : (isEditMode ? t('common.actions.save_topic') : t('common.actions.create_topic'))}</button>
+                    <button type="button" className={styles.ghostBtn} onClick={cancelEditor}>{t('common.actions.cancel')}</button>
                 </div>
                 </form>
             )}

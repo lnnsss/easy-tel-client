@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
+import { useTranslation } from 'react-i18next';
 import $api from '../../api/instance';
 import { useNavigate } from 'react-router-dom';
 import { useStores } from '../../stores/StoreContext';
@@ -20,6 +21,7 @@ const StopIcon = ({ className }) => (
 );
 
 const DictionaryPage = observer(() => {
+    const { t } = useTranslation();
     const { uiStore } = useStores();
     const navigate = useNavigate();
     const [items, setItems] = useState([]);
@@ -268,10 +270,10 @@ const DictionaryPage = observer(() => {
     const openAssessment = async () => {
         if (!assessmentStatus.hasEnoughWords) {
             uiStore.showModal({
-                title: 'Недостаточно слов',
-                message: `Нужно изучить минимум ${assessmentStatus.requiredWords} слов`,
+                title: t('pages.dictionary.modals.not_enough_words_title'),
+                message: t('pages.dictionary.modals.not_enough_words_message', { count: assessmentStatus.requiredWords }),
                 variant: 'info',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('common.close')
             });
             return;
         }
@@ -292,7 +294,7 @@ const DictionaryPage = observer(() => {
         <div className={`${styles.container} app-page-shell`}>
             <div className={`${styles.headerBar} app-page-top`}>
                 <div>
-                    <h1 className={`${styles.title} app-page-title`}>Мои изученные слова</h1>
+                    <h1 className={`${styles.title} app-page-title`}>{t('pages.dictionary.title')}</h1>
                     <p className={styles.totalLabel}>Всего: {totalItems}</p>
                 </div>
                 <div className={styles.headerRight}>

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import $api from '../../api/instance';
 import styles from './TranslatePage.module.css';
 
@@ -50,6 +51,7 @@ const saveHistory = (items) => {
 };
 
 const TranslatePage = () => {
+    const { t } = useTranslation();
     const [direction, setDirection] = useState('rus2tat');
     const [ruText, setRuText] = useState('');
     const [ttText, setTtText] = useState('');
@@ -357,7 +359,7 @@ const TranslatePage = () => {
     return (
         <div className={`${styles.container} app-page-shell`}>
             <div className="app-page-top">
-                <h1 className="app-page-title">Переводчик</h1>
+                <h1 className="app-page-title">{t('pages.translator.title')}</h1>
             </div>
             <section className={styles.card}>
                 <div className={styles.cardHead}>

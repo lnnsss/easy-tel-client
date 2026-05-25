@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createTopicBlock, getTopicAssetUrlCandidates } from '../../utils/topicContent';
 import styles from './TopicBlocksEditor.module.css';
 
@@ -149,6 +150,7 @@ const TopicBlocksEditor = ({
     disabled = false,
     validationErrors = []
 }) => {
+    const { t } = useTranslation();
     const [dragIndex, setDragIndex] = useState(-1);
     const [dragOverIndex, setDragOverIndex] = useState(-1);
     const [dragLocked, setDragLocked] = useState(false);
@@ -462,15 +464,15 @@ const TopicBlocksEditor = ({
                     disabled={disabled}
                     className={styles.addButton}
                 >
-                    Добавить
+                    {t('common.actions.add')}
                 </button>
                 {isAddMenuOpen && !disabled && (
                     <div className={styles.addMenu} onClick={(event) => event.stopPropagation()}>
-                        <button type="button" onClick={() => addBlock('h2')}>Заголовок</button>
-                        <button type="button" onClick={() => addBlock('h3')}>Подзаголовок</button>
-                        <button type="button" onClick={() => addBlock('text')}>Текст</button>
-                        <button type="button" onClick={() => addBlock('image')}>Картинка</button>
-                        <button type="button" onClick={() => addBlock('spacer')}>Отступ</button>
+                        <button type="button" onClick={() => addBlock('h2')}>{t('editor.blocks.h2')}</button>
+                        <button type="button" onClick={() => addBlock('h3')}>{t('editor.blocks.h3')}</button>
+                        <button type="button" onClick={() => addBlock('text')}>{t('editor.blocks.text')}</button>
+                        <button type="button" onClick={() => addBlock('image')}>{t('editor.blocks.image')}</button>
+                        <button type="button" onClick={() => addBlock('spacer')}>{t('editor.blocks.spacer')}</button>
                     </div>
                 )}
             </div>

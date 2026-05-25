@@ -2,17 +2,22 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { observer } from 'mobx-react-lite';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Navbar.module.css';
 import CourseService from '../../services/CourseService';
+import { INTERFACE_LANG_KEY } from '../../i18n';
 
 const Navbar = observer(() => {
+    const { t, i18n } = useTranslation();
     const { authStore, chatStore, uiStore } = useStores();
     const navigate = useNavigate();
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
     const [isDesktopSettingsOpen, setIsDesktopSettingsOpen] = useState(false);
     const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
-    const [interfaceLang, setInterfaceLang] = useState('ru');
+    const [interfaceLang, setInterfaceLang] = useState(() => (
+        i18n.language?.startsWith('tt') ? 'tt' : 'ru'
+    ));
     const [theme, setTheme] = useState(() => (
         document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
     ));
@@ -71,6 +76,11 @@ const Navbar = observer(() => {
         }
     }, [isMobileDropdownOpen]);
 
+    useEffect(() => {
+        const next = i18n.language?.startsWith('tt') ? 'tt' : 'ru';
+        setInterfaceLang(next);
+    }, [i18n.language]);
+
     const onToggleTheme = async () => {
         const nextTheme = theme === 'light' ? 'dark' : 'light';
         setTheme(nextTheme);
@@ -89,11 +99,11 @@ const Navbar = observer(() => {
     const onLogoutConfirm = () => {
         closeMenu();
         uiStore.showModal({
-            title: 'Выйти из аккаунта?',
-            message: 'Вы уверены, что хотите выйти?',
+            title: t('navbar.settings.logout_confirm_title'),
+            message: t('navbar.settings.logout_confirm_message'),
             variant: 'info',
-            primaryLabel: 'Выйти',
-            secondaryLabel: 'Отмена',
+            primaryLabel: t('navbar.settings.logout_confirm_yes'),
+            secondaryLabel: t('navbar.settings.logout_confirm_no'),
             onPrimary: () => {
                 authStore.logout();
                 uiStore.closeModal();
@@ -107,10 +117,10 @@ const Navbar = observer(() => {
         const refCode = String(authStore.user?.referralCode || '').trim();
         if (!refCode) {
             uiStore.showModal({
-                title: 'Реферальная ссылка недоступна',
-                message: 'Попробуйте обновить страницу и открыть настройки снова.',
+                title: t('navbar.settings.ref_unavailable_title'),
+                message: t('navbar.settings.ref_unavailable_message'),
                 variant: 'info',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('navbar.settings.close')
             });
             return;
         }
@@ -118,15 +128,22 @@ const Navbar = observer(() => {
         const link = `${origin}/register?ref=${encodeURIComponent(refCode)}`;
         try {
             await navigator.clipboard.writeText(link);
-            uiStore.showCopyToast('Скопировано в буфер обмена');
+            uiStore.showCopyToast(t('navbar.settings.copy_toast'));
         } catch {
             uiStore.showModal({
-                title: 'Не удалось скопировать',
-                message: 'Скопируйте ссылку вручную: ' + link,
+                title: t('navbar.settings.copy_failed_title'),
+                message: `${t('navbar.settings.copy_failed_message')} ${link}`,
                 variant: 'info',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('navbar.settings.close')
             });
         }
+    };
+
+    const onChangeInterfaceLang = async (lang) => {
+        const next = lang === 'tt' ? 'tt' : 'ru';
+        setInterfaceLang(next);
+        localStorage.setItem(INTERFACE_LANG_KEY, next);
+        await i18n.changeLanguage(next);
     };
 
     const loadDailyRewardsState = async () => {
@@ -182,12 +199,12 @@ const Navbar = observer(() => {
                     {!isAdmin && (
                         <>
                             {authStore.isAuth && (
-                                <Link to="/ai-chat" className={`${styles.link} ${styles.aiChatLink}`} onClick={closeMenu}>AI чат-бот</Link>
+                                <Link to="/ai-chat" className={`${styles.link} ${styles.aiChatLink}`} onClick={closeMenu}>{t('navbar.menu.ai_chat')}</Link>
                             )}
                             {authStore.isAuth && (
                                 <>
-                                    <Link to="/translate" className={styles.link} onClick={closeMenu}>Переводчик</Link>
-                                    <Link to="/scanner" className={styles.link} onClick={closeMenu}>Сканер</Link>
+                                    <Link to="/translate" className={styles.link} onClick={closeMenu}>{t('navbar.menu.translator')}</Link>
+                                    <Link to="/scanner" className={styles.link} onClick={closeMenu}>{t('navbar.menu.scanner')}</Link>
                                 </>
                             )}
                         </>
@@ -195,12 +212,12 @@ const Navbar = observer(() => {
 
                     {authStore.isAuth && !isAdmin && (
                         <>
-                            <Link to="/dictionary" className={styles.link} onClick={closeMenu}>Словарь</Link>
-                            <Link to="/courses" className={styles.link} onClick={closeMenu}>Материал</Link>
-                            {isAuthor && <Link to="/author/learning" className={styles.link} onClick={closeMenu}>Авторство</Link>}
-                            <Link to="/friends" className={styles.link} onClick={closeMenu}>Друзья</Link>
+                            <Link to="/dictionary" className={styles.link} onClick={closeMenu}>{t('navbar.menu.dictionary')}</Link>
+                            <Link to="/courses" className={styles.link} onClick={closeMenu}>{t('navbar.menu.materials')}</Link>
+                            {isAuthor && <Link to="/author/learning" className={styles.link} onClick={closeMenu}>{t('navbar.menu.authoring')}</Link>}
+                            <Link to="/friends" className={styles.link} onClick={closeMenu}>{t('navbar.menu.friends')}</Link>
                             <Link to="/chats" className={`${styles.link} ${styles.chatLink}`} onClick={closeMenu}>
-                                Чаты
+                                {t('navbar.menu.chats')}
                                 {chatStore.unreadTotal > 0 && <span className={styles.chatBadge}>{chatStore.unreadTotal}</span>}
                             </Link>
                         </>
@@ -208,10 +225,10 @@ const Navbar = observer(() => {
 
                     {isAdmin && (
                         <>
-                            <Link to="/words" className={styles.link} onClick={closeMenu}>Словарь</Link>
-                            <Link to="/admin/learning" className={styles.link} onClick={closeMenu}>Материал</Link>
-                            <Link to="/admin/users" className={styles.link} onClick={closeMenu}>Пользователи</Link>
-                            <Link to="/admin/misc" className={styles.link} onClick={closeMenu}>Остальное</Link>
+                            <Link to="/words" className={styles.link} onClick={closeMenu}>{t('navbar.menu.dictionary')}</Link>
+                            <Link to="/admin/learning" className={styles.link} onClick={closeMenu}>{t('navbar.menu.materials')}</Link>
+                            <Link to="/admin/users" className={styles.link} onClick={closeMenu}>{t('navbar.menu.users')}</Link>
+                            <Link to="/admin/misc" className={styles.link} onClick={closeMenu}>{t('navbar.menu.misc')}</Link>
                         </>
                     )}
                 </div>
@@ -224,12 +241,12 @@ const Navbar = observer(() => {
                                 className={styles.profileAvatarBtn}
                                 style={!profileAvatarSrc && authStore.user?.avatarAccentColor ? { backgroundColor: authStore.user.avatarAccentColor } : undefined}
                                 onClick={closeMenu}
-                                aria-label="Личный кабинет"
+                                aria-label={t('navbar.settings.aria_profile')}
                             >
                                 {profileAvatarSrc && !avatarLoadFailed ? (
                                     <img
                                         src={profileAvatarSrc}
-                                        alt="Профиль"
+                                        alt={t('navbar.settings.aria_profile')}
                                         className={styles.profileAvatarImage}
                                         onError={() => setAvatarLoadFailed(true)}
                                     />
@@ -241,7 +258,7 @@ const Navbar = observer(() => {
                             <button
                                 type="button"
                                 className={styles.settingsBtn}
-                                aria-label="Настройки и меню"
+                                aria-label={t('navbar.settings.aria_settings')}
                                 aria-expanded={isMobileDropdownOpen || isDesktopSettingsOpen}
                                 onClick={() => {
                                     if (window.innerWidth <= 1040) {
@@ -272,10 +289,10 @@ const Navbar = observer(() => {
                     ) : (
                         <>
                             <div className={styles.authBtns}>
-                                <Link to="/login" className={styles.link} onClick={closeMenu}>Вход</Link>
-                                <Link to="/register" className={styles.btnRegister} onClick={closeMenu}>Регистрация</Link>
+                                <Link to="/login" className={styles.link} onClick={closeMenu}>{t('navbar.auth.login')}</Link>
+                                <Link to="/register" className={styles.btnRegister} onClick={closeMenu}>{t('navbar.auth.register')}</Link>
                             </div>
-                            <Link to="/login" className={styles.mobileLoginBtn} onClick={closeMenu}>Вход</Link>
+                            <Link to="/login" className={styles.mobileLoginBtn} onClick={closeMenu}>{t('navbar.auth.login')}</Link>
                         </>
                     )}
                 </div>
@@ -286,8 +303,8 @@ const Navbar = observer(() => {
                             <div className={styles.settingsOverlay} onClick={closeMenu}>
                                 <div className={styles.settingsModal} onClick={(e) => e.stopPropagation()}>
                                     <div className={styles.settingsHead}>
-                                        <h3 className={styles.settingsTitle}>Настройки</h3>
-                                        <button type="button" className={styles.settingsCloseBtn} onClick={closeMenu} aria-label="Закрыть">×</button>
+                                        <h3 className={styles.settingsTitle}>{t('navbar.settings.title')}</h3>
+                                        <button type="button" className={styles.settingsCloseBtn} onClick={closeMenu} aria-label={t('navbar.settings.aria_close')}>×</button>
                                     </div>
 
                                     <div className={styles.settingsList}>
@@ -299,11 +316,11 @@ const Navbar = observer(() => {
                                                     onClick={onOpenDailyRewards}
                                                     disabled={isRewardsLoading}
                                                 >
-                                                    <span>Награды 7 дней</span>
+                                                    <span>{t('navbar.settings.rewards7')}</span>
                                                     <span className={styles.referralHelpWrap}>
                                                         <span className={styles.referralHelp}>?</span>
                                                         <span className={styles.referralTooltip}>
-                                                            Ежедневные награды за первые 7 дней входа на платформу
+                                                            {t('navbar.settings.rewards_tooltip')}
                                                         </span>
                                                     </span>
                                                 </button>
@@ -312,11 +329,11 @@ const Navbar = observer(() => {
 
                                         {!isAdmin && (
                                             <button type="button" className={styles.referralBtn} onClick={onCopyReferralLink}>
-                                                <span>Рефералка</span>
+                                                <span>{t('navbar.settings.referral')}</span>
                                                 <span className={styles.referralHelpWrap}>
                                                     <span className={styles.referralHelp}>?</span>
                                                     <span className={styles.referralTooltip}>
-                                                        Вы получите 10 монет, если кто-то зарегистрируется по вашей ссылке
+                                                        {t('navbar.settings.ref_tooltip')}
                                                     </span>
                                                 </span>
                                             </button>
@@ -331,7 +348,7 @@ const Navbar = observer(() => {
                                                     navigate('/achievements');
                                                 }}
                                             >
-                                                <span>Достижения</span>
+                                                <span>{t('navbar.settings.achievements')}</span>
                                             </button>
                                         )}
 
@@ -344,27 +361,27 @@ const Navbar = observer(() => {
                                                     navigate('/character');
                                                 }}
                                             >
-                                                <span>Персонаж</span>
+                                                <span>{t('navbar.settings.character')}</span>
                                             </button>
                                         )}
 
                                         <button type="button" className={styles.settingsItem} onClick={onToggleTheme}>
-                                            <span>Тема</span>
-                                            <span className={styles.settingsValue}>{theme === 'dark' ? 'Тёмная' : 'Светлая'}</span>
+                                            <span>{t('navbar.settings.theme')}</span>
+                                            <span className={styles.settingsValue}>{theme === 'dark' ? t('navbar.settings.theme_dark') : t('navbar.settings.theme_light')}</span>
                                         </button>
 
                                         <div className={styles.settingsControlRow}>
-                                            <span className={styles.settingsControlLabel}>Язык</span>
-                                            <div className={styles.segmentedControl} role="group" aria-label="Язык интерфейса">
+                                            <span className={styles.settingsControlLabel}>{t('navbar.settings.language')}</span>
+                                            <div className={styles.segmentedControl} role="group" aria-label={t('navbar.settings.aria_language')}>
                                                 {[
                                                     { value: 'ru', label: 'ру' },
-                                                    { value: 'tat', label: 'тат' }
+                                                    { value: 'tt', label: 'тат' }
                                                 ].map((langOption) => (
                                                     <button
                                                         key={langOption.value}
                                                         type="button"
                                                         className={`${styles.segmentedBtn} ${interfaceLang === langOption.value ? styles.segmentedBtnActive : ''}`}
-                                                        onClick={() => setInterfaceLang(langOption.value)}
+                                                        onClick={() => onChangeInterfaceLang(langOption.value)}
                                                     >
                                                         {langOption.label}
                                                     </button>
@@ -372,7 +389,7 @@ const Navbar = observer(() => {
                                             </div>
                                         </div>
 
-                                        <button type="button" className={`${styles.settingsItem} ${styles.settingsLogout}`} onClick={onLogoutConfirm}>Выйти</button>
+                                        <button type="button" className={`${styles.settingsItem} ${styles.settingsLogout}`} onClick={onLogoutConfirm}>{t('navbar.settings.logout')}</button>
                                     </div>
                                 </div>
                             </div>,
@@ -385,11 +402,11 @@ const Navbar = observer(() => {
                                 {!isAdmin && (
                                     !dailyRewardsState?.progress?.isCompleted && (
                                         <button type="button" className={`${styles.mobileMenuItem} ${styles.referralBtnMobile}`} onClick={onOpenDailyRewards} disabled={isRewardsLoading}>
-                                            <span>Награды 7 дней</span>
+                                            <span>{t('navbar.settings.rewards7')}</span>
                                             <span className={styles.referralHelpWrap}>
                                                 <span className={styles.referralHelp}>?</span>
                                                 <span className={styles.referralTooltip}>
-                                                    Ежедневные награды за первые 7 дней входа на платформу
+                                                    {t('navbar.settings.rewards_tooltip')}
                                                 </span>
                                             </span>
                                         </button>
@@ -398,11 +415,11 @@ const Navbar = observer(() => {
 
                                 {!isAdmin && (
                                     <button type="button" className={`${styles.mobileMenuItem} ${styles.referralBtnMobile}`} onClick={onCopyReferralLink}>
-                                        <span>Рефералка</span>
+                                        <span>{t('navbar.settings.referral')}</span>
                                         <span className={styles.referralHelpWrap}>
                                             <span className={styles.referralHelp}>?</span>
                                             <span className={styles.referralTooltip}>
-                                                Вы получите 10 монет, если кто-то зарегистрируется по вашей ссылке
+                                                {t('navbar.settings.ref_tooltip')}
                                             </span>
                                         </span>
                                     </button>
@@ -417,7 +434,7 @@ const Navbar = observer(() => {
                                             navigate('/achievements');
                                         }}
                                     >
-                                        Достижения
+                                        {t('navbar.settings.achievements')}
                                     </button>
                                 )}
 
@@ -430,7 +447,7 @@ const Navbar = observer(() => {
                                             navigate('/character');
                                         }}
                                     >
-                                        Персонаж
+                                        {t('navbar.settings.character')}
                                     </button>
                                 )}
 
@@ -441,22 +458,22 @@ const Navbar = observer(() => {
                                         await onToggleTheme();
                                     }}
                                 >
-                                    <span>Тема</span>
-                                    <span className={styles.settingsValue}>{theme === 'dark' ? 'Тёмная' : 'Светлая'}</span>
+                                    <span>{t('navbar.settings.theme')}</span>
+                                    <span className={styles.settingsValue}>{theme === 'dark' ? t('navbar.settings.theme_dark') : t('navbar.settings.theme_light')}</span>
                                 </button>
 
                                 <div className={styles.mobileLanguageRow}>
-                                    <span className={styles.settingsControlLabel}>Язык</span>
-                                    <div className={styles.segmentedControl} role="group" aria-label="Язык интерфейса">
+                                    <span className={styles.settingsControlLabel}>{t('navbar.settings.language')}</span>
+                                    <div className={styles.segmentedControl} role="group" aria-label={t('navbar.settings.aria_language')}>
                                         {[
                                             { value: 'ru', label: 'ру' },
-                                            { value: 'tat', label: 'тат' }
+                                            { value: 'tt', label: 'тат' }
                                         ].map((langOption) => (
                                             <button
                                                 key={langOption.value}
                                                 type="button"
                                                 className={`${styles.segmentedBtn} ${interfaceLang === langOption.value ? styles.segmentedBtnActive : ''}`}
-                                                onClick={() => setInterfaceLang(langOption.value)}
+                                                onClick={() => onChangeInterfaceLang(langOption.value)}
                                             >
                                                 {langOption.label}
                                             </button>
@@ -472,12 +489,12 @@ const Navbar = observer(() => {
                                 {!isAdmin && (
                                     <>
                                         {authStore.isAuth && (
-                                            <Link to="/ai-chat" className={`${styles.mobileNavLink} ${styles.mobileAiChatLink}`} onClick={closeMenu}>AI чат-бот</Link>
+                                            <Link to="/ai-chat" className={`${styles.mobileNavLink} ${styles.mobileAiChatLink}`} onClick={closeMenu}>{t('navbar.menu.ai_chat')}</Link>
                                         )}
                                         {authStore.isAuth && (
                                             <>
-                                                <Link to="/translate" className={styles.mobileNavLink} onClick={closeMenu}>Переводчик</Link>
-                                                <Link to="/scanner" className={styles.mobileNavLink} onClick={closeMenu}>Сканер</Link>
+                                                <Link to="/translate" className={styles.mobileNavLink} onClick={closeMenu}>{t('navbar.menu.translator')}</Link>
+                                                <Link to="/scanner" className={styles.mobileNavLink} onClick={closeMenu}>{t('navbar.menu.scanner')}</Link>
                                             </>
                                         )}
                                     </>
@@ -485,12 +502,12 @@ const Navbar = observer(() => {
 
                                 {authStore.isAuth && !isAdmin && (
                                     <>
-                                        <Link to="/dictionary" className={styles.mobileNavLink} onClick={closeMenu}>Словарь</Link>
-                                        <Link to="/courses" className={styles.mobileNavLink} onClick={closeMenu}>Материал</Link>
-                                        {isAuthor && <Link to="/author/learning" className={styles.mobileNavLink} onClick={closeMenu}>Авторство</Link>}
-                                        <Link to="/friends" className={styles.mobileNavLink} onClick={closeMenu}>Друзья</Link>
+                                        <Link to="/dictionary" className={styles.mobileNavLink} onClick={closeMenu}>{t('navbar.menu.dictionary')}</Link>
+                                        <Link to="/courses" className={styles.mobileNavLink} onClick={closeMenu}>{t('navbar.menu.materials')}</Link>
+                                        {isAuthor && <Link to="/author/learning" className={styles.mobileNavLink} onClick={closeMenu}>{t('navbar.menu.authoring')}</Link>}
+                                        <Link to="/friends" className={styles.mobileNavLink} onClick={closeMenu}>{t('navbar.menu.friends')}</Link>
                                         <Link to="/chats" className={`${styles.mobileNavLink} ${styles.mobileChatLink}`} onClick={closeMenu}>
-                                            Чаты
+                                            {t('navbar.menu.chats')}
                                             {chatStore.unreadTotal > 0 && <span className={styles.chatBadge}>{chatStore.unreadTotal}</span>}
                                         </Link>
                                     </>
@@ -498,10 +515,10 @@ const Navbar = observer(() => {
 
                                 {isAdmin && (
                                     <>
-                                        <Link to="/words" className={styles.mobileNavLink} onClick={closeMenu}>Словарь</Link>
-                                        <Link to="/admin/learning" className={styles.mobileNavLink} onClick={closeMenu}>Материал</Link>
-                                        <Link to="/admin/users" className={styles.mobileNavLink} onClick={closeMenu}>Пользователи</Link>
-                                        <Link to="/admin/misc" className={styles.mobileNavLink} onClick={closeMenu}>Остальное</Link>
+                                        <Link to="/words" className={styles.mobileNavLink} onClick={closeMenu}>{t('navbar.menu.dictionary')}</Link>
+                                        <Link to="/admin/learning" className={styles.mobileNavLink} onClick={closeMenu}>{t('navbar.menu.materials')}</Link>
+                                        <Link to="/admin/users" className={styles.mobileNavLink} onClick={closeMenu}>{t('navbar.menu.users')}</Link>
+                                        <Link to="/admin/misc" className={styles.mobileNavLink} onClick={closeMenu}>{t('navbar.menu.misc')}</Link>
                                     </>
                                 )}
                             </div>
@@ -509,7 +526,7 @@ const Navbar = observer(() => {
                             <div className={styles.mobileDivider} />
 
                             <button type="button" className={`${styles.mobileMenuItem} ${styles.settingsLogout}`} onClick={onLogoutConfirm}>
-                                Выйти
+                                {t('navbar.settings.logout')}
                             </button>
                         </div>
                     </>
@@ -518,20 +535,20 @@ const Navbar = observer(() => {
                 {isRewardsModalOpen && createPortal(
                     <div className={styles.rewardsModalOverlay} onClick={() => setIsRewardsModalOpen(false)}>
                         <div className={styles.rewardsModalCard} onClick={(e) => e.stopPropagation()}>
-                            <h3 className={styles.rewardsModalTitle}>Награды 7 дней</h3>
+                            <h3 className={styles.rewardsModalTitle}>{t('navbar.rewards_modal.title')}</h3>
                             <div className={styles.rewardsGrid}>
                                 {(dailyRewardsState?.rewards || []).map((item) => {
                                     const parts = [];
-                                    if ((Number(item.coins) || 0) > 0) parts.push(`${item.coins} монет`);
-                                    if ((Number(item.studyPoints) || 0) > 0) parts.push(`${item.studyPoints} опыта`);
-                                    if (!parts.length) parts.push('Нет награды');
+                                    if ((Number(item.coins) || 0) > 0) parts.push(`${item.coins} ${t('navbar.rewards_modal.coins')}`);
+                                    if ((Number(item.studyPoints) || 0) > 0) parts.push(`${item.studyPoints} ${t('navbar.rewards_modal.xp')}`);
+                                    if (!parts.length) parts.push(t('navbar.rewards_modal.no_reward'));
                                     const isClaimed = item.status === 'claimed';
                                     return (
                                         <div
                                             key={item.dayNumber}
                                             className={`${styles.rewardsDayCard} ${isClaimed ? styles.rewardsDayClaimed : ''}`}
                                         >
-                                            <div className={styles.rewardsDayTitle}>День {item.dayNumber}</div>
+                                            <div className={styles.rewardsDayTitle}>{t('navbar.rewards_modal.day')} {item.dayNumber}</div>
                                             <div className={`${styles.rewardsDayReward} ${isClaimed ? styles.rewardsDayRewardClaimed : ''}`}>
                                                 {parts.join(' · ')}
                                             </div>
@@ -540,7 +557,7 @@ const Navbar = observer(() => {
                                 })}
                             </div>
                             <button type="button" className={styles.rewardsModalCloseBtn} onClick={() => setIsRewardsModalOpen(false)}>
-                                Закрыть
+                                {t('navbar.rewards_modal.close')}
                             </button>
                         </div>
                     </div>,

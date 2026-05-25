@@ -1,0 +1,327 @@
+{
+  "navbar": {
+    "menu": {
+      "ai_chat": "AI чат-бот",
+      "translator": "Тәрҗемәче",
+      "scanner": "Сканер",
+      "dictionary": "Сүзлек",
+      "materials": "Материал",
+      "authoring": "Авторлык",
+      "friends": "Дуслар",
+      "chats": "Чатлар",
+      "users": "Кулланучылар",
+      "misc": "Калганы"
+    },
+    "auth": {
+      "login": "Керү",
+      "register": "Теркәлү"
+    },
+    "settings": {
+      "title": "Көйләүләр",
+      "rewards7": "7 көнлек бүләкләр",
+      "referral": "Реферал",
+      "achievements": "Казанышлар",
+      "character": "Персонаж",
+      "theme": "Тема",
+      "theme_dark": "Караңгы",
+      "theme_light": "Якты",
+      "language": "Тел",
+      "logout": "Чыгу",
+      "close": "Ябу",
+      "logout_confirm_title": "Аккаунттан чыгаргамы?",
+      "logout_confirm_message": "Чыгарга телисезме?",
+      "logout_confirm_yes": "Чыгу",
+      "logout_confirm_no": "Кире кагу",
+      "ref_unavailable_title": "Рефераль сылтама юк",
+      "ref_unavailable_message": "Битне яңартып, көйләүләрне яңадан ачыгыз.",
+      "copy_failed_title": "Күчереп булмады",
+      "copy_failed_message": "Сылтаманы кул белән күчерегез:",
+      "copy_toast": "Буферга күчерелде",
+      "aria_profile": "Шәхси кабинет",
+      "aria_settings": "Көйләүләр һәм меню",
+      "aria_close": "Ябу",
+      "aria_language": "Интерфейс теле",
+      "ref_tooltip": "Сезнең сылтама белән берәү теркәлсә, 10 тәңкә аласыз",
+      "rewards_tooltip": "Платформага керүнең беренче 7 көне өчен көндәлек бүләкләр"
+    },
+    "rewards_modal": {
+      "title": "7 көнлек бүләкләр",
+      "day": "Көн",
+      "close": "Ябу",
+      "no_reward": "Бүләк юк",
+      "coins": "тәңкә",
+      "xp": "тәҗрибә"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "EasyTel-га керү",
+      "identifier": "Email яки Username",
+      "password": "Серсүз",
+      "submit": "Керү",
+      "loading": "Керәбез...",
+      "google": "Google аша керү",
+      "forgot_prefix": "Серсүзне оныттыгызмы?",
+      "forgot_link": "Торгызу",
+      "register_prefix": "Беренче тапкырмы?",
+      "register_link": "Аккаунт булдыру",
+      "aria_show_password": "Серсүзне күрсәтү",
+      "aria_hide_password": "Серсүзне яшерү"
+    },
+    "register": {
+      "title": "EasyTel-да теркәлү",
+      "first_name": "Исем",
+      "last_name": "Фамилия",
+      "username": "Username",
+      "email": "Email",
+      "password": "Серсүз",
+      "confirm_password": "Серсүзне раслагыз",
+      "submit": "Теркәлү",
+      "loading": "Аккаунт ясыйбыз...",
+      "login_prefix": "Аккаунтыгыз бармы?",
+      "login_link": "Керү",
+      "aria_show_password": "Серсүзне күрсәтү",
+      "aria_hide_password": "Серсүзне яшерү",
+      "errors": {
+        "password_mismatch": "Серсүзләр туры килми",
+        "name_letters_only": "Исем һәм фамилия хәрефләрдән генә торырга тиеш",
+        "name_min_len": "Исем һәм фамилия кимендә 3 символ булырга тиеш",
+        "invalid_email": "Дөрес булмаган email",
+        "username_min_len": "Username кимендә 3 символ булырга тиеш",
+        "username_rule": "Username: инглиз хәрефләре һәм саннар гына, кимендә бер хәреф",
+        "password_min_len": "Серсүз кимендә 8 символ булырга тиеш",
+        "password_allowed": "Серсүздә инглиз хәрефләре, саннар һәм махсус символлар гына",
+        "password_complexity": "Серсүздә зур/кечкенә хәреф, сан һәм махсус символ булырга тиеш"
+      }
+    },
+    "forgot": {
+      "title": "Серсүзне торгызу",
+      "email": "Сезнең email",
+      "submit": "Сылтама җибәрү",
+      "back_login": "Керү битенә кайту"
+    },
+    "reset": {
+      "title": "Яңа серсүз",
+      "new_password": "Яңа серсүз",
+      "confirm_new_password": "Яңа серсүзне раслагыз",
+      "submit": "Серсүзне яңарту",
+      "back_login": "Керү битенә кайту",
+      "errors": {
+        "missing_token": "Серсүз торгызу токены юк",
+        "password_mismatch": "Серсүзләр туры килми",
+        "password_min_len": "Серсүз кимендә 8 символ булырга тиеш",
+        "password_allowed": "Серсүздә инглиз хәрефләре, саннар һәм махсус символлар гына",
+        "password_complexity": "Серсүздә зур/кечкенә хәреф, сан һәм махсус символ булырга тиеш"
+      }
+    },
+    "verify": {
+      "title": "Email раслау",
+      "code": "6 билгеле код",
+      "submit": "Раслау",
+      "resend": "Кодны яңадан җибәрү",
+      "back_profile": "Профильгә кайту",
+      "success_default": "Почта расланды",
+      "resend_default": "Яңа код җибәрелде"
+    },
+    "google_callback": {
+      "title": "Google аша керү..."
+    }
+  },
+  "home": {
+    "hero": {
+      "description": "Татар телен өйрәнү платформасы: ясалма интеллект, компьютер күрүе һәм структурланган уку материалы бер урында.",
+      "scanner": "Сканер",
+      "materials": "Материал",
+      "ai_chat": "AI чат-бот"
+    },
+    "features": {
+      "one": {
+        "title": "Интерактивлык һәм мотивация",
+        "text": "Өйрәнү гамәл аша бара: предметларны сканерлагыз, шунда ук тәрҗемә алыгыз һәм сүзләрне уен форматында ныгытыгыз."
+      },
+      "two": {
+        "title": "Сыйфатлы уку материалы",
+        "text": "Курслар темалар һәм катлаулылык дәрәҗәләре буенча җыелган. Материал телне системалы рәвештә өйрәнергә ярдәм итә."
+      },
+      "three": {
+        "title": "Мәдәни кыйммәтне саклау",
+        "text": "EasyTel татар теленә кызыксынуны арттыра һәм аны көндәлек тормышта кулланырга ярдәм итә."
+      }
+    },
+    "ranking": {
+      "global": "Гомуми рейтинг",
+      "friends": "Дуслар рейтингы",
+      "tab_global": "Гомуми",
+      "tab_friends": "Дуслар",
+      "points": "очко",
+      "empty": "Рейтингта әлегә катнашучылар юк",
+      "loading": "Йөкләү..."
+    },
+    "banner": {
+      "close_aria": "Плашканы яшерү",
+      "dismiss_title": "Плашканы яшерергәме?",
+      "dismiss_checkbox": "Бүтән күрсәтмәскә",
+      "cancel": "Кире кагу",
+      "hide": "Яшерү"
+    }
+  },
+  "common": {
+    "close": "Ябу",
+    "to_dictionary": "Сүзлеккә",
+    "actions": {
+      "create": "Булдыру",
+      "create_course": "Курс булдыру",
+      "create_topic": "Тема булдыру",
+      "save": "Саклау",
+      "save_topic": "Теманы саклау",
+      "cancel": "Кире кагу",
+      "delete": "Бетерү",
+      "edit": "Үзгәртү",
+      "publish": "Бастыру",
+      "to_draft": "Караламага",
+      "new_topic": "Яңа тема",
+      "send": "Җибәрү",
+      "accept": "Кабул итү",
+      "decline": "Кире кагу",
+      "add": "Өстәү",
+      "hide": "Яшерү",
+      "chat": "Чат",
+      "withdraw_request": "Гаризаны кире алу",
+      "publish_request": "Гариза бастыру",
+      "back": "Артка",
+      "exit": "Чыгу",
+      "return_to_dictionary": "Сүзлеккә кайту",
+      "next_word": "Киләсе сүз",
+      "finish_test": "Тестны тәмамлау",
+      "checking": "Тикшерәбез...",
+      "delete_chat": "Чатны бетерү",
+      "delete_message": "Хәбәрне бетерү"
+    }
+  },
+  "footer": {
+    "rights_reserved": "Барлык хокуклар якланган"
+  },
+  "app": {
+    "loading_session": "Сессия йөкләнә...",
+    "reconnecting": "Сервер белән тоташуны торгызабыз...",
+    "achievement": {
+      "new_prefix": "Яңа казаныш:"
+    },
+    "modals": {
+      "author_approved_title": "Автор роле хупланды",
+      "author_decision_title": "Автор гаризасы буенча карар",
+      "author_approved_message": "Котлыйбыз! Сезгә курслар авторы роле бирелде.",
+      "author_rejected_with_comment": "Гариза кире кагылды.",
+      "author_rejected_message": "Гариза кире кагылды. Сез теләсә кайсы вакытта яңадан гариза бирә аласыз.",
+      "admin_comment": "Администратор комментарие",
+      "no_bonus": "бонуссыз",
+      "first_day_reward": "Сез платформада беренче тапкыр! Бүгенге бүләгегез:",
+      "streak_reward_prefix": "Сез платформага {{day}} көн рәттән керәсез! Бүгенге бүләгегез:",
+      "login_reward_title": "Кергән өчен бүләк",
+      "claim": "Алу",
+      "claim_failed_title": "Бүләкне алып булмады",
+      "try_again": "Тагын бер тапкыр сынап карагыз"
+    }
+  },
+  "pages": {
+    "ai_chat": {
+      "title": "AI чат-бот Айша",
+      "subtitle": "Татар телен AI-тьютор белән практика."
+    },
+    "friends": {
+      "title": "Дуслар",
+      "modals": {
+        "send_request_title": "Гариза җибәрергәме?",
+        "send_request_message": "Кулланучыга дуслык гаризасы җибәрергәме?",
+        "accept_request_title": "Гаризаны кабул итәргәме?",
+        "accept_request_message": "Бу кулланучы белән дуслыкны расларга?",
+        "remove_friend_title": "Дуслардан бетерергәме?",
+        "remove_friend_message": "Кулланучы дуслар исемлегеннән бетереләчәк.",
+        "cancel_request_title": "Гаризаны кире алыргамы?",
+        "cancel_request_message": "Дуслык гаризасы гамәлдән чыгарылачак.",
+        "companion_published_notice": "Гариза бастырылды. Башка кулланучылар сезне күрә ала.",
+        "companion_published_message": "Әңгәмәдәш эзләү гаризасы бастырылды",
+        "companion_withdrawn_notice": "Сез әңгәмәдәш эзләү гаризасын кире алдыгыз."
+      }
+    },
+    "courses": {
+      "title": "Уку материалы",
+      "subtitle": "Материал сайлап алыгыз һәм темаларны чират белән узыгыз.",
+      "modals": {
+        "author_request_sent": "Автор роленә гаризагыз администраторга җибәрелде.",
+        "confirm_submit_title": "Гаризаны җибәрергәме?",
+        "confirm_submit_message": "Автор роленә гариза җибәрүне раслагыз."
+      }
+    },
+    "achievements": {
+      "title": "Казанышлар"
+    },
+    "translator": {
+      "title": "Тәрҗемәче"
+    },
+    "dictionary": {
+      "title": "Өйрәнгән сүзләрем",
+      "modals": {
+        "not_enough_words_title": "Сүзләр җитми",
+        "not_enough_words_message": "Кимендә {{count}} сүз өйрәнергә кирәк"
+      }
+    },
+    "chats": {
+      "title": "Чатлар"
+    },
+    "course": {
+      "fallback_title": "Курс",
+      "modals": {
+        "quiz_failed_title": "Тест узылмады",
+        "quiz_failed_message": "Нәтиҗә: {{score}}% (узу чиге: {{passing}}%). Тагын сынап карагыз.",
+        "retry": "Кабатлау",
+        "quiz_done_title": "Тест тәмамланды",
+        "quiz_done_next_message": "Афәрин! Дөрес җаваплар: {{score}}%. Киләсе тема ачылды.",
+        "continue": "Дәвам итү",
+        "course_done_title": "Курс тәмамланды",
+        "course_done_message": "Тест нәтиҗәсе: {{score}}%. Котлыйбыз, казаныш исәпләнде.",
+        "to_profile": "Профильгә",
+        "result_message": "Нәтиҗә: {{score}}%"
+      }
+    },
+    "author": {
+      "courses": "Курслар",
+      "new_course": "Яңа курс",
+      "new_topic": "Яңа тема",
+      "edit_topic": "Теманы үзгәртү"
+    },
+    "admin": {
+      "new_course": "Яңа курс",
+      "new_topic": "Яңа тема",
+      "edit_topic": "Теманы үзгәртү",
+      "users_title": "Админ: кулланучылар",
+      "users_subtitle": "Кулланучылар белән идарә. Барлыгы:",
+      "materials_title": "Админ: материал",
+      "materials_subtitle": "Категорияләр һәм курслар белән идарә.",
+      "dictionary_title": "Админ: сүзлек",
+      "dictionary_subtitle": "Сүзлек белән идарә.",
+      "misc_title": "Админ: калганы",
+      "misc_subtitle": "Курсны беркетү һәм көндәлек бүләкләр."
+    }
+  },
+  "modals": {
+    "yes": "Әйе",
+    "no": "Юк",
+    "error": "Хата",
+    "done": "Әзер",
+    "sent": "Җибәрелде",
+    "cancel": "Кире кагу",
+    "send": "Җибәрү",
+    "send_failed": "Җибәреп булмады",
+    "action_failed": "Гамәлне үтәп булмады"
+  },
+  "editor": {
+    "blocks": {
+      "h2": "Башисем",
+      "h3": "Астисем",
+      "text": "Текст",
+      "image": "Рәсем",
+      "spacer": "Ара"
+    }
+  }
+}
