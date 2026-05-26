@@ -144,6 +144,39 @@
     gap: 16px;
 }
 
+.requestTypeBtn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.requestTypeTextCol {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.requestTypeTextCol h2 {
+    margin: 0;
+}
+
+.requestTypeCount {
+    flex-shrink: 0;
+    font-size: 2rem;
+    line-height: 1;
+    font-weight: 800;
+}
+
+.requestTypeHint {
+    margin: 0;
+    color: var(--color-text-muted);
+}
+
 .empty {
     margin: 4px 0 0;
     color: var(--color-text-muted);

@@ -150,6 +150,7 @@ const AdminUsersPage = () => {
         if (!normalizedValue) return;
         try {
             await navigator.clipboard.writeText(normalizedValue);
+            uiStore.showCopyToast('Скопировано в буфер обмена');
         } catch {
             // Ignore clipboard permission errors.
         }
@@ -452,7 +453,13 @@ const AdminUsersPage = () => {
                                         </div>
                                         <span className={styles.badge}>{requestStatusLabel(request.status)}</span>
                                     </div>
-                                    <p className={styles.requestMeta}>Email: {request.userId?.email || '—'}</p>
+                                    <p className={styles.requestMeta}>
+                                        Email:
+                                        {' '}
+                                        <button type="button" className={styles.emailBtn} onClick={() => handleCopyText(request.userId?.email || '')}>
+                                            {request.userId?.email || '—'}
+                                        </button>
+                                    </p>
                                     <p className={styles.requestMeta}>Дата: {formatDate(request.createdAt)}</p>
                                     {request.status === 'pending' && (
                                         <button

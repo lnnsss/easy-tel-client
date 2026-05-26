@@ -15,6 +15,7 @@ const FriendsPage = observer(() => {
     const [outgoingPage, setOutgoingPage] = useState(1);
     const [companionPage, setCompanionPage] = useState(1);
     const [isCompanionModalOpen, setIsCompanionModalOpen] = useState(false);
+    const [requestsModalType, setRequestsModalType] = useState('');
     const [companionPurpose, setCompanionPurpose] = useState('speech_practice');
     const [companionOther, setCompanionOther] = useState('');
     const [companionNotice, setCompanionNotice] = useState('');
@@ -199,64 +200,21 @@ const FriendsPage = observer(() => {
             </section>
 
             <section className={styles.gridTwo}>
-                <div className={styles.card}>
-                    <h2>Входящие заявки</h2>
-                    <div className={styles.list}>
-                        {(socialStore.incomingRequests || []).map((item) => (
-                            <div key={item._id} className={styles.userRow}>
-                                <div className={styles.userLeft}>
-                                    <AppAvatar
-                                        src={getAvatarSrc(item.from.avatarUrl)}
-                                        fullName={`${item.from.firstName || ''} ${item.from.lastName || ''}`.trim()}
-                                        className={styles.avatar}
-                                        style={!item.from.avatarUrl && item.from.avatarAccentColor ? { backgroundColor: item.from.avatarAccentColor } : undefined}
-                                    />
-                                    <div className={styles.userMeta}>
-                                        <strong>{item.from.firstName} {item.from.lastName}</strong>
-                                        <span>@{item.from.username}</span>
-                                    </div>
-                                </div>
-                                <div className={styles.rowActions}>
-                                    <button type="button" onClick={() => onAcceptRequest(item._id)}>Принять</button>
-                                    <button type="button" className={styles.ghost} onClick={() => socialStore.declineRequest(item._id)}>Отклонить</button>
-                                </div>
-                            </div>
-                        ))}
-                        {!socialStore.isLoadingRequests && !(socialStore.incomingRequests || []).length && (
-                            <p className={styles.empty}>Нет входящих заявок</p>
-                        )}
-                    </div>
-                    {renderPagination(socialStore.incomingPagination, setIncomingPage)}
-                </div>
+                <button type="button" className={`${styles.card} ${styles.requestTypeBtn}`} onClick={() => setRequestsModalType('incoming')}>
+                    <span className={styles.requestTypeTextCol}>
+                        <h2>Входящие заявки</h2>
+                        <p className={styles.requestTypeHint}>Открыть список входящих заявок</p>
+                    </span>
+                    <strong className={styles.requestTypeCount}>{socialStore.incomingPagination?.total || 0}</strong>
+                </button>
 
-                <div className={styles.card}>
-                    <h2>Исходящие заявки</h2>
-                    <div className={styles.list}>
-                        {(socialStore.outgoingRequests || []).map((item) => (
-                            <div key={item._id} className={styles.userRow}>
-                                <Link to={`/u/${encodeURIComponent(item.to.username)}`} className={styles.userLeft}>
-                                    <AppAvatar
-                                        src={getAvatarSrc(item.to.avatarUrl)}
-                                        fullName={`${item.to.firstName || ''} ${item.to.lastName || ''}`.trim()}
-                                        className={styles.avatar}
-                                        style={!item.to.avatarUrl && item.to.avatarAccentColor ? { backgroundColor: item.to.avatarAccentColor } : undefined}
-                                    />
-                                    <div className={styles.userMeta}>
-                                        <strong>{item.to.firstName} {item.to.lastName}</strong>
-                                        <span>@{item.to.username}</span>
-                                    </div>
-                                </Link>
-                                <div className={styles.rowActions}>
-                                    <button type="button" className={styles.ghost} onClick={() => onCancelRequest(item._id)}>Отменить</button>
-                                </div>
-                            </div>
-                        ))}
-                        {!socialStore.isLoadingRequests && !(socialStore.outgoingRequests || []).length && (
-                            <p className={styles.empty}>Нет исходящих заявок</p>
-                        )}
-                    </div>
-                    {renderPagination(socialStore.outgoingPagination, setOutgoingPage)}
-                </div>
+                <button type="button" className={`${styles.card} ${styles.requestTypeBtn}`} onClick={() => setRequestsModalType('outgoing')}>
+                    <span className={styles.requestTypeTextCol}>
+                        <h2>Исходящие заявки</h2>
+                        <p className={styles.requestTypeHint}>Открыть список исходящих заявок</p>
+                    </span>
+                    <strong className={styles.requestTypeCount}>{socialStore.outgoingPagination?.total || 0}</strong>
+                </button>
             </section>
 
             <div className={styles.findCompanionWrap}>
@@ -405,6 +363,71 @@ const FriendsPage = observer(() => {
                         )}
                         {renderPagination(socialStore.companionPagination, setCompanionPage)}
                     </div>
+                </div>
+            </div>
+        )}
+        {requestsModalType === 'incoming' && (
+            <div className={styles.modalOverlay} onClick={() => setRequestsModalType('')}>
+                <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+                    <h3>Входящие заявки</h3>
+                    <div className={styles.list}>
+                        {(socialStore.incomingRequests || []).map((item) => (
+                            <div key={item._id} className={styles.userRow}>
+                                <div className={styles.userLeft}>
+                                    <AppAvatar
+                                        src={getAvatarSrc(item.from.avatarUrl)}
+                                        fullName={`${item.from.firstName || ''} ${item.from.lastName || ''}`.trim()}
+                                        className={styles.avatar}
+                                        style={!item.from.avatarUrl && item.from.avatarAccentColor ? { backgroundColor: item.from.avatarAccentColor } : undefined}
+                                    />
+                                    <div className={styles.userMeta}>
+                                        <strong>{item.from.firstName} {item.from.lastName}</strong>
+                                        <span>@{item.from.username}</span>
+                                    </div>
+                                </div>
+                                <div className={styles.rowActions}>
+                                    <button type="button" onClick={() => onAcceptRequest(item._id)}>Принять</button>
+                                    <button type="button" className={styles.ghost} onClick={() => socialStore.declineRequest(item._id)}>Отклонить</button>
+                                </div>
+                            </div>
+                        ))}
+                        {!socialStore.isLoadingRequests && !(socialStore.incomingRequests || []).length && (
+                            <p className={styles.empty}>Нет входящих заявок</p>
+                        )}
+                    </div>
+                    {renderPagination(socialStore.incomingPagination, setIncomingPage)}
+                </div>
+            </div>
+        )}
+        {requestsModalType === 'outgoing' && (
+            <div className={styles.modalOverlay} onClick={() => setRequestsModalType('')}>
+                <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+                    <h3>Исходящие заявки</h3>
+                    <div className={styles.list}>
+                        {(socialStore.outgoingRequests || []).map((item) => (
+                            <div key={item._id} className={styles.userRow}>
+                                <Link to={`/u/${encodeURIComponent(item.to.username)}`} className={styles.userLeft}>
+                                    <AppAvatar
+                                        src={getAvatarSrc(item.to.avatarUrl)}
+                                        fullName={`${item.to.firstName || ''} ${item.to.lastName || ''}`.trim()}
+                                        className={styles.avatar}
+                                        style={!item.to.avatarUrl && item.to.avatarAccentColor ? { backgroundColor: item.to.avatarAccentColor } : undefined}
+                                    />
+                                    <div className={styles.userMeta}>
+                                        <strong>{item.to.firstName} {item.to.lastName}</strong>
+                                        <span>@{item.to.username}</span>
+                                    </div>
+                                </Link>
+                                <div className={styles.rowActions}>
+                                    <button type="button" className={styles.ghost} onClick={() => onCancelRequest(item._id)}>Отменить</button>
+                                </div>
+                            </div>
+                        ))}
+                        {!socialStore.isLoadingRequests && !(socialStore.outgoingRequests || []).length && (
+                            <p className={styles.empty}>Нет исходящих заявок</p>
+                        )}
+                    </div>
+                    {renderPagination(socialStore.outgoingPagination, setOutgoingPage)}
                 </div>
             </div>
         )}

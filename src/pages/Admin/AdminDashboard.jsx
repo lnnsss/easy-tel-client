@@ -194,11 +194,11 @@ const AdminDashboard = () => {
                     <div className={styles.modalCard}>
                         <h2>Редактировать слово</h2>
                         <form onSubmit={handleEditSubmit} className={styles.form}>
-                            <input value={editingWord.nameRu} onChange={e => setEditingWord({...editingWord, nameRu: e.target.value})} required />
-                            <input value={editingWord.nameTatar} onChange={e => setEditingWord({...editingWord, nameTatar: e.target.value})} required />
-                            <input value={editingWord.nameEn} onChange={e => setEditingWord({...editingWord, nameEn: e.target.value})} required />
-                            <input value={editingWord.transcription} onChange={e => setEditingWord({...editingWord, transcription: e.target.value})} />
-                            <textarea value={editingWord.descriptionRu} onChange={e => setEditingWord({...editingWord, descriptionRu: e.target.value})} />
+                            <input placeholder="Русский" value={editingWord.nameRu} onChange={e => setEditingWord({...editingWord, nameRu: e.target.value})} required />
+                            <input placeholder="Татарский" value={editingWord.nameTatar} onChange={e => setEditingWord({...editingWord, nameTatar: e.target.value})} required />
+                            <input placeholder="English" value={editingWord.nameEn} onChange={e => setEditingWord({...editingWord, nameEn: e.target.value})} required />
+                            <input placeholder="Транскрипция" value={editingWord.transcription} onChange={e => setEditingWord({...editingWord, transcription: e.target.value})} />
+                            <textarea placeholder="Описание" value={editingWord.descriptionRu} onChange={e => setEditingWord({...editingWord, descriptionRu: e.target.value})} />
                             <div className={styles.modalButtons}>
                                 <button type="button" onClick={() => setIsModalOpen(false)} className={styles.cancelBtn}>{t('common.actions.cancel')}</button>
                                 <button type="submit" className={`${styles.addBtn} ${styles.modalSubmitBtn}`}>{t('common.actions.save')}</button>

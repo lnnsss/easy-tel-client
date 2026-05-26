@@ -215,7 +215,10 @@ const CourseDetailPage = () => {
                                             <button
                                                 type="button"
                                                 className={styles.primaryBtn}
-                                                onClick={() => setIsQuizMode(true)}
+                                                onClick={() => {
+                                                    setIsQuizMode(true);
+                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                }}
                                             >
                                                 Перейти к тесту
                                             </button>

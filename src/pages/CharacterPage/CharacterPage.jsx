@@ -129,19 +129,15 @@ const CharacterPage = observer(() => {
     };
 
     const onToggleGender = async () => {
-        let nextConfig = null;
-        setConfig((prev) => {
-            const nextGender = prev.gender === 'male' ? 'female' : 'male';
-            const nextCharacter = runtimeAssets.genderDefaults[nextGender];
-            nextConfig = {
-                ...prev,
-                gender: nextGender,
-                characterFile: nextCharacter
-            };
-            return nextConfig;
-        });
+        const nextGender = equippedConfig.gender === 'male' ? 'female' : 'male';
+        const nextCharacter = runtimeAssets.genderDefaults[nextGender];
+        const nextConfig = {
+            ...equippedConfig,
+            gender: nextGender,
+            characterFile: nextCharacter
+        };
+        setConfig(nextConfig);
         setLayerKeys((prev) => ({ ...prev, characterFile: prev.characterFile + 1 }));
-        if (!nextConfig) return;
         await authStore.updateCharacterCustomization(nextConfig);
     };
 
@@ -159,6 +155,18 @@ const CharacterPage = observer(() => {
                 secondaryLabel: 'Закрыть'
             });
             return;
+        }
+
+        const equipField = CATEGORY_FIELD_MAP[category];
+        if (equipField) {
+            setConfig((prev) => ({
+                ...prev,
+                [equipField]: file
+            }));
+            setLayerKeys((prev) => ({
+                ...prev,
+                [equipField]: prev[equipField] + 1
+            }));
         }
 
         uiStore.showModal({
