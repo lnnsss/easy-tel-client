@@ -277,7 +277,15 @@ const DictionaryPage = observer(() => {
             });
             return;
         }
-        if (!assessmentStatus.needsRetake && assessmentStatus.result) return;
+        if (!assessmentStatus.needsRetake && assessmentStatus.result) {
+            uiStore.showModal({
+                title: t('pages.dictionary.modals.weekly_locked_title'),
+                message: t('pages.dictionary.modals.weekly_locked_message'),
+                variant: 'info',
+                secondaryLabel: t('common.close')
+            });
+            return;
+        }
         setAssessmentLoading(true);
         try {
             navigate('/dictionary/assessment');

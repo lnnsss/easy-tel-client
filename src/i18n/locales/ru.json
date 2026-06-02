@@ -263,7 +263,9 @@
       "title": "Мои изученные слова",
       "modals": {
         "not_enough_words_title": "Недостаточно слов",
-        "not_enough_words_message": "Нужно изучить минимум {{count}} слов"
+        "not_enough_words_message": "Нужно изучить минимум {{count}} слов",
+        "weekly_locked_title": "Тест уже пройден",
+        "weekly_locked_message": "Повторное прохождение будет доступно на следующей неделе. Текущий результат сохраняется до конца недели."
       }
     },
     "chats": {

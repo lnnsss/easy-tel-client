@@ -22,6 +22,24 @@
   box-shadow: var(--shadow-sm);
 }
 
+.resultCard {
+  text-align: center;
+  padding-top: 28px;
+  padding-bottom: 28px;
+}
+
+.resultCard h1 {
+  margin: 0 0 16px;
+}
+
+.resultCard p {
+  margin: 10px 0;
+}
+
+.resultCard .actionBtn {
+  margin-top: 16px;
+}
+
 .topRow {
   display: flex;
   align-items: center;

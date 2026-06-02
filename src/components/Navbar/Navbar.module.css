@@ -163,6 +163,13 @@
     gap: var(--space-4);
 }
 
+.guestControls {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 10px;
+}
+
 .link {
     text-decoration: none;
     color: var(--color-text-dim);

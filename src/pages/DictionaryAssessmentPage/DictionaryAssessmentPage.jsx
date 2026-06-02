@@ -2,10 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import $api from '../../api/instance';
+import { useStores } from '../../stores/StoreContext';
 import styles from './DictionaryAssessmentPage.module.css';
 
 const DictionaryAssessmentPage = () => {
     const { t } = useTranslation();
+    const { uiStore } = useStores();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
@@ -26,13 +28,26 @@ const DictionaryAssessmentPage = () => {
                     questions: Array.isArray(data?.questions) ? data.questions : []
                 });
             } catch (e) {
-                setError(e?.response?.data?.message || 'Не удалось начать тест');
+                const message = e?.response?.data?.message || 'Не удалось начать тест';
+                if (String(message).includes('уже пройден')) {
+                    uiStore.showModal({
+                        title: t('pages.dictionary.modals.weekly_locked_title'),
+                        message: t('pages.dictionary.modals.weekly_locked_message'),
+                        variant: 'info',
+                        secondaryLabel: t('common.close'),
+                        onSecondary: () => {
+                            uiStore.closeModal();
+                            navigate('/dictionary');
+                        }
+                    });
+                }
+                setError(message);
             } finally {
                 setLoading(false);
             }
         };
         start();
-    }, []);
+    }, [navigate, t, uiStore]);
 
     const currentQuestion = session.questions[step] || null;
     const selectedOption = answers[step];
@@ -83,7 +98,7 @@ const DictionaryAssessmentPage = () => {
     if (result) {
         return (
             <div className={styles.page}>
-                <div className={styles.card}>
+                <div className={`${styles.card} ${styles.resultCard}`}>
                     <h1>Тест завершен</h1>
                     <p>Правильных ответов: <strong>{result.correctAnswers}/{result.totalQuestions}</strong></p>
                     <p>Ваш уровень на неделю: <strong>{result.level}</strong></p>

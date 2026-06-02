@@ -86,7 +86,7 @@ const Navbar = observer(() => {
         setTheme(nextTheme);
         localStorage.setItem('theme', nextTheme);
         document.documentElement.setAttribute('data-theme', nextTheme);
-        if (nextTheme === 'dark') {
+        if (authStore.isAuth && nextTheme === 'dark') {
             try {
                 const { default: $api } = await import('../../api/instance');
                 await $api.post('/achievements/event', { eventType: 'theme_dark_used' });
@@ -292,12 +292,44 @@ const Navbar = observer(() => {
                                 <Link to="/login" className={styles.link} onClick={closeMenu}>{t('navbar.auth.login')}</Link>
                                 <Link to="/register" className={styles.btnRegister} onClick={closeMenu}>{t('navbar.auth.register')}</Link>
                             </div>
-                            <Link to="/login" className={styles.mobileLoginBtn} onClick={closeMenu}>{t('navbar.auth.login')}</Link>
+                            <div className={styles.guestControls}>
+                                <Link to="/login" className={styles.mobileLoginBtn} onClick={closeMenu}>{t('navbar.auth.login')}</Link>
+                                <button
+                                    type="button"
+                                    className={styles.settingsBtn}
+                                    aria-label={t('navbar.settings.aria_settings')}
+                                    aria-expanded={isMobileDropdownOpen || isDesktopSettingsOpen}
+                                    onClick={() => {
+                                        if (window.innerWidth <= 1040) {
+                                            setIsMobileDropdownOpen((prev) => !prev);
+                                            return;
+                                        }
+                                        setIsDesktopSettingsOpen((prev) => !prev);
+                                    }}
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path
+                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.757.426 1.757 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.757-2.924 1.757-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.757-.426-1.757-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065Z"
+                                            stroke="currentColor"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+                                        <path
+                                            d="M12 15.25a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5Z"
+                                            stroke="currentColor"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
                         </>
                     )}
                 </div>
 
-                {authStore.isAuth && (
+                {(authStore.isAuth || isDesktopSettingsOpen || isMobileDropdownOpen) && (
                     <>
                         {isDesktopSettingsOpen && window.innerWidth > 1040 && createPortal(
                             <div className={styles.settingsOverlay} onClick={closeMenu}>
@@ -308,7 +340,7 @@ const Navbar = observer(() => {
                                     </div>
 
                                     <div className={styles.settingsList}>
-                                        {!isAdmin && (
+                                        {authStore.isAuth && !isAdmin && (
                                             !dailyRewardsState?.progress?.isCompleted && (
                                                 <button
                                                     type="button"
@@ -327,7 +359,7 @@ const Navbar = observer(() => {
                                             )
                                         )}
 
-                                        {!isAdmin && (
+                                        {authStore.isAuth && !isAdmin && (
                                             <button type="button" className={styles.referralBtn} onClick={onCopyReferralLink}>
                                                 <span>{t('navbar.settings.referral')}</span>
                                                 <span className={styles.referralHelpWrap}>
@@ -339,7 +371,7 @@ const Navbar = observer(() => {
                                             </button>
                                         )}
 
-                                        {!isAdmin && (
+                                        {authStore.isAuth && !isAdmin && (
                                             <button
                                                 type="button"
                                                 className={styles.settingsItem}
@@ -352,7 +384,7 @@ const Navbar = observer(() => {
                                             </button>
                                         )}
 
-                                        {!isAdmin && (
+                                        {authStore.isAuth && !isAdmin && (
                                             <button
                                                 type="button"
                                                 className={styles.settingsItem}
@@ -389,7 +421,9 @@ const Navbar = observer(() => {
                                             </div>
                                         </div>
 
-                                        <button type="button" className={`${styles.settingsItem} ${styles.settingsLogout}`} onClick={onLogoutConfirm}>{t('navbar.settings.logout')}</button>
+                                        {authStore.isAuth && (
+                                            <button type="button" className={`${styles.settingsItem} ${styles.settingsLogout}`} onClick={onLogoutConfirm}>{t('navbar.settings.logout')}</button>
+                                        )}
                                     </div>
                                 </div>
                             </div>,
@@ -399,7 +433,7 @@ const Navbar = observer(() => {
                         <div className={`${styles.mobileOverlay} ${isMobileDropdownOpen ? styles.mobileOverlayActive : ''}`} onClick={closeMenu} />
                         <div className={`${styles.mobileDropdown} ${isMobileDropdownOpen ? styles.mobileDropdownActive : ''}`}>
                             <div className={styles.mobileSettingsSection}>
-                                {!isAdmin && (
+                                {authStore.isAuth && !isAdmin && (
                                     !dailyRewardsState?.progress?.isCompleted && (
                                         <button type="button" className={`${styles.mobileMenuItem} ${styles.referralBtnMobile}`} onClick={onOpenDailyRewards} disabled={isRewardsLoading}>
                                             <span>{t('navbar.settings.rewards7')}</span>
@@ -413,7 +447,7 @@ const Navbar = observer(() => {
                                     )
                                 )}
 
-                                {!isAdmin && (
+                                {authStore.isAuth && !isAdmin && (
                                     <button type="button" className={`${styles.mobileMenuItem} ${styles.referralBtnMobile}`} onClick={onCopyReferralLink}>
                                         <span>{t('navbar.settings.referral')}</span>
                                         <span className={styles.referralHelpWrap}>
@@ -425,7 +459,7 @@ const Navbar = observer(() => {
                                     </button>
                                 )}
 
-                                {!isAdmin && (
+                                {authStore.isAuth && !isAdmin && (
                                     <button
                                         type="button"
                                         className={styles.mobileMenuItem}
@@ -438,7 +472,7 @@ const Navbar = observer(() => {
                                     </button>
                                 )}
 
-                                {!isAdmin && (
+                                {authStore.isAuth && !isAdmin && (
                                     <button
                                         type="button"
                                         className={styles.mobileMenuItem}
@@ -483,9 +517,9 @@ const Navbar = observer(() => {
 
                             </div>
 
-                            <div className={styles.mobileDivider} />
+                            {authStore.isAuth && <div className={styles.mobileDivider} />}
 
-                            <div className={styles.mobileNavSection}>
+                            {authStore.isAuth && <div className={styles.mobileNavSection}>
                                 {!isAdmin && (
                                     <>
                                         {authStore.isAuth && (
@@ -521,13 +555,15 @@ const Navbar = observer(() => {
                                         <Link to="/admin/misc" className={styles.mobileNavLink} onClick={closeMenu}>{t('navbar.menu.misc')}</Link>
                                     </>
                                 )}
-                            </div>
+                            </div>}
 
-                            <div className={styles.mobileDivider} />
+                            {authStore.isAuth && <div className={styles.mobileDivider} />}
 
-                            <button type="button" className={`${styles.mobileMenuItem} ${styles.settingsLogout}`} onClick={onLogoutConfirm}>
-                                {t('navbar.settings.logout')}
-                            </button>
+                            {authStore.isAuth && (
+                                <button type="button" className={`${styles.mobileMenuItem} ${styles.settingsLogout}`} onClick={onLogoutConfirm}>
+                                    {t('navbar.settings.logout')}
+                                </button>
+                            )}
                         </div>
                     </>
                 )}

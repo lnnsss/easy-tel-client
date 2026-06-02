@@ -263,7 +263,9 @@
       "title": "Өйрәнгән сүзләрем",
       "modals": {
         "not_enough_words_title": "Сүзләр җитми",
-        "not_enough_words_message": "Кимендә {{count}} сүз өйрәнергә кирәк"
+        "not_enough_words_message": "Кимендә {{count}} сүз өйрәнергә кирәк",
+        "weekly_locked_title": "Тест инде үтелгән",
+        "weekly_locked_message": "Кабат үтү киләсе атнада ачылачак. Хәзерге нәтиҗә атна ахырына кадәр саклана."
       }
     },
     "chats": {
