@@ -6,6 +6,7 @@ import { useStores } from '../../stores/StoreContext';
 import profileStyles from './Profile.module.css';
 import styles from './PublicProfilePage.module.css';
 import CharacterPreviewCard from '../../components/CharacterPreviewCard/CharacterPreviewCard';
+import { getAvatarFallbackStyle } from '../../utils/avatarAccentColor';
 
 const PublicProfilePage = () => {
     const { t } = useTranslation();
@@ -58,6 +59,9 @@ const PublicProfilePage = () => {
         const last = (profile?.lastName || '').trim().charAt(0);
         return `${first}${last}`.toUpperCase() || 'U';
     }, [profile?.firstName, profile?.lastName]);
+    const avatarFallbackStyle = useMemo(() => (
+        getAvatarFallbackStyle(profile?.avatarAccentColor, `${profile?.username || ''}${initials}`)
+    ), [profile?.avatarAccentColor, profile?.username, initials]);
 
     const onCopyUsername = async () => {
         const normalizedUsername = String(profile?.username || '').trim().replace(/^@+/, '');
@@ -322,7 +326,7 @@ const PublicProfilePage = () => {
                         <div className={profileStyles.avatarRow}>
                             <div
                                 className={profileStyles.avatarCircle}
-                                style={!avatarSrc && profile.avatarAccentColor ? { backgroundColor: profile.avatarAccentColor } : undefined}
+                                style={!avatarSrc ? avatarFallbackStyle : undefined}
                             >
                                 {avatarSrc && !avatarLoadFailed ? (
                                     <img

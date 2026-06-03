@@ -9,6 +9,14 @@
     overflow: hidden;
 }
 
+.simpleContainer {
+    align-items: center;
+    min-height: 100%;
+    height: auto;
+    padding: 48px var(--space-page-x);
+    overflow: visible;
+}
+
 .splitLayout {
     width: 100%;
     max-width: none;
@@ -96,6 +104,7 @@
 @media (max-width: 480px) {
     .grid { grid-template-columns: 1fr; }
     .card { padding: 25px; }
+    .simpleContainer { padding: 28px 14px; }
 }
 
 @media (max-width: 1024px) {

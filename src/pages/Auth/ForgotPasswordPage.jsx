@@ -23,7 +23,7 @@ const ForgotPasswordPage = observer(() => {
     };
 
     return (
-        <div className={styles.container}>
+        <div className={`${styles.container} ${styles.simpleContainer}`}>
             <form className={styles.card} onSubmit={onSubmit}>
                 <h1>{t('auth.forgot.title')}</h1>
                 {error && <p className={styles.error}>{error}</p>}

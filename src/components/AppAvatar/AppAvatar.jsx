@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { getAvatarFallbackStyle } from '../../utils/avatarAccentColor';
 
 const getInitials = (fullName = '') => {
     const parts = String(fullName || '').trim().split(/\s+/).filter(Boolean);
@@ -18,9 +19,14 @@ const AppAvatar = ({
 }) => {
     const [failed, setFailed] = useState(false);
     const initials = useMemo(() => getInitials(fullName), [fullName]);
+    const isFallback = !src || failed;
+    const avatarStyle = isFallback
+        ? { ...getAvatarFallbackStyle(style?.backgroundColor, fullName || initials), ...style }
+        : style;
+    const initialsStyle = isFallback ? { color: '#ffffff', ...fallbackStyle } : fallbackStyle;
 
     return (
-        <div className={className} style={style}>
+        <div className={className} style={avatarStyle}>
             {src && !failed ? (
                 <img
                     src={src}
@@ -29,7 +35,7 @@ const AppAvatar = ({
                     onError={() => setFailed(true)}
                 />
             ) : (
-                <span className={fallbackClassName} style={fallbackStyle}>{initials}</span>
+                <span className={fallbackClassName} style={initialsStyle}>{initials}</span>
             )}
         </div>
     );

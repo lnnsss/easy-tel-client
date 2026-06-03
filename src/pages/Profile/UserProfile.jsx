@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Profile.module.css';
 import CharacterPreviewCard from '../../components/CharacterPreviewCard/CharacterPreviewCard';
+import { getAvatarFallbackStyle } from '../../utils/avatarAccentColor';
 
 const UserProfile = ({ user }) => {
     const { t } = useTranslation();
@@ -53,6 +54,9 @@ const UserProfile = ({ user }) => {
         const serverBase = apiBase.replace(/\/api\/?$/, '');
         return `${serverBase}${user.avatarUrl}`;
     }, [user.avatarUrl]);
+    const avatarFallbackStyle = useMemo(() => (
+        getAvatarFallbackStyle(user.avatarAccentColor, `${user.username || ''}${initials}`)
+    ), [user.avatarAccentColor, user.username, initials]);
 
     const onAvatarChange = async (e) => {
         const file = e.target.files?.[0];
@@ -210,7 +214,7 @@ const UserProfile = ({ user }) => {
                         <div className={styles.avatarRow}>
                             <div
                                 className={styles.avatarCircle}
-                                style={!avatarSrc && user.avatarAccentColor ? { backgroundColor: user.avatarAccentColor } : undefined}
+                                style={!avatarSrc ? avatarFallbackStyle : undefined}
                             >
                                 {avatarSrc && !avatarLoadFailed ? (
                                     <img

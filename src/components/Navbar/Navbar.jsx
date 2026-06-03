@@ -7,6 +7,7 @@ import { useStores } from '../../stores/StoreContext';
 import styles from './Navbar.module.css';
 import CourseService from '../../services/CourseService';
 import { INTERFACE_LANG_KEY } from '../../i18n';
+import { getAvatarFallbackStyle } from '../../utils/avatarAccentColor';
 
 const Navbar = observer(() => {
     const { t, i18n } = useTranslation();
@@ -48,6 +49,12 @@ const Navbar = observer(() => {
         const serverBase = apiBase.replace(/\/api\/?$/, '');
         return `${serverBase}${avatarUrl}`;
     }, [authStore.user?.avatarUrl]);
+    const profileAvatarStyle = useMemo(() => (
+        getAvatarFallbackStyle(
+            authStore.user?.avatarAccentColor,
+            `${authStore.user?.username || ''}${profileInitials}`
+        )
+    ), [authStore.user?.avatarAccentColor, authStore.user?.username, profileInitials]);
 
     useEffect(() => {
         if (authStore.isAuth && !isAdmin) {
@@ -239,7 +246,7 @@ const Navbar = observer(() => {
                             <Link
                                 to={profileRoute}
                                 className={styles.profileAvatarBtn}
-                                style={!profileAvatarSrc && authStore.user?.avatarAccentColor ? { backgroundColor: authStore.user.avatarAccentColor } : undefined}
+                                style={!profileAvatarSrc ? profileAvatarStyle : undefined}
                                 onClick={closeMenu}
                                 aria-label={t('navbar.settings.aria_profile')}
                             >
