@@ -177,7 +177,7 @@ const TranslatePage = () => {
         try {
             await navigator.clipboard.writeText(value);
         } catch {
-            // no-op
+            // Ничего не делаем.
         }
     };
 
@@ -268,7 +268,7 @@ const TranslatePage = () => {
         try {
             await fetchAudioUrl(cleanText, speakerValue);
         } catch {
-            // silent prefetch fail: пользователь увидит ошибку только при явном клике озвучки
+            // Тихая ошибка предварительной загрузки: пользователь увидит ошибку только при явном клике озвучки.
         }
     };
 
@@ -318,7 +318,7 @@ const TranslatePage = () => {
             const { url, fromCache } = await fetchAudioUrl(textToSpeak, speaker);
             playAudioFromUrl(url, { suppressBlockedError: true });
             if (!fromCache) {
-                // no-op: пометка для читаемости, что первый клик прошел через свежую загрузку
+                // Ничего не делаем: пометка для читаемости, что первый клик прошел через свежую загрузку.
             }
         } catch (e) {
             try {

@@ -152,7 +152,7 @@ const AdminUsersPage = () => {
             await navigator.clipboard.writeText(normalizedValue);
             uiStore.showCopyToast('Скопировано в буфер обмена');
         } catch {
-            // Ignore clipboard permission errors.
+            // Игнорируем ошибки доступа к буферу обмена.
         }
     };
 

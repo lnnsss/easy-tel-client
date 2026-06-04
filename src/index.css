@@ -1,5 +1,5 @@
 :root {
-    /* Typography */
+    /* Типографика */
     --font-family-base: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     --font-size-xs: 12px;
     --font-size-sm: 14px;
@@ -13,7 +13,7 @@
     --font-weight-bold: 700;
     --font-weight-extrabold: 800;
 
-    /* Layout */
+    /* Разметка */
     --container-xs: 500px;
     --container-sm: 800px;
     --container-md: 1000px;
@@ -29,19 +29,19 @@
     --space-7: 30px;
     --space-8: 40px;
 
-    /* Radius */
+    /* Радиусы */
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 16px;
     --radius-xl: 24px;
 
-    /* Core palette */
+    /* Основная палитра */
     --c-white: #ffffff;
     --c-gray: #a3a3a3;
     --c-black: #111111;
     --c-lime: #95DE34;
 
-    /* Theme tokens */
+    /* Токены темы */
     --color-bg: var(--c-white);
     --color-bg-soft: #f4f4f4;
     --color-bg-muted: #eeeeee;
@@ -129,13 +129,13 @@
 
     --navbar-bg: rgba(255, 255, 255, 0.95);
 
-    /* Shadows */
+    /* Тени */
     --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.05);
     --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.06);
     --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
 
-    /* Compatibility aliases (for existing modules) */
+    /* Алиасы совместимости для существующих модулей */
     --primary: var(--color-primary);
     --primary-hover: var(--color-primary-hover);
     --bg: var(--color-bg);
@@ -454,7 +454,7 @@ textarea::placeholder {
     opacity: 1;
 }
 
-/* Autofill normalization for light/dark across browsers */
+/* Нормализация автозаполнения для светлой и темной темы в разных браузерах */
 input:-webkit-autofill,
 textarea:-webkit-autofill,
 select:-webkit-autofill {

@@ -90,7 +90,7 @@ const CharacterPage = observer(() => {
                 if (Number.isFinite(Number(data?.itemPriceCoins))) setRuntimePrice(Number(data.itemPriceCoins));
                 if (Array.isArray(data?.paidCategories)) setRuntimePaidCategories(data.paidCategories);
             } catch (_e) {
-                // Fallback остается на статических значениях.
+                // Резервный вариант остается на статических значениях.
             }
         };
         loadAssets();

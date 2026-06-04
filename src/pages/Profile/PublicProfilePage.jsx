@@ -71,7 +71,7 @@ const PublicProfilePage = () => {
             await navigator.clipboard.writeText(value);
             uiStore.showCopyToast('Скопировано в буфер обмена');
         } catch {
-            // Ignore clipboard permission errors.
+            // Игнорируем ошибки доступа к буферу обмена.
         }
     };
 
