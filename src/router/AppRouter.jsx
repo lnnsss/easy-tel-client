@@ -36,6 +36,7 @@ import CharacterPage from '../pages/CharacterPage/CharacterPage';
 import AchievementsPage from '../pages/AchievementsPage/AchievementsPage';
 import AiChatPage from '../pages/AiChatPage/AiChatPage';
 
+// Собирает маршруты приложения с учетом роли и состояния авторизации пользователя.
 const AppRouter = observer(() => {
     const { authStore } = useStores();
 

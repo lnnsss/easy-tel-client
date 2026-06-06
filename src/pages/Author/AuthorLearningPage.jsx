@@ -6,19 +6,12 @@ import { useStores } from '../../stores/StoreContext';
 import styles from '../Admin/AdminLearningPage.module.css';
 
 const STATUS_OPTIONS = [
-    { value: '', label: 'Все статусы' },
-    { value: 'published', label: 'Опубликован' },
-    { value: 'draft', label: 'Черновик' }
+    { value: '', labelKey: 'pages.admin.learning.all_statuses' },
+    { value: 'published', labelKey: 'pages.admin.learning.published' },
+    { value: 'draft', labelKey: 'pages.admin.learning.draft' }
 ];
 
-const reviewLabel = (value) => {
-    if (value === 'pending_review') return 'На модерации';
-    if (value === 'approved') return 'Одобрен';
-    if (value === 'rejected') return 'Отклонен';
-    if (value === 'draft') return 'Черновик';
-    return 'Без модерации';
-};
-
+// Отрисовывает экран или компонент AuthorLearningPage и связывает его с данными приложения.
 const AuthorLearningPage = () => {
     const { t } = useTranslation();
     const { uiStore } = useStores();
@@ -30,6 +23,18 @@ const AuthorLearningPage = () => {
     const [filterStatus, setFilterStatus] = useState('');
     const [search, setSearch] = useState('');
     const [submittedCourseIds, setSubmittedCourseIds] = useState(new Set());
+
+    const statusLabel = (value) => (
+        value === 'published' ? t('pages.admin.learning.published') : t('pages.admin.learning.draft')
+    );
+
+    const reviewLabel = (value) => {
+        if (value === 'pending_review') return t('pages.admin.learning.pending_review');
+        if (value === 'approved') return t('pages.admin.learning.approved');
+        if (value === 'rejected') return t('pages.admin.learning.rejected');
+        if (value === 'draft') return t('pages.admin.learning.draft');
+        return t('pages.admin.learning.no_review');
+    };
 
     const getCourseCategoryIds = (course) => {
         const fromArray = Array.isArray(course?.categoryIds) ? course.categoryIds : [];
@@ -60,6 +65,7 @@ const AuthorLearningPage = () => {
         });
     }, [courses, filterCategoryId, filterStatus, search]);
 
+    // Загружает данные, необходимые для текущего экрана или сценария.
     const loadAll = async () => {
         try {
             setError('');
@@ -70,7 +76,7 @@ const AuthorLearningPage = () => {
             setCategories(categoriesRes.data || []);
             setCourses(coursesRes.data || []);
         } catch (e) {
-            setError(e.response?.data?.message || 'Ошибка загрузки кабинета автора');
+            setError(e.response?.data?.message || t('pages.admin.learning.author_load_error'));
         }
     };
 
@@ -81,13 +87,14 @@ const AuthorLearningPage = () => {
         return () => clearTimeout(timer);
     }, []);
 
+    // Удаляет связь или сущность по запросу пользователя.
     const removeCourse = async (courseId) => {
         uiStore.showModal({
-            title: 'Удалить курс?',
-            message: 'Курс-черновик будет удален вместе с темами и тестами.',
+            title: t('pages.admin.learning.delete_course_title'),
+            message: t('pages.admin.learning.delete_draft_course_message'),
             variant: 'error',
-            primaryLabel: 'Удалить',
-            secondaryLabel: 'Отмена',
+            primaryLabel: t('common.actions.delete'),
+            secondaryLabel: t('modals.cancel'),
             onPrimary: async () => {
                 try {
                     await CourseService.deleteAuthorCourse(courseId);
@@ -95,16 +102,17 @@ const AuthorLearningPage = () => {
                     await loadAll();
                 } catch (err) {
                     uiStore.showModal({
-                        title: 'Ошибка',
-                        message: err.response?.data?.message || 'Ошибка удаления курса',
+                        title: t('modals.error'),
+                        message: err.response?.data?.message || t('pages.admin.learning.delete_course_error'),
                         variant: 'error',
-                        secondaryLabel: 'Закрыть'
+                        secondaryLabel: t('common.close')
                     });
                 }
             }
         });
     };
 
+    // Выполняет подтвержденное действие после проверки состояния.
     const performSubmitCourse = async (courseId) => {
         try {
             const { data } = await CourseService.submitAuthorCourseForReview(courseId);
@@ -115,50 +123,51 @@ const AuthorLearningPage = () => {
                 return next;
             });
             uiStore.showModal({
-                title: alreadySubmitted ? 'Уже отправлено' : 'Отправлено',
-                message: alreadySubmitted ? 'Курс уже отправлен на модерацию.' : 'Курс отправлен на модерацию.',
+                title: alreadySubmitted ? t('pages.admin.learning.already_submitted_title') : t('pages.admin.learning.submitted_title'),
+                message: alreadySubmitted ? t('pages.admin.learning.already_submitted_message') : t('pages.admin.learning.submitted_message'),
                 variant: 'info',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('common.close')
             });
             await loadAll();
         } catch (err) {
             uiStore.showModal({
-                title: 'Ошибка',
-                message: err.response?.data?.message || 'Не удалось отправить курс на модерацию',
+                title: t('modals.error'),
+                message: err.response?.data?.message || t('pages.admin.learning.submit_review_error'),
                 variant: 'error',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('common.close')
             });
         }
     };
 
+    // Принимает отправленные пользователем данные и фиксирует результат.
     const submitCourse = async (course) => {
         if (!course?._id) return;
         if (course.canSubmitForReview === false) {
             uiStore.showModal({
-                title: 'Отправка недоступна',
-                message: 'В курсе нет изменений после последней модерации.',
+                title: t('pages.admin.learning.submit_unavailable_title'),
+                message: t('pages.admin.learning.submit_unavailable_message'),
                 variant: 'info',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('common.close')
             });
             return;
         }
         const alreadySubmitted = course.reviewStatus === 'pending_review' || submittedCourseIds.has(course._id);
         if (alreadySubmitted) {
             uiStore.showModal({
-                title: 'Уже отправлено',
-                message: 'Курс уже отправлен на модерацию.',
+                title: t('pages.admin.learning.already_submitted_title'),
+                message: t('pages.admin.learning.already_submitted_message'),
                 variant: 'info',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('common.close')
             });
             return;
         }
 
         uiStore.showModal({
-            title: 'Отправить курс на модерацию?',
-            message: 'После отправки редактирование курса будет временно недоступно.',
+            title: t('pages.admin.learning.submit_review_title'),
+            message: t('pages.admin.learning.submit_review_message'),
             variant: 'info',
-            primaryLabel: 'Отправить',
-            secondaryLabel: 'Отмена',
+            primaryLabel: t('modals.send'),
+            secondaryLabel: t('modals.cancel'),
             onPrimary: async () => {
                 uiStore.closeModal();
                 await performSubmitCourse(course._id);
@@ -179,30 +188,30 @@ const AuthorLearningPage = () => {
             <section className={styles.card}>
                 <div className={styles.coursesHead}>
                     <div className={styles.sectionHead}>
-                        <h3>Мои курсы</h3>
+                        <h3>{t('pages.admin.learning.my_courses')}</h3>
                         <button
                             type="button"
                             className={`${styles.linkBtn} ${styles.topCreateBtn}`}
                             onClick={() => navigate('/author/learning/courses/new')}
                         >
-                            Новый курс
+                            {t('pages.admin.learning.new_course')}
                         </button>
                     </div>
                     <div className={styles.filters}>
                         <input
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Поиск по названию/описанию"
+                            placeholder={t('pages.admin.learning.search_placeholder')}
                         />
                         <select value={filterCategoryId} onChange={(e) => setFilterCategoryId(e.target.value)}>
-                            <option value="">Все категории</option>
+                            <option value="">{t('pages.admin.learning.all_categories')}</option>
                             {categories.map((category) => (
                                 <option key={category._id} value={category._id}>{category.name}</option>
                             ))}
                         </select>
                         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
                             {STATUS_OPTIONS.map((item) => (
-                                <option key={item.value || 'all'} value={item.value}>{item.label}</option>
+                                <option key={item.value || 'all'} value={item.value}>{t(item.labelKey)}</option>
                             ))}
                         </select>
                     </div>
@@ -218,16 +227,16 @@ const AuthorLearningPage = () => {
                                         {course.title}
                                     </strong>
                                     <small>
-                                        {(getCourseCategoryNames(course).join(', ') || 'Без категории')} · {course.status === 'published' ? 'Опубликован' : 'Черновик'} · {reviewLabel(course.reviewStatus)}
+                                        {(getCourseCategoryNames(course).join(', ') || t('pages.admin.learning.no_category'))} · {statusLabel(course.status)} · {reviewLabel(course.reviewStatus)}
                                     </small>
                                 </div>
                                 <div className={styles.actions}>
                                     <Link
                                         className={styles.actionLink}
                                         to={`/author/learning/courses/${course._id}`}
-                                        title="Открыть страницу курса"
+                                        title={t('pages.admin.learning.open_course_title')}
                                     >
-                                        К курсу
+                                        {t('pages.admin.learning.to_course')}
                                     </Link>
                                     {course.status === 'draft' && (
                                         <button
@@ -235,19 +244,19 @@ const AuthorLearningPage = () => {
                                             onClick={() => submitCourse(course)}
                                             disabled={!canSubmit}
                                         >
-                                            {isPending ? 'Отправлено на модерацию' : (course.canSubmitForReview === false ? 'Нет изменений для отправки' : 'На модерацию')}
+                                            {isPending ? t('pages.admin.learning.sent_to_review') : (course.canSubmitForReview === false ? t('pages.admin.learning.no_changes') : t('pages.admin.learning.to_review'))}
                                         </button>
                                     )}
                                     {course.status !== 'published' && (
                                         <button type="button" onClick={() => removeCourse(course._id)}>
-                                            Удалить
+                                            {t('common.actions.delete')}
                                         </button>
                                     )}
                                 </div>
                             </div>
                         );
                     })}
-                {filteredCourses.length === 0 && <p className={styles.empty}>Курсы не найдены</p>}
+                {filteredCourses.length === 0 && <p className={styles.empty}>{t('pages.admin.learning.not_found')}</p>}
             </section>
         </div>
     );

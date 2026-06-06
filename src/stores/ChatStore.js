@@ -3,6 +3,7 @@ import { io } from 'socket.io-client';
 import $api from '../api/instance';
 import { authStore } from './AuthStore';
 
+// Хранит или изменяет состояние приложения для сценария getSocketBaseUrl.
 const getSocketBaseUrl = () => {
     const api = import.meta.env.VITE_API_URL || '';
     return api.replace(/\/api\/?$/, '');

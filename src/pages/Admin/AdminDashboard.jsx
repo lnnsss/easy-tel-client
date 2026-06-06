@@ -4,6 +4,7 @@ import AdminService from '../../services/AdminService';
 import { useStores } from '../../stores/StoreContext';
 import styles from './AdminDashboard.module.css';
 
+// Отрисовывает стартовую панель администратора с основными разделами.
 const AdminDashboard = () => {
     const { t } = useTranslation();
     const { uiStore } = useStores();
@@ -47,6 +48,7 @@ const AdminDashboard = () => {
         fetchWords();
     }, [fetchWords]);
 
+    // Обрабатывает пользовательское или системное событие.
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -56,14 +58,15 @@ const AdminDashboard = () => {
             fetchWords();
         } catch (err) {
             uiStore.showModal({
-                title: 'Ошибка',
-                message: err.response?.data?.message || 'Ошибка',
+                title: t('modals.error'),
+                message: err.response?.data?.message || t('modals.error'),
                 variant: 'error',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('common.close')
             });
         }
     };
 
+    // Обрабатывает пользовательское или системное событие.
     const handleEditSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -72,21 +75,22 @@ const AdminDashboard = () => {
             fetchWords();
         } catch {
             uiStore.showModal({
-                title: 'Ошибка',
-                message: 'Ошибка обновления',
+                title: t('modals.error'),
+                message: t('pages.admin.dictionary.update_error'),
                 variant: 'error',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('common.close')
             });
         }
     };
 
+    // Обрабатывает пользовательское или системное событие.
     const handleDeleteFull = async (id) => {
         uiStore.showModal({
-            title: 'Удалить слово?',
-            message: 'Слово будет удалено навсегда.',
+            title: t('pages.admin.dictionary.delete_title'),
+            message: t('pages.admin.dictionary.delete_message'),
             variant: 'error',
-            primaryLabel: 'Удалить',
-            secondaryLabel: 'Отмена',
+            primaryLabel: t('common.actions.delete'),
+            secondaryLabel: t('common.actions.cancel'),
             onPrimary: async () => {
                 try {
                     await AdminService.deleteWord(id);
@@ -94,21 +98,23 @@ const AdminDashboard = () => {
                     fetchWords();
                 } catch {
                     uiStore.showModal({
-                        title: 'Ошибка',
-                        message: 'Ошибка при удалении',
+                        title: t('modals.error'),
+                        message: t('pages.admin.dictionary.delete_error'),
                         variant: 'error',
-                        secondaryLabel: 'Закрыть'
+                        secondaryLabel: t('common.close')
                     });
                 }
             }
         });
     };
 
+    // Открывает локальное состояние интерфейса или модального окна.
     const openModal = (word) => {
         setEditingWord({ ...word });
         setIsModalOpen(true);
     };
 
+    // Формирует повторяемый фрагмент интерфейса.
     const renderPagination = () => {
         const btns = [];
         for (let i = 1; i <= totalPages; i++) {
@@ -137,7 +143,7 @@ const AdminDashboard = () => {
                 <div className={styles.searchBar}>
                     <input
                         type="text"
-                        placeholder="Поиск по RU / TAT / EN..."
+                        placeholder={t('pages.admin.dictionary.search_placeholder')}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className={styles.searchInput}
@@ -148,13 +154,13 @@ const AdminDashboard = () => {
             <div className={styles.mainLayout}>
                 <aside className={styles.formContainer}>
                     <div className={styles.card}>
-                        <h3>Новое слово</h3>
+                        <h3>{t('pages.admin.dictionary.new_word')}</h3>
                         <form onSubmit={handleSubmit} className={styles.form}>
-                            <input placeholder="Русский" value={formData.nameRu} onChange={e => setFormData({ ...formData, nameRu: e.target.value })} required />
-                            <input placeholder="Татарский" value={formData.nameTatar} onChange={e => setFormData({ ...formData, nameTatar: e.target.value })} required />
+                            <input placeholder={t('pages.admin.dictionary.russian')} value={formData.nameRu} onChange={e => setFormData({ ...formData, nameRu: e.target.value })} required />
+                            <input placeholder={t('pages.admin.dictionary.tatar')} value={formData.nameTatar} onChange={e => setFormData({ ...formData, nameTatar: e.target.value })} required />
                             <input placeholder="English" value={formData.nameEn} onChange={e => setFormData({ ...formData, nameEn: e.target.value })} required />
-                            <input placeholder="Транскрипция" value={formData.transcription} onChange={e => setFormData({ ...formData, transcription: e.target.value })} />
-                            <textarea placeholder="Описание" value={formData.descriptionRu} onChange={e => setFormData({ ...formData, descriptionRu: e.target.value })} />
+                            <input placeholder={t('pages.admin.dictionary.transcription')} value={formData.transcription} onChange={e => setFormData({ ...formData, transcription: e.target.value })} />
+                            <textarea placeholder={t('pages.admin.dictionary.description')} value={formData.descriptionRu} onChange={e => setFormData({ ...formData, descriptionRu: e.target.value })} />
                             <button type="submit" className={styles.addBtn}>{t('common.actions.create')}</button>
                         </form>
                     </div>
@@ -163,7 +169,7 @@ const AdminDashboard = () => {
                 <main className={styles.listContainer}>
                     <div className={styles.card}>
                         <div className={styles.listHeader}>
-                            <h3>База слов</h3>
+                            <h3>{t('pages.admin.dictionary.word_base')}</h3>
                         </div>
 
                         <div className={styles.wordGrid}>
@@ -181,7 +187,7 @@ const AdminDashboard = () => {
                                     </div>
                                 </div>
                             ))}
-                            {!loading && words.length === 0 && <div className={styles.empty}>Ничего не найдено</div>}
+                            {!loading && words.length === 0 && <div className={styles.empty}>{t('pages.admin.dictionary.empty')}</div>}
                         </div>
 
                         {totalPages > 1 && <div className={styles.pagination}>{renderPagination()}</div>}
@@ -192,13 +198,13 @@ const AdminDashboard = () => {
             {isModalOpen && editingWord && (
                 <div className={styles.modalOverlay}>
                     <div className={styles.modalCard}>
-                        <h2>Редактировать слово</h2>
+                        <h2>{t('pages.admin.dictionary.edit_word')}</h2>
                         <form onSubmit={handleEditSubmit} className={styles.form}>
-                            <input placeholder="Русский" value={editingWord.nameRu} onChange={e => setEditingWord({...editingWord, nameRu: e.target.value})} required />
-                            <input placeholder="Татарский" value={editingWord.nameTatar} onChange={e => setEditingWord({...editingWord, nameTatar: e.target.value})} required />
+                            <input placeholder={t('pages.admin.dictionary.russian')} value={editingWord.nameRu} onChange={e => setEditingWord({...editingWord, nameRu: e.target.value})} required />
+                            <input placeholder={t('pages.admin.dictionary.tatar')} value={editingWord.nameTatar} onChange={e => setEditingWord({...editingWord, nameTatar: e.target.value})} required />
                             <input placeholder="English" value={editingWord.nameEn} onChange={e => setEditingWord({...editingWord, nameEn: e.target.value})} required />
-                            <input placeholder="Транскрипция" value={editingWord.transcription} onChange={e => setEditingWord({...editingWord, transcription: e.target.value})} />
-                            <textarea placeholder="Описание" value={editingWord.descriptionRu} onChange={e => setEditingWord({...editingWord, descriptionRu: e.target.value})} />
+                            <input placeholder={t('pages.admin.dictionary.transcription')} value={editingWord.transcription} onChange={e => setEditingWord({...editingWord, transcription: e.target.value})} />
+                            <textarea placeholder={t('pages.admin.dictionary.description')} value={editingWord.descriptionRu} onChange={e => setEditingWord({...editingWord, descriptionRu: e.target.value})} />
                             <div className={styles.modalButtons}>
                                 <button type="button" onClick={() => setIsModalOpen(false)} className={styles.cancelBtn}>{t('common.actions.cancel')}</button>
                                 <button type="submit" className={`${styles.addBtn} ${styles.modalSubmitBtn}`}>{t('common.actions.save')}</button>

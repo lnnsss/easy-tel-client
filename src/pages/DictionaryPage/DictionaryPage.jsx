@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStores } from '../../stores/StoreContext';
 import styles from './DictionaryPage.module.css';
 
+// Рисует иконку озвучивания для кнопок воспроизведения.
 const SpeakerIcon = ({ className }) => (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
         <path d="M4 10v4h4l5 4V6l-5 4H4z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
@@ -14,14 +15,16 @@ const SpeakerIcon = ({ className }) => (
     </svg>
 );
 
+// Рисует иконку остановки для активного воспроизведения.
 const StopIcon = ({ className }) => (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
         <rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" />
     </svg>
 );
 
+// Отрисовывает экран или компонент DictionaryPage и связывает его с данными приложения.
 const DictionaryPage = observer(() => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { uiStore } = useStores();
     const navigate = useNavigate();
     const [items, setItems] = useState([]);
@@ -53,6 +56,7 @@ const DictionaryPage = observer(() => {
     });
     const [assessmentLoading, setAssessmentLoading] = useState(false);
 
+    // Загружает данные, необходимые для текущего экрана или сценария.
     const loadDictionaryPage = async (nextPage, query = '') => {
         setLoading(true);
 
@@ -109,6 +113,7 @@ const DictionaryPage = observer(() => {
         return () => media.removeEventListener('change', applyMobileMode);
     }, []);
 
+    // Загружает данные, необходимые для текущего экрана или сценария.
     const loadAssessmentStatus = async () => {
         try {
             const { data } = await $api.get('/dictionary/weekly-assessment');
@@ -168,7 +173,7 @@ const DictionaryPage = observer(() => {
         } catch (err) {
             setUsageExamplesErrorByWordId((prev) => ({
                 ...prev,
-                [wordId]: err?.response?.data?.message || 'Не удалось сгенерировать примеры'
+                [wordId]: err?.response?.data?.message || t('pages.dictionary.examples_error')
             }));
         } finally {
             setUsageExamplesLoadingByWordId((prev) => ({ ...prev, [wordId]: false }));
@@ -177,6 +182,7 @@ const DictionaryPage = observer(() => {
 
     const isDescriptionExpanded = (wordId) => Boolean(descriptionExpandedByWordId[wordId]);
 
+    // Переключает состояние выбранной сущности или настройки.
     const toggleDescription = (wordId, e) => {
         e?.stopPropagation?.();
         setDescriptionExpandedByWordId((prev) => ({
@@ -232,7 +238,7 @@ const DictionaryPage = observer(() => {
             };
             nextAudio.onerror = () => {
                 setTtsPlayingKey(null);
-                setTtsError('Не удалось воспроизвести озвучку');
+                setTtsError(t('pages.dictionary.tts_play_error'));
                 URL.revokeObjectURL(nextUrl);
             };
 
@@ -250,16 +256,16 @@ const DictionaryPage = observer(() => {
                         utterance.onend = () => setTtsPlayingKey(null);
                         utterance.onerror = () => {
                             setTtsPlayingKey(null);
-                            setTtsError(err?.response?.data?.message || 'Не удалось озвучить слово');
+                            setTtsError(err?.response?.data?.message || t('pages.dictionary.tts_word_error'));
                         };
                         window.speechSynthesis.cancel();
                         window.speechSynthesis.speak(utterance);
                         setTtsPlayingKey(targetKey);
                     } else {
-                        setTtsError(err?.response?.data?.message || 'Не удалось озвучить слово');
+                        setTtsError(err?.response?.data?.message || t('pages.dictionary.tts_word_error'));
                     }
                 } catch {
-                    setTtsError(err?.response?.data?.message || 'Не удалось озвучить слово');
+                    setTtsError(err?.response?.data?.message || t('pages.dictionary.tts_word_error'));
                 }
             }
         } finally {
@@ -267,6 +273,7 @@ const DictionaryPage = observer(() => {
         }
     };
 
+    // Открывает локальное состояние интерфейса или модального окна.
     const openAssessment = async () => {
         if (!assessmentStatus.hasEnoughWords) {
             uiStore.showModal({
@@ -296,14 +303,16 @@ const DictionaryPage = observer(() => {
         }
     };
 
-    if (loading) return <div className={styles.loader}>Загрузка словаря...</div>;
+    const locale = i18n.language?.startsWith('tt') ? 'tt-RU' : 'ru-RU';
+
+    if (loading) return <div className={styles.loader}>{t('pages.dictionary.loading')}</div>;
 
     return (
         <div className={`${styles.container} app-page-shell`}>
             <div className={`${styles.headerBar} app-page-top`}>
                 <div>
                     <h1 className={`${styles.title} app-page-title`}>{t('pages.dictionary.title')}</h1>
-                    <p className={styles.totalLabel}>Всего: {totalItems}</p>
+                    <p className={styles.totalLabel}>{t('pages.dictionary.total', { count: totalItems })}</p>
                 </div>
                 <div className={styles.headerRight}>
                     <div className={styles.assessmentStatusWrap}>
@@ -316,12 +325,12 @@ const DictionaryPage = observer(() => {
                             {assessmentLoading
                                 ? '...'
                                 : assessmentStatus.needsRetake
-                                    ? 'Проверить себя'
+                                    ? t('pages.dictionary.self_check')
                                     : (assessmentStatus.result?.level || 'A1')}
                         </button>
                         <div className={styles.assessmentTooltip}>
-                            Уровни: A1 (0-11), B1 (12-17), B2 (18-20).<br />
-                            Самый высокий уровень: B2.
+                            {t('pages.dictionary.levels_hint')}<br />
+                            {t('pages.dictionary.max_level_hint')}
                         </div>
                     </div>
                     {!isMobileView && (
@@ -329,19 +338,19 @@ const DictionaryPage = observer(() => {
                             <button
                                 className={`${styles.switchBtn} ${viewMode === 'table' ? styles.switchBtnActive : ''}`}
                                 onClick={() => setViewMode('table')}
-                                aria-label="Режим таблицы"
+                                aria-label={t('pages.dictionary.table_mode_aria')}
                                 type="button"
                             >
                                 <svg viewBox="0 0 24 24" aria-hidden="true">
                                     <rect x="3" y="4" width="18" height="16" rx="2"></rect>
                                     <path d="M3 10h18M9 4v16M15 4v16"></path>
                                 </svg>
-                                <span>Таблица</span>
+                                <span>{t('pages.dictionary.table')}</span>
                             </button>
                             <button
                                 className={`${styles.switchBtn} ${viewMode === 'cards' ? styles.switchBtnActive : ''}`}
                                 onClick={() => setViewMode('cards')}
-                                aria-label="Режим карточек"
+                                aria-label={t('pages.dictionary.cards_mode_aria')}
                                 type="button"
                             >
                                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -350,7 +359,7 @@ const DictionaryPage = observer(() => {
                                     <rect x="3" y="13" width="8" height="7" rx="1.5"></rect>
                                     <rect x="13" y="13" width="8" height="7" rx="1.5"></rect>
                                 </svg>
-                                <span>Блоки</span>
+                                <span>{t('pages.dictionary.blocks')}</span>
                             </button>
                         </div>
                     )}
@@ -360,7 +369,7 @@ const DictionaryPage = observer(() => {
                 <input
                     type="text"
                     className={styles.searchInput}
-                    placeholder="Поиск по русскому, татарскому или английскому слову"
+                    placeholder={t('pages.dictionary.search_placeholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -369,7 +378,7 @@ const DictionaryPage = observer(() => {
 
             {items.length === 0 ? (
                 <div className={styles.empty}>
-                    <p>Вы еще не добавили ни одного слова в словарь.</p>
+                    <p>{t('pages.dictionary.empty')}</p>
                 </div>
             ) : (isMobileView || viewMode === 'cards') ? (
                 <div className={styles.grid}>
@@ -391,7 +400,7 @@ const DictionaryPage = observer(() => {
                                     <span className={styles.transcription}>[{item.word.transcription}]</span>
                                 </div>
                                 <p className={styles.russian}>
-                                    <strong>Русский:</strong> {item.word.nameRu}
+                                    <strong>{t('pages.dictionary.russian')}</strong> {item.word.nameRu}
                                 </p>
                                 {isOpened && (
                                     <>
@@ -408,13 +417,13 @@ const DictionaryPage = observer(() => {
                                             }}
                                         >
                                             <div className={styles.descriptionHead}>
-                                                <p className={styles.descriptionLabel}>Описание</p>
+                                                <p className={styles.descriptionLabel}>{t('pages.dictionary.description')}</p>
                                                 <span className={styles.descriptionToggle}>
-                                                    {isDescriptionExpanded(item.word._id) ? 'Скрыть' : 'Показать'}
+                                                    {isDescriptionExpanded(item.word._id) ? t('pages.dictionary.hide') : t('pages.dictionary.show')}
                                                 </span>
                                             </div>
                                             <div className={`${styles.descriptionBody} ${!isDescriptionExpanded(item.word._id) ? styles.descriptionBodyCollapsed : ''}`}>
-                                                <p className={styles.description}>{item.word.descriptionRu || 'Описание отсутствует'}</p>
+                                                <p className={styles.description}>{item.word.descriptionRu || t('pages.dictionary.no_description')}</p>
                                                 {!isDescriptionExpanded(item.word._id) && <div className={styles.descriptionFade} />}
                                             </div>
                                         </div>
@@ -430,16 +439,16 @@ const DictionaryPage = observer(() => {
                                                     disabled={usageLoading}
                                                 >
                                                     {usageLoading
-                                                        ? 'Генерация примеров...'
+                                                        ? t('pages.dictionary.examples_loading')
                                                         : usageExamples.length > 0
-                                                            ? 'Другие примеры предложений'
-                                                            : 'Примеры предложений'}
+                                                            ? t('pages.dictionary.more_examples')
+                                                            : t('pages.dictionary.examples')}
                                                 </button>
                                             </div>
                                             {usageError && <p className={styles.usageError}>{usageError}</p>}
                                             {usageRequested && usageExamples.length > 0 && (
                                                 <div className={styles.usageExamples}>
-                                                    <p className={styles.usageTitle}>2 примера предложений</p>
+                                                    <p className={styles.usageTitle}>{t('pages.dictionary.examples_count')}</p>
                                                     {usageExamples.map((example, idx) => {
                                                         const usageTtsKey = `${item._id}:example:${idx}`;
                                                         return (
@@ -453,8 +462,8 @@ const DictionaryPage = observer(() => {
                                                                             e.stopPropagation();
                                                                             speakText(usageTtsKey, example.textTatar);
                                                                         }}
-                                                                        title={ttsPlayingKey === usageTtsKey ? 'Остановить озвучку' : 'Озвучить пример'}
-                                                                        aria-label="Озвучить пример"
+                                                                        title={ttsPlayingKey === usageTtsKey ? t('pages.dictionary.stop_tts') : t('pages.dictionary.speak_example')}
+                                                                        aria-label={t('pages.dictionary.speak_example')}
                                                                         disabled={ttsLoadingKey === usageTtsKey}
                                                                     >
                                                                         {ttsLoadingKey === usageTtsKey ? (
@@ -483,8 +492,8 @@ const DictionaryPage = observer(() => {
                                             e.stopPropagation();
                                             speakText(`${item._id}:word`, item.word.nameTatar);
                                         }}
-                                        title={ttsPlayingKey === `${item._id}:word` ? 'Остановить озвучку' : 'Озвучить слово'}
-                                        aria-label="Озвучить слово"
+                                        title={ttsPlayingKey === `${item._id}:word` ? t('pages.dictionary.stop_tts') : t('pages.dictionary.speak_word')}
+                                        aria-label={t('pages.dictionary.speak_word')}
                                         disabled={ttsLoadingKey === `${item._id}:word`}
                                     >
                                         {ttsLoadingKey === `${item._id}:word` ? (
@@ -495,7 +504,7 @@ const DictionaryPage = observer(() => {
                                             <SpeakerIcon className={styles.ttsIconSvg} />
                                         )}
                                     </button>
-                                    <span>Добавлено: {new Date(item.learnedAt).toLocaleDateString()}</span>
+                                    <span>{t('pages.dictionary.added', { date: new Date(item.learnedAt).toLocaleDateString(locale) })}</span>
                                 </div>
                             </button>
                         );
@@ -506,11 +515,11 @@ const DictionaryPage = observer(() => {
                     <table className={styles.table}>
                         <thead>
                             <tr>
-                                <th>Озвучка</th>
-                                <th>Татарский</th>
-                                <th>Транскрипция</th>
-                                <th>Русский</th>
-                                <th>Добавлено</th>
+                                <th>{t('pages.dictionary.audio')}</th>
+                                <th>{t('pages.dictionary.tatar')}</th>
+                                <th>{t('pages.dictionary.transcription')}</th>
+                                <th>{t('pages.dictionary.russian_header')}</th>
+                                <th>{t('pages.dictionary.added_header')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -534,8 +543,8 @@ const DictionaryPage = observer(() => {
                                                         e.stopPropagation();
                                                         speakText(`${item._id}:word`, item.word.nameTatar);
                                                     }}
-                                                    title={ttsPlayingKey === `${item._id}:word` ? 'Остановить озвучку' : 'Озвучить слово'}
-                                                    aria-label="Озвучить слово"
+                                                    title={ttsPlayingKey === `${item._id}:word` ? t('pages.dictionary.stop_tts') : t('pages.dictionary.speak_word')}
+                                                    aria-label={t('pages.dictionary.speak_word')}
                                                     disabled={ttsLoadingKey === `${item._id}:word`}
                                                 >
                                                     {ttsLoadingKey === `${item._id}:word` ? (
@@ -550,7 +559,7 @@ const DictionaryPage = observer(() => {
                                             <td>{item.word.nameTatar}</td>
                                             <td>[{item.word.transcription}]</td>
                                             <td>{item.word.nameRu}</td>
-                                            <td>{new Date(item.learnedAt).toLocaleDateString()}</td>
+                                            <td>{new Date(item.learnedAt).toLocaleDateString(locale)}</td>
                                         </tr>
                                         {isOpen && (
                                             <tr className={styles.tableDescriptionRow}>
@@ -569,14 +578,14 @@ const DictionaryPage = observer(() => {
                                                             }}
                                                         >
                                                             <div className={styles.descriptionHead}>
-                                                                <p className={styles.descriptionLabel}>Описание</p>
+                                                                <p className={styles.descriptionLabel}>{t('pages.dictionary.description')}</p>
                                                                 <span className={styles.descriptionToggle}>
-                                                                    {isDescriptionExpanded(item.word._id) ? 'Скрыть' : 'Показать'}
+                                                                    {isDescriptionExpanded(item.word._id) ? t('pages.dictionary.hide') : t('pages.dictionary.show')}
                                                                 </span>
                                                             </div>
                                                             <div className={`${styles.descriptionBody} ${!isDescriptionExpanded(item.word._id) ? styles.descriptionBodyCollapsed : ''}`}>
                                                                 <p className={styles.description}>
-                                                                    {item.word.descriptionRu || 'Описание отсутствует'}
+                                                                    {item.word.descriptionRu || t('pages.dictionary.no_description')}
                                                                 </p>
                                                                 {!isDescriptionExpanded(item.word._id) && <div className={styles.descriptionFade} />}
                                                             </div>
@@ -593,16 +602,16 @@ const DictionaryPage = observer(() => {
                                                                     disabled={usageLoading}
                                                                 >
                                                                     {usageLoading
-                                                                        ? 'Генерация примеров...'
+                                                                        ? t('pages.dictionary.examples_loading')
                                                                         : usageExamples.length > 0
-                                                                            ? 'Другие примеры предложений'
-                                                                            : 'Примеры предложений'}
+                                                                            ? t('pages.dictionary.more_examples')
+                                                                            : t('pages.dictionary.examples')}
                                                                 </button>
                                                             </div>
                                                             {usageError && <p className={styles.usageError}>{usageError}</p>}
                                                             {usageRequested && usageExamples.length > 0 && (
                                                                 <div className={styles.usageExamples}>
-                                                                    <p className={styles.usageTitle}>2 примера предложений</p>
+                                                                    <p className={styles.usageTitle}>{t('pages.dictionary.examples_count')}</p>
                                                                     {usageExamples.map((example, idx) => {
                                                                         const usageTtsKey = `${item._id}:example:${idx}`;
                                                                         return (
@@ -616,8 +625,8 @@ const DictionaryPage = observer(() => {
                                                                                             e.stopPropagation();
                                                                                             speakText(usageTtsKey, example.textTatar);
                                                                                         }}
-                                                                                        title={ttsPlayingKey === usageTtsKey ? 'Остановить озвучку' : 'Озвучить пример'}
-                                                                                        aria-label="Озвучить пример"
+                                                                                        title={ttsPlayingKey === usageTtsKey ? t('pages.dictionary.stop_tts') : t('pages.dictionary.speak_example')}
+                                                                                        aria-label={t('pages.dictionary.speak_example')}
                                                                                         disabled={ttsLoadingKey === usageTtsKey}
                                                                                     >
                                                                                         {ttsLoadingKey === usageTtsKey ? (

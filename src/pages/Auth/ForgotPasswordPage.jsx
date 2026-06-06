@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Auth.module.css';
 
+// Отрисовывает экран или компонент ForgotPasswordPage и связывает его с данными приложения.
 const ForgotPasswordPage = observer(() => {
     const { t } = useTranslation();
     const { authStore } = useStores();
@@ -12,6 +13,7 @@ const ForgotPasswordPage = observer(() => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
+    // Обрабатывает событие интерфейса пользователя.
     const onSubmit = async (e) => {
         e.preventDefault();
         setError('');

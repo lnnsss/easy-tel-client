@@ -8,6 +8,7 @@ import styles from './Auth.module.css';
 const PASSWORD_ALLOWED_REGEX = /^[A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]+$/;
 const PASSWORD_COMPLEXITY_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/;
 
+// Отрисовывает экран или компонент ResetPasswordPage и связывает его с данными приложения.
 const ResetPasswordPage = observer(() => {
     const { t } = useTranslation();
     const { authStore } = useStores();
@@ -31,6 +32,7 @@ const ResetPasswordPage = observer(() => {
         return '';
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onSubmit = async (e) => {
         e.preventDefault();
         setError('');

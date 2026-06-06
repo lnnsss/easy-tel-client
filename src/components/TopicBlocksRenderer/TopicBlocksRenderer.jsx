@@ -2,15 +2,18 @@ import React from 'react';
 import { getTopicAssetUrlCandidates, getTopicBlocksForEditor } from '../../utils/topicContent';
 import styles from './TopicBlocksRenderer.module.css';
 
+// Возвращает нужные данные или вычисленное значение.
 const getImageWidthPercent = (value) => {
     const numeric = Number(value);
     if (!Number.isFinite(numeric)) return 50;
     return Math.max(10, Math.min(100, Math.round(numeric)));
 };
 
+// Отрисовывает экран или компонент TopicBlocksRenderer и связывает его с данными приложения.
 const TopicBlocksRenderer = ({ topic }) => {
     const blocks = getTopicBlocksForEditor(topic);
 
+    // Обрабатывает пользовательское или системное событие.
     const handleImageFallback = (event, url) => {
         const candidates = getTopicAssetUrlCandidates(url);
         const currentIndex = Number(event.currentTarget.dataset.fallbackIndex || 0);

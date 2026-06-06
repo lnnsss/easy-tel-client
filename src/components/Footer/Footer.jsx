@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styles from './Footer.module.css';
 
+// Отрисовывает экран или компонент Footer и связывает его с данными приложения.
 const Footer = () => {
     const { t } = useTranslation();
 

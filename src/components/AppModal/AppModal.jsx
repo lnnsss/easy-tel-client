@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './AppModal.module.css';
 
 const AppModal = ({
@@ -11,11 +12,14 @@ const AppModal = ({
     onClose,
     onPrimary,
     onSecondary,
-    primaryLabel = 'В словарь',
-    secondaryLabel = 'Закрыть'
+    primaryLabel,
+    secondaryLabel
 }) => {
+    const { t } = useTranslation();
     if (!isOpen) return null;
-    const hasSecondary = Boolean(secondaryLabel);
+    const resolvedPrimaryLabel = primaryLabel || t('common.to_dictionary');
+    const resolvedSecondaryLabel = secondaryLabel === undefined ? t('common.close') : secondaryLabel;
+    const hasSecondary = Boolean(resolvedSecondaryLabel);
     const isSingleAction = !onPrimary || !hasSecondary;
 
     return (
@@ -29,12 +33,12 @@ const AppModal = ({
                             className={`${styles.primaryBtn} ${variant === 'error' ? styles.primaryDanger : ''}`}
                             onClick={onPrimary}
                         >
-                            {primaryLabel}
+                            {resolvedPrimaryLabel}
                         </button>
                     )}
                     {hasSecondary && (
                         <button className={styles.closeBtn} onClick={onSecondary || onClose}>
-                            {secondaryLabel}
+                            {resolvedSecondaryLabel}
                         </button>
                     )}
                 </div>

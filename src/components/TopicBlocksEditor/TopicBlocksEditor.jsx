@@ -4,13 +4,14 @@ import { createTopicBlock, getTopicAssetUrlCandidates } from '../../utils/topicC
 import styles from './TopicBlocksEditor.module.css';
 
 const BLOCK_LABELS = {
-    h2: 'Заголовок',
-    h3: 'Подзаголовок',
-    text: 'Текст',
-    image: 'Картинка',
-    spacer: 'Отступ'
+    h2: 'editor.blocks.h2',
+    h3: 'editor.blocks.h3',
+    text: 'editor.blocks.text',
+    image: 'editor.blocks.image',
+    spacer: 'editor.blocks.spacer'
 };
 
+// Переставляет элемент списка при ручной сортировке или drag-and-drop.
 const moveItem = (items, fromIndex, toIndex) => {
     if (fromIndex === toIndex) return items;
     const next = [...items];
@@ -29,34 +30,38 @@ const ALLOWED_IMAGE_TYPES = new Set([
 ]);
 const ALLOWED_IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp', '.gif'];
 const SKIP_DELETE_CONFIRM_KEY = 'topicBlocksSkipDeleteConfirm';
+// Возвращает нужные данные или вычисленное значение.
 const getImageWidthPercent = (value) => {
     const numeric = Number(value);
     if (!Number.isFinite(numeric)) return 50;
     return Math.max(10, Math.min(100, Math.round(numeric)));
 };
+// Проверяет условие и возвращает логический результат.
 const isDragInteractiveTarget = (target) => {
     if (!(target instanceof Element)) return false;
     return Boolean(target.closest('input, textarea, select, button, label, [contenteditable="true"]'));
 };
 
-const getImageValidationError = (file) => {
-    if (!file) return 'Файл изображения не выбран';
+// Возвращает нужные данные или вычисленное значение.
+const getImageValidationError = (file, t) => {
+    if (!file) return t('editor.topic_blocks.file_required');
 
     const name = String(file.name || '').toLowerCase();
     const hasAllowedExtension = ALLOWED_IMAGE_EXTENSIONS.some((ext) => name.endsWith(ext));
     const hasAllowedType = ALLOWED_IMAGE_TYPES.has(String(file.type || '').toLowerCase());
 
     if (!hasAllowedType && !hasAllowedExtension) {
-        return 'Поддерживаются PNG, JPG, JPEG, WEBP и GIF';
+        return t('editor.topic_blocks.file_type');
     }
 
     if (Number(file.size || 0) > MAX_IMAGE_SIZE_BYTES) {
-        return 'Размер изображения не должен превышать 5MB';
+        return t('editor.topic_blocks.file_size');
     }
 
     return '';
 };
 
+// Проверяет, разрешено ли выполнить действие.
 const canLoadImageFromCandidates = (candidates) => new Promise((resolve) => {
     if (!Array.isArray(candidates) || candidates.length === 0) {
         resolve(false);
@@ -170,11 +175,13 @@ const TopicBlocksEditor = ({
         setIsAddMenuOpen(false);
     };
 
+    // Обновляет сущность по данным из запроса.
     const updateBlock = (index, patch) => {
         const next = blocks.map((block, i) => (i === index ? { ...block, ...patch } : block));
         onChange(next);
     };
 
+    // Удаляет связь или сущность по запросу пользователя.
     const removeBlock = (index) => {
         onChange(blocks.filter((_, i) => i !== index));
     };
@@ -188,6 +195,7 @@ const TopicBlocksEditor = ({
         setPendingDeleteIndex(index);
     };
 
+    // Показывает подтверждение перед необратимым действием.
     const confirmRemoveBlock = () => {
         if (pendingDeleteIndex < 0 || pendingDeleteIndex >= blocks.length) {
             setPendingDeleteIndex(-1);
@@ -204,6 +212,7 @@ const TopicBlocksEditor = ({
         setDontAskAgainChecked(false);
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onDropBlock = (dropIndex) => {
         if (dragIndex < 0 || dropIndex < 0 || dragIndex >= blocks.length || dropIndex >= blocks.length) {
             setDragIndex(-1);
@@ -217,10 +226,11 @@ const TopicBlocksEditor = ({
         setDragOverIndex(-1);
     };
 
+    // Принимает загруженный файл и возвращает информацию для дальнейшей работы.
     const uploadBlockImage = async (file, blockIndex) => {
         if (!file || !onUploadImage) return;
 
-        const validationError = getImageValidationError(file);
+        const validationError = getImageValidationError(file, t);
         if (validationError) {
             onUploadError?.(validationError);
             return;
@@ -230,25 +240,26 @@ const TopicBlocksEditor = ({
             setUploadingIndex(blockIndex);
             const url = await onUploadImage(file, blockIndex);
             if (!url) {
-                onUploadError?.('Не удалось получить URL загруженного изображения');
+                onUploadError?.(t('editor.topic_blocks.upload_url_missing'));
                 return;
             }
 
             const candidates = getTopicAssetUrlCandidates(url);
             const canLoad = await canLoadImageFromCandidates(candidates);
             if (!canLoad) {
-                onUploadError?.('Изображение загружено, но браузер не смог его отобразить. Используйте PNG, JPG, WEBP или GIF.');
+                onUploadError?.(t('editor.topic_blocks.upload_display_failed'));
                 return;
             }
 
             updateBlock(blockIndex, { url });
         } catch (error) {
-            onUploadError?.(error?.message || 'Ошибка загрузки изображения');
+            onUploadError?.(error?.message || t('editor.topic_blocks.upload_failed'));
         } finally {
             setUploadingIndex(-1);
         }
     };
 
+    // Обрабатывает пользовательское или системное событие.
     const handleImageFallback = (event, url) => {
         const candidates = getTopicAssetUrlCandidates(url);
         const currentIndex = Number(event.currentTarget.dataset.fallbackIndex || 0);
@@ -256,7 +267,7 @@ const TopicBlocksEditor = ({
         if (nextIndex >= candidates.length) {
             if (event.currentTarget.dataset.fallbackFailed !== '1') {
                 event.currentTarget.dataset.fallbackFailed = '1';
-                onUploadError?.('Не удалось отобразить это изображение. Попробуйте другой формат (PNG, JPG, WEBP, GIF).');
+                onUploadError?.(t('editor.topic_blocks.image_display_failed'));
             }
             return;
         }
@@ -296,7 +307,7 @@ const TopicBlocksEditor = ({
     return (
         <div className={styles.editor}>
             {blocks.length === 0 && (
-                <p className={styles.empty}>Добавьте минимум один блок контента.</p>
+                <p className={styles.empty}>{t('editor.topic_blocks.empty')}</p>
             )}
 
             <div className={styles.blocks}>
@@ -323,15 +334,15 @@ const TopicBlocksEditor = ({
                         }}
                     >
                         <div className={styles.blockTop}>
-                            <small className={styles.blockType}>{BLOCK_LABELS[block.type] || 'Блок'}</small>
+                            <small className={styles.blockType}>{t(BLOCK_LABELS[block.type] || 'editor.blocks.block')}</small>
                             {!disabled && (
                                 <button
                                     type="button"
                                     className={styles.removeButton}
                                     onClick={() => requestRemoveBlock(index)}
                                     draggable={false}
-                                    aria-label="Удалить блок"
-                                    title="Удалить блок"
+                                    aria-label={t('editor.topic_blocks.delete_block')}
+                                    title={t('editor.topic_blocks.delete_block')}
                                 >
                                     ×
                                 </button>
@@ -346,7 +357,7 @@ const TopicBlocksEditor = ({
                                         className={`${styles.editableH2} ${validationErrors[index] ? styles.fieldInvalid : ''}`}
                                         value={block.text || ''}
                                         onChange={(text) => updateBlock(index, { text })}
-                                        placeholder="Введите заголовок"
+                                        placeholder={t('editor.topic_blocks.h2_placeholder')}
                                         disabled={disabled}
                                         singleLine
                                     />
@@ -357,7 +368,7 @@ const TopicBlocksEditor = ({
                                         className={`${styles.editableH3} ${validationErrors[index] ? styles.fieldInvalid : ''}`}
                                         value={block.text || ''}
                                         onChange={(text) => updateBlock(index, { text })}
-                                        placeholder="Введите подзаголовок"
+                                        placeholder={t('editor.topic_blocks.h3_placeholder')}
                                         disabled={disabled}
                                         singleLine
                                     />
@@ -368,7 +379,7 @@ const TopicBlocksEditor = ({
                                         className={`${styles.editableText} ${validationErrors[index] ? styles.fieldInvalid : ''}`}
                                         value={block.text || ''}
                                         onChange={(text) => updateBlock(index, { text })}
-                                        placeholder="Введите текст"
+                                        placeholder={t('editor.topic_blocks.text_placeholder')}
                                         disabled={disabled}
                                     />
                                 )}
@@ -395,7 +406,7 @@ const TopicBlocksEditor = ({
                                         <div className={styles.previewFrame} style={{ width: `${getImageWidthPercent(block.widthPercent)}%` }}>
                                             <img
                                                 src={getTopicAssetUrlCandidates(block.url)[0]}
-                                                alt="Предпросмотр"
+                                                alt={t('editor.topic_blocks.preview_alt')}
                                                 className={styles.preview}
                                                 data-fallback-index="0"
                                                 onError={(event) => handleImageFallback(event, block.url)}
@@ -403,19 +414,19 @@ const TopicBlocksEditor = ({
                                         </div>
                                     ) : (
                                         <span className={styles.imagePlaceholder}>
-                                            {uploadingIndex === index ? 'Загрузка...' : 'Нажмите, чтобы выбрать изображение'}
+                                            {uploadingIndex === index ? t('editor.topic_blocks.uploading') : t('editor.topic_blocks.choose_image')}
                                         </span>
                                     )}
                                 </label>
                                 <input
                                     value={block.url || ''}
                                     onChange={(e) => updateBlock(index, { url: e.target.value })}
-                                    placeholder="Или вставьте URL изображения"
+                                    placeholder={t('editor.topic_blocks.image_url_placeholder')}
                                     disabled={disabled}
                                     className={styles.imageUrlInput}
                                 />
                                 <div className={styles.imageScaleRow}>
-                                    <span className={styles.imageScaleLabel}>Масштаб</span>
+                                    <span className={styles.imageScaleLabel}>{t('editor.topic_blocks.scale')}</span>
                                     <input
                                         type="range"
                                         min="10"
@@ -447,7 +458,7 @@ const TopicBlocksEditor = ({
                         )}
 
                         {block.type === 'spacer' && (
-                            <div className={styles.spacerBlock} aria-label="Пустой блок-отступ" />
+                            <div className={styles.spacerBlock} aria-label={t('editor.topic_blocks.spacer_aria')} />
                         )}
                     </div>
                 ))}
@@ -480,22 +491,22 @@ const TopicBlocksEditor = ({
             {pendingDeleteIndex >= 0 ? (
                 <div className={styles.confirmOverlay} onClick={() => setPendingDeleteIndex(-1)}>
                     <div className={styles.confirmModal} onClick={(event) => event.stopPropagation()}>
-                        <h4 className={styles.confirmTitle}>Удалить блок?</h4>
-                        <p className={styles.confirmText}>Это действие нельзя отменить.</p>
+                        <h4 className={styles.confirmTitle}>{t('editor.topic_blocks.delete_title')}</h4>
+                        <p className={styles.confirmText}>{t('editor.topic_blocks.delete_text')}</p>
                         <label className={styles.confirmCheckboxRow}>
                             <input
                                 type="checkbox"
                                 checked={dontAskAgainChecked}
                                 onChange={(event) => setDontAskAgainChecked(event.target.checked)}
                             />
-                            <span>Больше не показывать</span>
+                            <span>{t('editor.topic_blocks.dont_show_again')}</span>
                         </label>
                         <div className={styles.confirmActions}>
                             <button type="button" className={styles.confirmDeleteBtn} onClick={confirmRemoveBlock}>
-                                Удалить
+                                {t('common.actions.delete')}
                             </button>
                             <button type="button" className={styles.confirmCancelBtn} onClick={() => setPendingDeleteIndex(-1)}>
-                                Отмена
+                                {t('common.actions.cancel')}
                             </button>
                         </div>
                     </div>

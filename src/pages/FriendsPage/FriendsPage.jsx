@@ -1,11 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useStores } from '../../stores/StoreContext';
 import AppAvatar from '../../components/AppAvatar/AppAvatar';
 import styles from './FriendsPage.module.css';
 
+// Отрисовывает экран или компонент FriendsPage и связывает его с данными приложения.
 const FriendsPage = observer(() => {
+    const { t } = useTranslation();
     const { socialStore, chatStore, uiStore } = useStores();
     const navigate = useNavigate();
     const [query, setQuery] = useState('');
@@ -63,18 +66,18 @@ const FriendsPage = observer(() => {
             title,
             message,
             variant: 'info',
-            primaryLabel: 'Да',
-            secondaryLabel: 'Нет',
+            primaryLabel: t('modals.yes'),
+            secondaryLabel: t('modals.no'),
             onPrimary: async () => {
                 try {
                     await onConfirm();
                     uiStore.closeModal();
                 } catch (e) {
                     uiStore.showModal({
-                        title: 'Ошибка',
-                        message: e?.response?.data?.message || 'Не удалось выполнить действие',
+                        title: t('modals.error'),
+                        message: e?.response?.data?.message || t('modals.action_failed'),
                         variant: 'error',
-                        secondaryLabel: 'Закрыть'
+                        secondaryLabel: t('common.close')
                     });
                 }
             },
@@ -82,38 +85,43 @@ const FriendsPage = observer(() => {
         });
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onSendFriendRequest = (userId) => {
         showActionConfirm(
-            'Отправить заявку?',
-            'Отправить пользователю запрос в друзья?',
+            t('pages.friends.modals.send_request_title'),
+            t('pages.friends.modals.send_request_message'),
             () => socialStore.sendFriendRequest(userId)
         );
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onAcceptRequest = (requestId) => {
         showActionConfirm(
-            'Принять заявку?',
-            'Подтвердить дружбу с этим пользователем?',
+            t('pages.friends.modals.accept_request_title'),
+            t('pages.friends.modals.accept_request_message'),
             () => socialStore.acceptRequest(requestId)
         );
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onRemoveFriend = (friendUserId) => {
         showActionConfirm(
-            'Удалить из друзей?',
-            'Пользователь будет удален из списка друзей.',
+            t('pages.friends.modals.remove_friend_title'),
+            t('pages.friends.modals.remove_friend_message'),
             () => socialStore.removeFriend(friendUserId)
         );
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onCancelRequest = (requestId) => {
         showActionConfirm(
-            'Отменить заявку?',
-            'Заявка в друзья будет отменена.',
+            t('pages.friends.modals.cancel_request_title'),
+            t('pages.friends.modals.cancel_request_message'),
             () => socialStore.cancelRequest(requestId)
         );
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onStartChat = async (friendId) => {
         const conversation = await chatStore.openOrCreateChat(friendId);
         if (conversation?._id) {
@@ -121,24 +129,27 @@ const FriendsPage = observer(() => {
         }
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onPublishCompanionRequest = async (e) => {
         e.preventDefault();
         await socialStore.publishCompanionRequest(companionPurpose, companionOther);
         setCompanionPage(1);
-        setCompanionNotice('Заявка опубликована. Другие пользователи уже могут вас видеть.');
+        setCompanionNotice(t('pages.friends.modals.companion_published_notice'));
         uiStore.showModal({
-            title: 'Готово',
-            message: 'Заявка на поиск собеседника опубликована',
+            title: t('modals.done'),
+            message: t('pages.friends.modals.companion_published_message'),
             variant: 'success',
-            secondaryLabel: 'Закрыть'
+            secondaryLabel: t('common.close')
         });
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onWithdrawCompanionRequest = async () => {
         await socialStore.withdrawCompanionRequest();
-        setCompanionNotice('Вы отозвали заявку на поиск собеседника.');
+        setCompanionNotice(t('pages.friends.modals.companion_withdrawn_notice'));
     };
 
+    // Формирует повторяемый фрагмент интерфейса.
     const renderPagination = (pagination, onPageChange) => {
         if (!pagination || pagination.totalPages <= 1) return null;
         return (
@@ -166,11 +177,11 @@ const FriendsPage = observer(() => {
         <>
         <div className={`${styles.container} app-page-shell`}>
             <div className="app-page-top">
-                <h1 className={`${styles.title} app-page-title`}>Друзья</h1>
+                <h1 className={`${styles.title} app-page-title`}>{t('pages.friends.title')}</h1>
             </div>
 
             <section className={styles.card}>
-                <h2>Друзья</h2>
+                <h2>{t('pages.friends.title')}</h2>
                 <div className={styles.list}>
                     {(socialStore.friends || []).map((friend) => (
                         <div key={friend._id} className={styles.userRow}>
@@ -183,17 +194,17 @@ const FriendsPage = observer(() => {
                                 />
                                 <div className={styles.userMeta}>
                                     <strong>{friend.firstName} {friend.lastName}</strong>
-                                    <span>{friend.totalPoints || 0} очков</span>
+                                    <span>{t('pages.friends.points', { count: friend.totalPoints || 0 })}</span>
                                 </div>
                             </Link>
                             <div className={styles.rowActions}>
-                                <button type="button" onClick={() => onStartChat(friend._id)}>Чат</button>
-                                <button type="button" className={styles.ghost} onClick={() => onRemoveFriend(friend._id)}>Удалить</button>
+                                <button type="button" onClick={() => onStartChat(friend._id)}>{t('pages.friends.chat')}</button>
+                                <button type="button" className={styles.ghost} onClick={() => onRemoveFriend(friend._id)}>{t('pages.friends.delete')}</button>
                             </div>
                         </div>
                     ))}
                     {!socialStore.isLoadingFriends && !(socialStore.friends || []).length && (
-                        <p className={styles.empty}>Пока нет друзей</p>
+                        <p className={styles.empty}>{t('pages.friends.empty_friends')}</p>
                     )}
                 </div>
                 {renderPagination(socialStore.friendsPagination, setFriendsPage)}
@@ -202,16 +213,16 @@ const FriendsPage = observer(() => {
             <section className={styles.gridTwo}>
                 <button type="button" className={`${styles.card} ${styles.requestTypeBtn}`} onClick={() => setRequestsModalType('incoming')}>
                     <span className={styles.requestTypeTextCol}>
-                        <h2>Входящие заявки</h2>
-                        <p className={styles.requestTypeHint}>Открыть список входящих заявок</p>
+                        <h2>{t('pages.friends.incoming')}</h2>
+                        <p className={styles.requestTypeHint}>{t('pages.friends.incoming_hint')}</p>
                     </span>
                     <strong className={styles.requestTypeCount}>{socialStore.incomingPagination?.total || 0}</strong>
                 </button>
 
                 <button type="button" className={`${styles.card} ${styles.requestTypeBtn}`} onClick={() => setRequestsModalType('outgoing')}>
                     <span className={styles.requestTypeTextCol}>
-                        <h2>Исходящие заявки</h2>
-                        <p className={styles.requestTypeHint}>Открыть список исходящих заявок</p>
+                        <h2>{t('pages.friends.outgoing')}</h2>
+                        <p className={styles.requestTypeHint}>{t('pages.friends.outgoing_hint')}</p>
                     </span>
                     <strong className={styles.requestTypeCount}>{socialStore.outgoingPagination?.total || 0}</strong>
                 </button>
@@ -223,15 +234,15 @@ const FriendsPage = observer(() => {
                     className={styles.findCompanionBtn}
                     onClick={() => setIsCompanionModalOpen(true)}
                 >
-                    Найти собеседника для совместного обучения
+                    {t('pages.friends.find_companion')}
                 </button>
             </div>
 
             <section className={styles.card}>
-                <h2>Поиск пользователей</h2>
+                <h2>{t('pages.friends.search_title')}</h2>
                 <input
                     className={styles.searchInput}
-                    placeholder="Искать по username, имени или фамилии"
+                    placeholder={t('pages.friends.search_placeholder')}
                     value={query}
                     onChange={(e) => {
                         setQuery(e.target.value);
@@ -254,24 +265,24 @@ const FriendsPage = observer(() => {
                                 </div>
                             </Link>
                             <div className={styles.rowActions}>
-                                {user.relationStatus === 'friend' && <span className={styles.badge}>Друзья</span>}
+                                {user.relationStatus === 'friend' && <span className={styles.badge}>{t('pages.friends.badge_friends')}</span>}
                                 {user.relationStatus === 'pending_outgoing' && (
-                                    <button type="button" onClick={() => onCancelRequest(user.requestId)}>Отменить</button>
+                                    <button type="button" onClick={() => onCancelRequest(user.requestId)}>{t('pages.friends.cancel')}</button>
                                 )}
                                 {user.relationStatus === 'pending_incoming' && (
                                     <>
-                                        <button type="button" onClick={() => onAcceptRequest(user.requestId)}>Принять</button>
-                                        <button type="button" className={styles.ghost} onClick={() => socialStore.declineRequest(user.requestId)}>Отклонить</button>
+                                        <button type="button" onClick={() => onAcceptRequest(user.requestId)}>{t('pages.friends.accept')}</button>
+                                        <button type="button" className={styles.ghost} onClick={() => socialStore.declineRequest(user.requestId)}>{t('pages.friends.decline')}</button>
                                     </>
                                 )}
                                 {user.relationStatus === 'none' && (
-                                    <button type="button" onClick={() => onSendFriendRequest(user._id)}>Добавить</button>
+                                    <button type="button" onClick={() => onSendFriendRequest(user._id)}>{t('pages.friends.add')}</button>
                                 )}
                             </div>
                         </div>
                     ))}
                     {!socialStore.isLoadingSearch && !normalizedSearch.length && (
-                        <p className={styles.empty}>Ничего не найдено</p>
+                        <p className={styles.empty}>{t('pages.friends.not_found')}</p>
                     )}
                 </div>
                 {renderPagination(socialStore.searchPagination, setSearchPage)}
@@ -280,32 +291,32 @@ const FriendsPage = observer(() => {
         {isCompanionModalOpen && (
             <div className={styles.modalOverlay} onClick={() => setIsCompanionModalOpen(false)}>
                 <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                    <h3>Поиск собеседника</h3>
+                    <h3>{t('pages.friends.companion_title')}</h3>
                     {companionNotice && <div className={styles.notice}>{companionNotice}</div>}
                     <form className={styles.modalForm} onSubmit={onPublishCompanionRequest}>
                         <div className={styles.publishRow}>
                             <label className={styles.publishField}>
-                                <span className={styles.fieldLabel}>Зачем ищете собеседника?</span>
+                                <span className={styles.fieldLabel}>{t('pages.friends.companion_reason')}</span>
                                 <select
                                     value={companionPurpose}
                                     onChange={(e) => setCompanionPurpose(e.target.value)}
                                 >
-                                    <option value="speech_practice">Для тренировки татарской речи</option>
-                                    <option value="competition">Для соревнования между собой</option>
-                                    <option value="course_together">Для совместного прохождения курса</option>
-                                    <option value="motivation">Для взаимной мотивации</option>
-                                    <option value="other">Другое</option>
+                                    <option value="speech_practice">{t('pages.friends.companion_speech')}</option>
+                                    <option value="competition">{t('pages.friends.companion_competition')}</option>
+                                    <option value="course_together">{t('pages.friends.companion_course')}</option>
+                                    <option value="motivation">{t('pages.friends.companion_motivation')}</option>
+                                    <option value="other">{t('pages.friends.companion_other')}</option>
                                 </select>
                             </label>
-                            <button type="submit" className={styles.primaryAction}>Опубликовать заявку</button>
+                            <button type="submit" className={styles.primaryAction}>{t('pages.friends.publish_request')}</button>
                         </div>
                         {companionPurpose === 'other' && (
                             <label>
-                                <span className={styles.fieldLabel}>Своя причина</span>
+                                <span className={styles.fieldLabel}>{t('pages.friends.custom_reason')}</span>
                                 <input
                                     value={companionOther}
                                     onChange={(e) => setCompanionOther(e.target.value)}
-                                    placeholder="Например: готовлюсь к собеседованию"
+                                    placeholder={t('pages.friends.custom_reason_placeholder')}
                                 />
                             </label>
                         )}
@@ -313,20 +324,20 @@ const FriendsPage = observer(() => {
 
                     {socialStore.myCompanionRequest?.isActive && (
                         <>
-                            <h4 className={styles.sectionTitle}>Мои заявки</h4>
+                            <h4 className={styles.sectionTitle}>{t('pages.friends.my_requests')}</h4>
                             <div className={styles.myRequestCard}>
                                 <div className={styles.myRequestContent}>
                                     <p>{socialStore.myCompanionRequest.purposeLabel}</p>
                                 </div>
                                 <button type="button" className={styles.ghostAction} onClick={onWithdrawCompanionRequest}>
-                                    Отозвать заявку
+                                    {t('pages.friends.withdraw_request')}
                                 </button>
                             </div>
                         </>
                     )}
 
                     <div className={styles.modalList}>
-                        <h4 className={styles.sectionTitle}>Прочие заявки</h4>
+                        <h4 className={styles.sectionTitle}>{t('pages.friends.other_requests')}</h4>
                         {(socialStore.companionRequests || []).map((item) => (
                             <div key={item._id} className={styles.userRow}>
                                 <Link to={`/u/${encodeURIComponent(item.user.username)}`} className={styles.userLeft}>
@@ -342,24 +353,24 @@ const FriendsPage = observer(() => {
                                     </div>
                                 </Link>
                                 <div className={styles.rowActions}>
-                                    {item.relationStatus === 'friend' && <span className={styles.badge}>Друзья</span>}
+                                    {item.relationStatus === 'friend' && <span className={styles.badge}>{t('pages.friends.badge_friends')}</span>}
                                     {item.relationStatus === 'pending_outgoing' && (
-                                        <button type="button" onClick={() => onCancelRequest(item.requestId)}>Отменить</button>
+                                        <button type="button" onClick={() => onCancelRequest(item.requestId)}>{t('pages.friends.cancel')}</button>
                                     )}
                                     {item.relationStatus === 'pending_incoming' && (
                                         <>
-                                            <button type="button" onClick={() => onAcceptRequest(item.requestId)}>Принять</button>
-                                            <button type="button" className={styles.ghost} onClick={() => socialStore.declineRequest(item.requestId)}>Отклонить</button>
+                                            <button type="button" onClick={() => onAcceptRequest(item.requestId)}>{t('pages.friends.accept')}</button>
+                                            <button type="button" className={styles.ghost} onClick={() => socialStore.declineRequest(item.requestId)}>{t('pages.friends.decline')}</button>
                                         </>
                                     )}
                                     {item.relationStatus === 'none' && (
-                                        <button type="button" onClick={() => onSendFriendRequest(item.user._id)}>Добавить</button>
+                                        <button type="button" onClick={() => onSendFriendRequest(item.user._id)}>{t('pages.friends.add')}</button>
                                     )}
                                 </div>
                             </div>
                         ))}
                         {!socialStore.isLoadingCompanion && !(socialStore.companionRequests || []).length && (
-                            <p className={styles.empty}>Пока никто не ищет собеседника</p>
+                            <p className={styles.empty}>{t('pages.friends.empty_companion')}</p>
                         )}
                         {renderPagination(socialStore.companionPagination, setCompanionPage)}
                     </div>
@@ -369,7 +380,7 @@ const FriendsPage = observer(() => {
         {requestsModalType === 'incoming' && (
             <div className={styles.modalOverlay} onClick={() => setRequestsModalType('')}>
                 <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                    <h3>Входящие заявки</h3>
+                    <h3>{t('pages.friends.incoming')}</h3>
                     <div className={styles.list}>
                         {(socialStore.incomingRequests || []).map((item) => (
                             <div key={item._id} className={styles.userRow}>
@@ -386,13 +397,13 @@ const FriendsPage = observer(() => {
                                     </div>
                                 </div>
                                 <div className={styles.rowActions}>
-                                    <button type="button" onClick={() => onAcceptRequest(item._id)}>Принять</button>
-                                    <button type="button" className={styles.ghost} onClick={() => socialStore.declineRequest(item._id)}>Отклонить</button>
+                                    <button type="button" onClick={() => onAcceptRequest(item._id)}>{t('pages.friends.accept')}</button>
+                                    <button type="button" className={styles.ghost} onClick={() => socialStore.declineRequest(item._id)}>{t('pages.friends.decline')}</button>
                                 </div>
                             </div>
                         ))}
                         {!socialStore.isLoadingRequests && !(socialStore.incomingRequests || []).length && (
-                            <p className={styles.empty}>Нет входящих заявок</p>
+                            <p className={styles.empty}>{t('pages.friends.empty_incoming')}</p>
                         )}
                     </div>
                     {renderPagination(socialStore.incomingPagination, setIncomingPage)}
@@ -402,7 +413,7 @@ const FriendsPage = observer(() => {
         {requestsModalType === 'outgoing' && (
             <div className={styles.modalOverlay} onClick={() => setRequestsModalType('')}>
                 <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                    <h3>Исходящие заявки</h3>
+                    <h3>{t('pages.friends.outgoing')}</h3>
                     <div className={styles.list}>
                         {(socialStore.outgoingRequests || []).map((item) => (
                             <div key={item._id} className={styles.userRow}>
@@ -419,12 +430,12 @@ const FriendsPage = observer(() => {
                                     </div>
                                 </Link>
                                 <div className={styles.rowActions}>
-                                    <button type="button" className={styles.ghost} onClick={() => onCancelRequest(item._id)}>Отменить</button>
+                                    <button type="button" className={styles.ghost} onClick={() => onCancelRequest(item._id)}>{t('pages.friends.cancel')}</button>
                                 </div>
                             </div>
                         ))}
                         {!socialStore.isLoadingRequests && !(socialStore.outgoingRequests || []).length && (
-                            <p className={styles.empty}>Нет исходящих заявок</p>
+                            <p className={styles.empty}>{t('pages.friends.empty_outgoing')}</p>
                         )}
                     </div>
                     {renderPagination(socialStore.outgoingPagination, setOutgoingPage)}

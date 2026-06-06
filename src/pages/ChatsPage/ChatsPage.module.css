@@ -291,6 +291,10 @@
     fill: currentColor;
 }
 
+.voiceBtnText {
+    display: none;
+}
+
 .voiceBtnRecording {
     border-color: #8c8f95;
     color: #5f6368;
@@ -729,8 +733,8 @@
         display: none;
     }
 
-    .voiceBtn::after {
-        content: "Голосовое сообщение";
+    .voiceBtnText {
+        display: inline;
         font-size: 0.92rem;
         font-weight: 700;
     }

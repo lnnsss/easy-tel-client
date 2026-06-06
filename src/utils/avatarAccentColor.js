@@ -15,10 +15,12 @@ const AVATAR_ACCENT_COLORS = [
     '#ad1457'
 ];
 
+// Проверяет условие и возвращает логический результат.
 const isHexColor = (value) => (
     typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value)
 );
 
+// Проверяет наличие нужного состояния или признака.
 const hashString = (value) => {
     const input = String(value || '').trim();
     let hash = 0;
@@ -31,11 +33,13 @@ const hashString = (value) => {
     return Math.abs(hash);
 };
 
+// Возвращает нужные данные или вычисленное значение.
 export const getAvatarAccentColor = (preferredColor, seed = '') => {
     if (isHexColor(preferredColor)) return preferredColor;
     return AVATAR_ACCENT_COLORS[hashString(seed) % AVATAR_ACCENT_COLORS.length];
 };
 
+// Возвращает нужные данные или вычисленное значение.
 export const getAvatarFallbackStyle = (preferredColor, seed = '') => ({
     backgroundColor: getAvatarAccentColor(preferredColor, seed),
     color: '#ffffff'

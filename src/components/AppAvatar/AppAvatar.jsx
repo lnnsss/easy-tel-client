@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { getAvatarFallbackStyle } from '../../utils/avatarAccentColor';
 
+// Возвращает нужные данные или вычисленное значение.
 const getInitials = (fullName = '') => {
     const parts = String(fullName || '').trim().split(/\s+/).filter(Boolean);
     if (parts.length === 0) return '?';

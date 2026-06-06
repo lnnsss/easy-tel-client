@@ -6,20 +6,12 @@ import { useStores } from '../../stores/StoreContext';
 import styles from './AdminLearningPage.module.css';
 
 const STATUS_OPTIONS = [
-    { value: '', label: 'Все статусы' },
-    { value: 'published', label: 'Опубликован' },
-    { value: 'draft', label: 'Черновик' }
+    { value: '', labelKey: 'pages.admin.learning.all_statuses' },
+    { value: 'published', labelKey: 'pages.admin.learning.published' },
+    { value: 'draft', labelKey: 'pages.admin.learning.draft' }
 ];
 
-const statusLabel = (value) => (value === 'published' ? 'Опубликован' : 'Черновик');
-const reviewLabel = (value) => {
-    if (value === 'pending_review') return 'На модерации';
-    if (value === 'approved') return 'Одобрен';
-    if (value === 'rejected') return 'Отклонен';
-    if (value === 'draft') return 'Черновик';
-    return 'Без модерации';
-};
-
+// Рисует иконку редактирования для управляющих кнопок.
 const PencilIcon = () => (
     <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M4 20l4.5-1 9.3-9.3a1.8 1.8 0 0 0 0-2.5l-1-1a1.8 1.8 0 0 0-2.5 0L5 15.5 4 20z" />
@@ -27,6 +19,7 @@ const PencilIcon = () => (
     </svg>
 );
 
+// Рисует иконку удаления для опасных действий.
 const TrashIcon = () => (
     <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M4 7h16" />
@@ -36,6 +29,7 @@ const TrashIcon = () => (
     </svg>
 );
 
+// Отрисовывает экран или компонент AdminLearningPage и связывает его с данными приложения.
 const AdminLearningPage = () => {
     const { t } = useTranslation();
     const { uiStore } = useStores();
@@ -59,6 +53,18 @@ const AdminLearningPage = () => {
         adminComment: '',
         isSubmitting: false
     });
+
+    const statusLabel = (value) => (
+        value === 'published' ? t('pages.admin.learning.published') : t('pages.admin.learning.draft')
+    );
+
+    const reviewLabel = (value) => {
+        if (value === 'pending_review') return t('pages.admin.learning.pending_review');
+        if (value === 'approved') return t('pages.admin.learning.approved');
+        if (value === 'rejected') return t('pages.admin.learning.rejected');
+        if (value === 'draft') return t('pages.admin.learning.draft');
+        return t('pages.admin.learning.no_review');
+    };
 
     const getCourseCategoryIds = (course) => {
         const fromArray = Array.isArray(course?.categoryIds) ? course.categoryIds : [];
@@ -97,6 +103,7 @@ const AdminLearningPage = () => {
         });
     }, [courses, filterCategoryId, filterStatus, search]);
 
+    // Загружает данные, необходимые для текущего экрана или сценария.
     const loadAll = async () => {
         try {
             const [categoriesRes, coursesRes] = await Promise.all([
@@ -106,14 +113,18 @@ const AdminLearningPage = () => {
             setCategories(categoriesRes.data || []);
             setCourses(coursesRes.data || []);
         } catch (e) {
-            setError(e.response?.data?.message || 'Ошибка загрузки обучения');
+            setError(e.response?.data?.message || t('pages.admin.learning.load_error'));
         }
     };
 
     useEffect(() => {
-        loadAll();
+        const timer = setTimeout(() => {
+            loadAll();
+        }, 0);
+        return () => clearTimeout(timer);
     }, []);
 
+    // Создает сущность и возвращает результат клиенту.
     const createCategory = async (e) => {
         e.preventDefault();
         try {
@@ -121,19 +132,20 @@ const AdminLearningPage = () => {
             setCategoryName('');
             await loadAll();
         } catch (err) {
-            setError(err.response?.data?.message || 'Ошибка создания категории');
+            setError(err.response?.data?.message || t('pages.admin.learning.create_category_error'));
         }
     };
 
+    // Переключает состояние выбранной сущности или настройки.
     const toggleCourseStatus = async (course) => {
         const nextStatus = course.status === 'published' ? 'draft' : 'published';
-        const nextLabel = nextStatus === 'published' ? 'Опубликован' : 'Черновик';
+        const nextLabel = statusLabel(nextStatus);
         uiStore.showModal({
-            title: 'Подтвердить действие?',
-            message: `Статус курса "${course.title}" будет изменен на "${nextLabel}".`,
+            title: t('pages.admin.learning.confirm_status_title'),
+            message: t('pages.admin.learning.confirm_status_message', { title: course.title, status: nextLabel }),
             variant: 'info',
-            primaryLabel: 'Подтвердить',
-            secondaryLabel: 'Отмена',
+            primaryLabel: t('modals.yes'),
+            secondaryLabel: t('modals.cancel'),
             onPrimary: async () => {
                 try {
                     await CourseService.updateAdminCourse(course._id, { status: nextStatus });
@@ -141,10 +153,10 @@ const AdminLearningPage = () => {
                     await loadAll();
                 } catch (err) {
                     uiStore.showModal({
-                        title: 'Ошибка',
-                        message: err.response?.data?.message || 'Ошибка обновления курса',
+                        title: t('modals.error'),
+                        message: err.response?.data?.message || t('pages.admin.learning.update_course_error'),
                         variant: 'error',
-                        secondaryLabel: 'Закрыть'
+                        secondaryLabel: t('common.close')
                     });
                 }
             },
@@ -152,13 +164,14 @@ const AdminLearningPage = () => {
         });
     };
 
+    // Удаляет связь или сущность по запросу пользователя.
     const removeCourse = async (courseId) => {
         uiStore.showModal({
-            title: 'Удалить курс?',
-            message: 'Курс будет удален вместе со всеми темами и тестами.',
+            title: t('pages.admin.learning.delete_course_title'),
+            message: t('pages.admin.learning.delete_course_message'),
             variant: 'error',
-            primaryLabel: 'Удалить',
-            secondaryLabel: 'Отмена',
+            primaryLabel: t('common.actions.delete'),
+            secondaryLabel: t('modals.cancel'),
             onPrimary: async () => {
                 try {
                     await CourseService.deleteAdminCourse(courseId);
@@ -166,16 +179,17 @@ const AdminLearningPage = () => {
                     await loadAll();
                 } catch (err) {
                     uiStore.showModal({
-                        title: 'Ошибка',
-                        message: err.response?.data?.message || 'Ошибка удаления курса',
+                        title: t('modals.error'),
+                        message: err.response?.data?.message || t('pages.admin.learning.delete_course_error'),
                         variant: 'error',
-                        secondaryLabel: 'Закрыть'
+                        secondaryLabel: t('common.close')
                     });
                 }
             }
         });
     };
 
+    // Открывает локальное состояние интерфейса или модального окна.
     const openReviewModal = (course, decision) => {
         setReviewModal({
             isOpen: true,
@@ -187,6 +201,7 @@ const AdminLearningPage = () => {
         });
     };
 
+    // Закрывает локальное состояние интерфейса или модального окна.
     const closeReviewModal = () => {
         setReviewModal((prev) => ({ ...prev, isOpen: false }));
     };
@@ -202,18 +217,19 @@ const AdminLearningPage = () => {
             closeReviewModal();
             await loadAll();
         } catch (err) {
-            setError(err.response?.data?.message || 'Ошибка модерации курса');
+            setError(err.response?.data?.message || t('pages.admin.learning.review_error'));
             setReviewModal((prev) => ({ ...prev, isSubmitting: false }));
         }
     };
 
+    // Удаляет связь или сущность по запросу пользователя.
     const removeCategory = async (categoryId) => {
         uiStore.showModal({
-            title: 'Удалить категорию?',
-            message: 'Категория удалится только если к ней не привязаны курсы.',
+            title: t('pages.admin.learning.delete_category_title'),
+            message: t('pages.admin.learning.delete_category_message'),
             variant: 'info',
-            primaryLabel: 'Удалить',
-            secondaryLabel: 'Отмена',
+            primaryLabel: t('common.actions.delete'),
+            secondaryLabel: t('modals.cancel'),
             onPrimary: async () => {
                 try {
                     await CourseService.deleteAdminCategory(categoryId);
@@ -221,10 +237,10 @@ const AdminLearningPage = () => {
                     await loadAll();
                 } catch (err) {
                     uiStore.showModal({
-                        title: 'Удаление недоступно',
-                        message: err.response?.data?.message || 'Категорию нельзя удалить, пока к ней привязан курс.',
+                        title: t('pages.admin.learning.delete_category_blocked_title'),
+                        message: err.response?.data?.message || t('pages.admin.learning.delete_category_blocked_message'),
                         variant: 'error',
-                        secondaryLabel: 'Понятно'
+                        secondaryLabel: t('pages.admin.learning.understood')
                     });
                 }
             }
@@ -236,6 +252,7 @@ const AdminLearningPage = () => {
         setEditingCategoryName(category.name || '');
     };
 
+    // Сохраняет изменения пользователя.
     const saveCategoryName = async () => {
         if (!editingCategoryId || !editingCategoryName.trim()) return;
         try {
@@ -244,7 +261,7 @@ const AdminLearningPage = () => {
             setEditingCategoryName('');
             await loadAll();
         } catch (err) {
-            setError(err.response?.data?.message || 'Ошибка обновления категории');
+            setError(err.response?.data?.message || t('pages.admin.learning.update_category_error'));
         }
     };
 
@@ -260,12 +277,12 @@ const AdminLearningPage = () => {
 
             <section className={styles.card}>
                 <div className={styles.sectionHead}>
-                    <h3>Категории</h3>
+                    <h3>{t('pages.admin.learning.categories')}</h3>
                     <form className={styles.inlineCreate} onSubmit={createCategory}>
                         <input
                             value={categoryName}
                             onChange={(e) => setCategoryName(e.target.value)}
-                            placeholder="Новая категория"
+                            placeholder={t('pages.admin.learning.new_category')}
                             required
                         />
                         <button type="submit">{t('common.actions.create')}</button>
@@ -279,21 +296,21 @@ const AdminLearningPage = () => {
                                     <input
                                         value={editingCategoryName}
                                         onChange={(e) => setEditingCategoryName(e.target.value)}
-                                        placeholder="Название категории"
+                                        placeholder={t('pages.admin.learning.category_name')}
                                     />
                                     <div className={styles.categoryActions}>
-                                        <button type="button" title="Сохранить" onClick={saveCategoryName}>✓</button>
-                                        <button type="button" title="Отмена" onClick={() => setEditingCategoryId('')}>✕</button>
+                                        <button type="button" title={t('pages.admin.learning.save')} onClick={saveCategoryName}>✓</button>
+                                        <button type="button" title={t('common.actions.cancel')} onClick={() => setEditingCategoryId('')}>✕</button>
                                     </div>
                                 </>
                             ) : (
                                 <>
                                     <span title={category.name} className={styles.categoryName}>{category.name}</span>
                                     <div className={styles.categoryActions}>
-                                        <button type="button" title="Переименовать" onClick={() => startEditCategory(category)}>
+                                        <button type="button" title={t('pages.admin.learning.rename')} onClick={() => startEditCategory(category)}>
                                             <PencilIcon />
                                         </button>
-                                        <button type="button" title="Удалить" onClick={() => removeCategory(category._id)}>
+                                        <button type="button" title={t('common.actions.delete')} onClick={() => removeCategory(category._id)}>
                                             <TrashIcon />
                                         </button>
                                     </div>
@@ -307,30 +324,30 @@ const AdminLearningPage = () => {
             <section className={styles.card}>
                 <div className={styles.coursesHead}>
                     <div className={styles.sectionHead}>
-                        <h3>Курсы</h3>
+                        <h3>{t('pages.admin.learning.courses')}</h3>
                         <button
                             type="button"
                             className={`${styles.linkBtn} ${styles.topCreateBtn}`}
                             onClick={() => navigate('/admin/learning/courses/new')}
                         >
-                            Новый курс
+                            {t('pages.admin.learning.new_course')}
                         </button>
                     </div>
                     <div className={styles.filters}>
                         <input
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Поиск по названию/описанию"
+                            placeholder={t('pages.admin.learning.search_placeholder')}
                         />
                         <select value={filterCategoryId} onChange={(e) => setFilterCategoryId(e.target.value)}>
-                            <option value="">Все категории</option>
+                            <option value="">{t('pages.admin.learning.all_categories')}</option>
                             {categories.map((category) => (
                                 <option key={category._id} value={category._id}>{category.name}</option>
                             ))}
                         </select>
                         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
                             {STATUS_OPTIONS.map((item) => (
-                                <option key={item.value || 'all'} value={item.value}>{item.label}</option>
+                                <option key={item.value || 'all'} value={item.value}>{t(item.labelKey)}</option>
                             ))}
                         </select>
                     </div>
@@ -340,7 +357,7 @@ const AdminLearningPage = () => {
                         <div className={styles.rowMain}>
                             <strong>{course.title}</strong>
                             <small>
-                                {(getCourseCategoryNames(course).join(', ') || 'Без категории')} · {statusLabel(course.status)} · {reviewLabel(course.reviewStatus)}
+                                {(getCourseCategoryNames(course).join(', ') || t('pages.admin.learning.no_category'))} · {statusLabel(course.status)} · {reviewLabel(course.reviewStatus)}
                                 {course?.ownerUserId?.username && (
                                     <>
                                         {' · '}
@@ -355,20 +372,20 @@ const AdminLearningPage = () => {
                             <Link
                                 className={styles.actionLink}
                                 to={`/admin/learning/courses/${course._id}`}
-                                title="Открыть страницу курса"
+                                title={t('pages.admin.learning.open_course_title')}
                             >
-                                К курсу
+                                {t('pages.admin.learning.to_course')}
                             </Link>
                             <button type="button" onClick={() => toggleCourseStatus(course)}>
-                                {course.status === 'published' ? 'В черновик' : 'Опубликовать'}
+                                {course.status === 'published' ? t('pages.admin.learning.to_draft') : t('pages.admin.learning.publish')}
                             </button>
                             {course.reviewStatus === 'pending_review' && (
                                 <>
                                     <button type="button" onClick={() => openReviewModal(course, 'approved')}>
-                                        Одобрить
+                                        {t('pages.admin.learning.approve')}
                                     </button>
                                     <button type="button" onClick={() => openReviewModal(course, 'rejected')}>
-                                        Отклонить
+                                        {t('pages.admin.learning.decline')}
                                     </button>
                                 </>
                             )}
@@ -376,36 +393,36 @@ const AdminLearningPage = () => {
                         </div>
                     </div>
                 ))}
-                {filteredCourses.length === 0 && <p className={styles.empty}>Курсы не найдены</p>}
+                {filteredCourses.length === 0 && <p className={styles.empty}>{t('pages.admin.learning.not_found')}</p>}
             </section>
 
             {reviewModal.isOpen && (
                 <div className={styles.modalOverlay} onClick={closeReviewModal}>
                     <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
-                        <button type="button" className={styles.modalClose} onClick={closeReviewModal} aria-label="Закрыть">
+                        <button type="button" className={styles.modalClose} onClick={closeReviewModal} aria-label={t('common.close')}>
                             ×
                         </button>
                         <h3 className={styles.modalTitle}>
-                            {reviewModal.decision === 'approved' ? 'Одобрить курс' : 'Отклонить курс'}
+                            {reviewModal.decision === 'approved' ? t('pages.admin.learning.review_course_approve') : t('pages.admin.learning.review_course_decline')}
                         </h3>
                         <p className={styles.modalDescription}>
-                            Курс: <strong>{reviewModal.courseTitle || '—'}</strong>
+                            {t('pages.admin.learning.course_label')} <strong>{reviewModal.courseTitle || '—'}</strong>
                         </p>
                         <label className={styles.modalField}>
-                            Комментарий администратора (необязательно)
+                            {t('pages.admin.learning.admin_comment_optional')}
                             <textarea
                                 className={styles.modalTextarea}
                                 value={reviewModal.adminComment}
                                 onChange={(e) => setReviewModal((prev) => ({ ...prev, adminComment: e.target.value }))}
-                                placeholder="Введите комментарий для автора"
+                                placeholder={t('pages.admin.learning.author_comment_placeholder')}
                             />
                         </label>
                         <div className={styles.modalActions}>
                             <button type="button" onClick={reviewCourse} disabled={reviewModal.isSubmitting}>
-                                {reviewModal.decision === 'approved' ? 'Одобрить' : 'Отклонить'}
+                                {reviewModal.decision === 'approved' ? t('pages.admin.learning.approve') : t('pages.admin.learning.decline')}
                             </button>
                             <button type="button" onClick={closeReviewModal} disabled={reviewModal.isSubmitting}>
-                                Отмена
+                                {t('modals.cancel')}
                             </button>
                         </div>
                     </div>

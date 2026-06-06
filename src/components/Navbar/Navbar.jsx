@@ -9,9 +9,10 @@ import CourseService from '../../services/CourseService';
 import { INTERFACE_LANG_KEY } from '../../i18n';
 import { getAvatarFallbackStyle } from '../../utils/avatarAccentColor';
 
+// Отрисовывает верхнюю навигацию, меню пользователя и счетчики уведомлений.
 const Navbar = observer(() => {
     const { t, i18n } = useTranslation();
-    const { authStore, chatStore, uiStore } = useStores();
+    const { authStore, chatStore, socialStore, uiStore } = useStores();
     const navigate = useNavigate();
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
     const [isDesktopSettingsOpen, setIsDesktopSettingsOpen] = useState(false);
@@ -26,6 +27,7 @@ const Navbar = observer(() => {
     const [isRewardsLoading, setIsRewardsLoading] = useState(false);
     const [isRewardsModalOpen, setIsRewardsModalOpen] = useState(false);
 
+    // Закрывает локальное состояние интерфейса или модального окна.
     const closeMenu = () => {
         setIsMobileDropdownOpen(false);
         setIsDesktopSettingsOpen(false);
@@ -34,6 +36,7 @@ const Navbar = observer(() => {
     const isAdmin = authStore.user?.role === 'admin';
     const isAuthor = authStore.user?.role === 'author';
     const profileRoute = isAdmin ? '/admin' : '/profile';
+    const incomingFriendRequestsCount = Number(socialStore.incomingPagination?.total || 0);
 
     const profileInitials = useMemo(() => {
         const first = (authStore.user?.firstName || '').trim().charAt(0);
@@ -60,10 +63,11 @@ const Navbar = observer(() => {
         if (authStore.isAuth && !isAdmin) {
             chatStore.connectSocket();
             chatStore.loadChats();
+            socialStore.loadIncomingRequests(1, 10);
         } else {
             chatStore.disconnectSocket();
         }
-    }, [authStore.isAuth, isAdmin, chatStore]);
+    }, [authStore.isAuth, isAdmin, chatStore, socialStore]);
 
     useEffect(() => {
         setAvatarLoadFailed(false);
@@ -88,6 +92,7 @@ const Navbar = observer(() => {
         setInterfaceLang(next);
     }, [i18n.language]);
 
+    // Обрабатывает событие интерфейса пользователя.
     const onToggleTheme = async () => {
         const nextTheme = theme === 'light' ? 'dark' : 'light';
         setTheme(nextTheme);
@@ -103,6 +108,7 @@ const Navbar = observer(() => {
         }
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onLogoutConfirm = () => {
         closeMenu();
         uiStore.showModal({
@@ -120,6 +126,7 @@ const Navbar = observer(() => {
         });
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onCopyReferralLink = async () => {
         const refCode = String(authStore.user?.referralCode || '').trim();
         if (!refCode) {
@@ -146,6 +153,7 @@ const Navbar = observer(() => {
         }
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onChangeInterfaceLang = async (lang) => {
         const next = lang === 'tt' ? 'tt' : 'ru';
         setInterfaceLang(next);
@@ -153,6 +161,7 @@ const Navbar = observer(() => {
         await i18n.changeLanguage(next);
     };
 
+    // Загружает данные, необходимые для текущего экрана или сценария.
     const loadDailyRewardsState = async () => {
         if (!authStore.isAuth || isAdmin) return;
         try {
@@ -166,6 +175,7 @@ const Navbar = observer(() => {
         }
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onOpenDailyRewards = async () => {
         let data = dailyRewardsState;
         if (!data) {
@@ -222,7 +232,12 @@ const Navbar = observer(() => {
                             <Link to="/dictionary" className={styles.link} onClick={closeMenu}>{t('navbar.menu.dictionary')}</Link>
                             <Link to="/courses" className={styles.link} onClick={closeMenu}>{t('navbar.menu.materials')}</Link>
                             {isAuthor && <Link to="/author/learning" className={styles.link} onClick={closeMenu}>{t('navbar.menu.authoring')}</Link>}
-                            <Link to="/friends" className={styles.link} onClick={closeMenu}>{t('navbar.menu.friends')}</Link>
+                            <Link to="/friends" className={`${styles.link} ${styles.friendsLink}`} onClick={closeMenu}>
+                                {t('navbar.menu.friends')}
+                                {incomingFriendRequestsCount > 0 && (
+                                    <span className={styles.friendRequestsBadge}>{incomingFriendRequestsCount}</span>
+                                )}
+                            </Link>
                             <Link to="/chats" className={`${styles.link} ${styles.chatLink}`} onClick={closeMenu}>
                                 {t('navbar.menu.chats')}
                                 {chatStore.unreadTotal > 0 && <span className={styles.chatBadge}>{chatStore.unreadTotal}</span>}
@@ -413,8 +428,8 @@ const Navbar = observer(() => {
                                             <span className={styles.settingsControlLabel}>{t('navbar.settings.language')}</span>
                                             <div className={styles.segmentedControl} role="group" aria-label={t('navbar.settings.aria_language')}>
                                                 {[
-                                                    { value: 'ru', label: 'ру' },
-                                                    { value: 'tt', label: 'тат' }
+                                                    { value: 'ru', label: t('navbar.settings.lang_ru_short') },
+                                                    { value: 'tt', label: t('navbar.settings.lang_tt_short') }
                                                 ].map((langOption) => (
                                                     <button
                                                         key={langOption.value}
@@ -507,8 +522,8 @@ const Navbar = observer(() => {
                                     <span className={styles.settingsControlLabel}>{t('navbar.settings.language')}</span>
                                     <div className={styles.segmentedControl} role="group" aria-label={t('navbar.settings.aria_language')}>
                                         {[
-                                            { value: 'ru', label: 'ру' },
-                                            { value: 'tt', label: 'тат' }
+                                            { value: 'ru', label: t('navbar.settings.lang_ru_short') },
+                                            { value: 'tt', label: t('navbar.settings.lang_tt_short') }
                                         ].map((langOption) => (
                                             <button
                                                 key={langOption.value}
@@ -546,7 +561,12 @@ const Navbar = observer(() => {
                                         <Link to="/dictionary" className={styles.mobileNavLink} onClick={closeMenu}>{t('navbar.menu.dictionary')}</Link>
                                         <Link to="/courses" className={styles.mobileNavLink} onClick={closeMenu}>{t('navbar.menu.materials')}</Link>
                                         {isAuthor && <Link to="/author/learning" className={styles.mobileNavLink} onClick={closeMenu}>{t('navbar.menu.authoring')}</Link>}
-                                        <Link to="/friends" className={styles.mobileNavLink} onClick={closeMenu}>{t('navbar.menu.friends')}</Link>
+                                        <Link to="/friends" className={`${styles.mobileNavLink} ${styles.mobileFriendsLink}`} onClick={closeMenu}>
+                                            {t('navbar.menu.friends')}
+                                            {incomingFriendRequestsCount > 0 && (
+                                                <span className={styles.friendRequestsBadge}>{incomingFriendRequestsCount}</span>
+                                            )}
+                                        </Link>
                                         <Link to="/chats" className={`${styles.mobileNavLink} ${styles.mobileChatLink}`} onClick={closeMenu}>
                                             {t('navbar.menu.chats')}
                                             {chatStore.unreadTotal > 0 && <span className={styles.chatBadge}>{chatStore.unreadTotal}</span>}

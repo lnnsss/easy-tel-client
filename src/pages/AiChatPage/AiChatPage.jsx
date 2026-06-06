@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import AiChatService from '../../services/AiChatService';
 import styles from './AiChatPage.module.css';
 
@@ -6,28 +7,31 @@ const MAX_CONTEXT_MESSAGES = 16;
 const AI_CHAT_STORAGE_KEY = 'aiChatMessages:v1';
 const AI_CHAT_MODE_STORAGE_KEY = 'aiChatMode:v1';
 const AI_CHAT_MODES = [
-    { value: 'tutor', label: 'Тьютор' },
-    { value: 'translate', label: 'Переводчик' }
+    { value: 'tutor', labelKey: 'pages.ai_chat.mode_tutor' },
+    { value: 'translate', labelKey: 'pages.ai_chat.mode_translate' }
 ];
 
+// Загружает данные, необходимые для текущего экрана или сценария.
 const loadModeFromStorage = () => {
     const saved = String(localStorage.getItem(AI_CHAT_MODE_STORAGE_KEY) || '').trim();
     return AI_CHAT_MODES.some((item) => item.value === saved) ? saved : 'tutor';
 };
 
-const buildAssistantGreeting = () => ({
+// Собирает данные в формат, удобный для дальнейшего использования.
+const buildAssistantGreeting = (content) => ({
     id: `assistant-${Date.now()}`,
     role: 'assistant',
-    content: 'Привет! Я Аиша, AI-тьютор платформы EasyTel по татарскому. Напиши слово или фразу, и я помогу с переводом, исправлением и практикой.'
+    content
 });
 
-const loadMessagesFromStorage = () => {
+// Загружает данные, необходимые для текущего экрана или сценария.
+const loadMessagesFromStorage = (greeting) => {
     try {
         const raw = localStorage.getItem(AI_CHAT_STORAGE_KEY);
-        if (!raw) return [buildAssistantGreeting()];
+        if (!raw) return [buildAssistantGreeting(greeting)];
 
         const parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed) || !parsed.length) return [buildAssistantGreeting()];
+        if (!Array.isArray(parsed) || !parsed.length) return [buildAssistantGreeting(greeting)];
 
         const safeMessages = parsed
             .filter((item) => item && (item.role === 'user' || item.role === 'assistant') && String(item.content || '').trim())
@@ -37,14 +41,16 @@ const loadMessagesFromStorage = () => {
                 content: String(item.content)
             }));
 
-        return safeMessages.length ? safeMessages : [buildAssistantGreeting()];
+        return safeMessages.length ? safeMessages : [buildAssistantGreeting(greeting)];
     } catch {
-        return [buildAssistantGreeting()];
+        return [buildAssistantGreeting(greeting)];
     }
 };
 
+// Отрисовывает экран или компонент AiChatPage и связывает его с данными приложения.
 const AiChatPage = () => {
-    const [messages, setMessages] = useState(loadMessagesFromStorage);
+    const { t } = useTranslation();
+    const [messages, setMessages] = useState(() => loadMessagesFromStorage(t('pages.ai_chat.greeting')));
     const [mode, setMode] = useState(loadModeFromStorage);
     const [draft, setDraft] = useState('');
     const [isSending, setIsSending] = useState(false);
@@ -101,15 +107,17 @@ const AiChatPage = () => {
         return () => clearStreamTimer();
     }, []);
 
+    // Обрабатывает событие интерфейса пользователя.
     const onStartNewChat = () => {
         if (isSending) return;
         clearStreamTimer();
         setDraft('');
         setError('');
         setIsModeMenuOpen(false);
-        setMessages([buildAssistantGreeting()]);
+        setMessages([buildAssistantGreeting(t('pages.ai_chat.greeting'))]);
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onSend = async (e) => {
         e.preventDefault();
         const userText = String(draft || '').trim();
@@ -137,7 +145,7 @@ const AiChatPage = () => {
 
             const assistantText = String(data?.reply || '').trim();
             if (!assistantText) {
-                throw new Error('Пустой ответ от AI');
+                throw new Error(t('pages.ai_chat.empty_ai_response'));
             }
 
             const assistantMessageId = `assistant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -170,7 +178,7 @@ const AiChatPage = () => {
             }, 80);
         } catch (err) {
             clearStreamTimer();
-            setError(err.response?.data?.message || err.message || 'Ошибка AI чата');
+            setError(err.response?.data?.message || err.message || t('pages.ai_chat.error'));
             setIsSending(false);
         }
     };
@@ -179,8 +187,8 @@ const AiChatPage = () => {
         <div className={`${styles.page} app-page-shell`}>
             <div className="app-page-top">
                 <div>
-                    <h1 className="app-page-title">AI чат-бот Аиша</h1>
-                    <p className="app-page-subtitle">Практика татарского с ИИ-тьютором.</p>
+                    <h1 className="app-page-title">{t('pages.ai_chat.title')}</h1>
+                    <p className="app-page-subtitle">{t('pages.ai_chat.subtitle')}</p>
                 </div>
             </div>
 
@@ -215,7 +223,7 @@ const AiChatPage = () => {
                                 className={styles.modeButton}
                                 onClick={() => setIsModeMenuOpen((prev) => !prev)}
                                 disabled={isSending}
-                                aria-label="Выбрать режим AI-чата"
+                                aria-label={t('pages.ai_chat.mode_aria')}
                                 aria-expanded={isModeMenuOpen}
                             >
                                 +
@@ -236,7 +244,7 @@ const AiChatPage = () => {
                                                 role="menuitemradio"
                                                 aria-checked={isActive}
                                             >
-                                                <span>{item.label}</span>
+                                                <span>{t(item.labelKey)}</span>
                                                 {isActive && <span className={styles.modeCheck}>✓</span>}
                                             </button>
                                         );
@@ -247,16 +255,16 @@ const AiChatPage = () => {
                         <input
                             value={draft}
                             onChange={(e) => setDraft(e.target.value)}
-                            placeholder="Напиши сообщение на русском или татарском..."
+                            placeholder={t('pages.ai_chat.placeholder')}
                             maxLength={1200}
                             disabled={isSending}
                         />
                     </div>
                     <button type="submit" disabled={isSending || !draft.trim()}>
-                        Отправить
+                        {t('pages.ai_chat.send')}
                     </button>
                     <button type="button" onClick={onStartNewChat} disabled={isSending} className={styles.newChatButton}>
-                        Новый чат
+                        {t('pages.ai_chat.new_chat')}
                     </button>
                 </form>
 

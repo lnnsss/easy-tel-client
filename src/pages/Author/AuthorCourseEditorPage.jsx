@@ -13,6 +13,7 @@ const emptyCourse = {
     order: 0
 };
 
+// Отрисовывает экран или компонент AuthorCourseEditorPage и связывает его с данными приложения.
 const AuthorCourseEditorPage = () => {
     const { t } = useTranslation();
     const { uiStore } = useStores();
@@ -28,12 +29,13 @@ const AuthorCourseEditorPage = () => {
                 const { data } = await CourseService.getAuthorCategories();
                 setCategories(data || []);
             } catch (err) {
-                setError(err.response?.data?.message || 'Ошибка загрузки категорий');
+                setError(err.response?.data?.message || t('pages.admin.course_form.load_categories_error'));
             }
         };
         loadCategories();
     }, []);
 
+    // Переключает состояние выбранной сущности или настройки.
     const toggleCourseFormCategory = (categoryId, checked) => {
         setCourseForm((prev) => {
             const current = Array.isArray(prev.categoryIds) ? prev.categoryIds : [];
@@ -45,10 +47,11 @@ const AuthorCourseEditorPage = () => {
         });
     };
 
+    // Принимает отправленные пользователем данные и фиксирует результат.
     const submitCreateCourse = async () => {
         if (saving) return;
         if (!Array.isArray(courseForm.categoryIds) || courseForm.categoryIds.length === 0) {
-            setError('Выберите хотя бы одну категорию');
+            setError(t('pages.admin.course_form.select_category_error'));
             return;
         }
         try {
@@ -57,20 +60,21 @@ const AuthorCourseEditorPage = () => {
             uiStore.closeModal();
             navigate(`/author/learning/courses/${data?._id || ''}`);
         } catch (err) {
-            setError(err.response?.data?.message || 'Ошибка создания курса');
+            setError(err.response?.data?.message || t('pages.admin.course_form.create_error'));
         } finally {
             setSaving(false);
         }
     };
 
+    // Создает сущность и возвращает результат клиенту.
     const createCourse = (event) => {
         event.preventDefault();
         uiStore.showModal({
-            title: 'Создать курс?',
-            message: 'Курс будет создан как черновик.',
+            title: t('pages.admin.course_form.create_title'),
+            message: t('pages.admin.course_form.create_message_author'),
             variant: 'info',
-            primaryLabel: 'Создать',
-            secondaryLabel: 'Отмена',
+            primaryLabel: t('common.actions.create'),
+            secondaryLabel: t('common.actions.cancel'),
             onPrimary: submitCreateCourse,
             onSecondary: () => uiStore.closeModal()
         });
@@ -78,11 +82,11 @@ const AuthorCourseEditorPage = () => {
 
     const cancelCreate = () => {
         uiStore.showModal({
-            title: 'Отменить создание?',
-            message: 'Несохраненные изменения будут потеряны.',
+            title: t('pages.admin.course_form.cancel_title'),
+            message: t('pages.admin.course_form.cancel_message'),
             variant: 'info',
-            primaryLabel: 'Выйти',
-            secondaryLabel: 'Остаться',
+            primaryLabel: t('common.actions.exit'),
+            secondaryLabel: t('pages.admin.course_form.stay'),
             onPrimary: () => {
                 uiStore.closeModal();
                 navigate('/author/learning');
@@ -95,7 +99,7 @@ const AuthorCourseEditorPage = () => {
         <div className={`${styles.page} app-page-shell`}>
             <div className="app-page-top">
                 <div>
-                    <Link to="/author/learning" className={styles.back}>← К курсам</Link>
+                    <Link to="/author/learning" className={styles.back}>{t('pages.admin.course_form.back_to_courses')}</Link>
                     <h1 className="app-page-title">{t('pages.author.new_course')}</h1>
                 </div>
             </div>
@@ -103,26 +107,26 @@ const AuthorCourseEditorPage = () => {
 
             <form className={styles.card} onSubmit={createCourse}>
                 <label className={styles.fieldGroup}>
-                    <span>Название</span>
+                    <span>{t('pages.admin.course_form.name')}</span>
                     <input
                         value={courseForm.title}
                         onChange={(e) => setCourseForm((prev) => ({ ...prev, title: e.target.value }))}
-                        placeholder="Название курса"
+                        placeholder={t('pages.admin.course_form.name_placeholder')}
                         required
                     />
                 </label>
                 <label className={styles.fieldGroup}>
-                    <span>Описание</span>
+                    <span>{t('pages.admin.course_form.description')}</span>
                     <textarea
                         value={courseForm.description}
                         onChange={(e) => setCourseForm((prev) => ({ ...prev, description: e.target.value }))}
-                        placeholder="Описание курса"
+                        placeholder={t('pages.admin.course_form.description_placeholder')}
                     />
                 </label>
                 <div className={styles.inlineFields}>
                     <div className={styles.fieldGroup}>
-                        <span>Категории</span>
-                        <div className={styles.categoryChecks} role="group" aria-label="Категории курса">
+                        <span>{t('pages.admin.course_form.categories')}</span>
+                        <div className={styles.categoryChecks} role="group" aria-label={t('pages.admin.course_form.course_categories')}>
                             {categories.map((category) => (
                                 <label
                                     key={category._id}
@@ -136,18 +140,18 @@ const AuthorCourseEditorPage = () => {
                                     <span>{category.name}</span>
                                 </label>
                             ))}
-                            {categories.length === 0 && <p className={styles.empty}>Сначала дождитесь категорий от администратора</p>}
+                            {categories.length === 0 && <p className={styles.empty}>{t('pages.admin.course_form.wait_categories')}</p>}
                         </div>
                     </div>
                     <label className={styles.fieldGroup}>
-                        <span>Статус</span>
+                        <span>{t('pages.admin.course_form.status')}</span>
                         <select value={courseForm.status} disabled>
-                            <option value="draft">Черновик</option>
+                            <option value="draft">{t('pages.admin.course_form.draft')}</option>
                         </select>
                     </label>
                 </div>
                 <div className={styles.equalActions}>
-                    <button type="submit" className={styles.successBtn} disabled={saving}>{saving ? 'Создаем...' : t('common.actions.create_course')}</button>
+                    <button type="submit" className={styles.successBtn} disabled={saving}>{saving ? t('pages.admin.course_form.creating') : t('common.actions.create_course')}</button>
                     <button type="button" className={styles.ghostBtn} onClick={cancelCreate}>{t('common.actions.cancel')}</button>
                 </div>
             </form>

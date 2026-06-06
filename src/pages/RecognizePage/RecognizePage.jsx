@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
+import { useTranslation } from 'react-i18next';
 import { useStores } from '../../stores/StoreContext';
 import $api from '../../api/instance';
 import styles from './RecognizePage.module.css';
 
+// Рисует иконку озвучивания для кнопок воспроизведения.
 const SpeakerIcon = ({ className }) => (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
         <path d="M4 10v4h4l5 4V6l-5 4H4z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
@@ -12,13 +14,16 @@ const SpeakerIcon = ({ className }) => (
     </svg>
 );
 
+// Рисует иконку остановки для активного воспроизведения.
 const StopIcon = ({ className }) => (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
         <rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" />
     </svg>
 );
 
+// Отрисовывает экран или компонент RecognizePage и связывает его с данными приложения.
 const RecognizePage = observer(() => {
+    const { t } = useTranslation();
     const { recognizeStore, authStore } = useStores();
     const [ttsLoadingKey, setTtsLoadingKey] = useState(null);
     const [ttsPlayingKey, setTtsPlayingKey] = useState(null);
@@ -42,6 +47,7 @@ const RecognizePage = observer(() => {
         setIsDescriptionExpanded(false);
     }, [recognizeStore.result?.id]);
 
+    // Обрабатывает пользовательское или системное событие.
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -83,6 +89,7 @@ const RecognizePage = observer(() => {
         setTtsPlayingKey(null);
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onSpeakText = async (targetKey, rawText) => {
         setTtsError('');
         const textToSpeak = String(rawText || '').trim();
@@ -131,7 +138,7 @@ const RecognizePage = observer(() => {
             audio.onerror = () => {
                 setTtsPlayingKey(null);
                 URL.revokeObjectURL(audioUrl);
-                setTtsError('Не удалось воспроизвести озвучку');
+                setTtsError(t('pages.scanner.tts_play_error'));
             };
             audio.play()
                 .then(() => setTtsPlayingKey(targetKey))
@@ -139,10 +146,10 @@ const RecognizePage = observer(() => {
                     if (err?.name === 'NotAllowedError') {
                         return;
                     }
-                    setTtsError('Не удалось воспроизвести озвучку');
+                    setTtsError(t('pages.scanner.tts_play_error'));
                 });
         } catch (e) {
-            setTtsError(e?.response?.data?.message || 'Не удалось озвучить слово');
+            setTtsError(e?.response?.data?.message || t('pages.scanner.tts_word_error'));
         } finally {
             setTtsLoadingKey(null);
         }
@@ -151,9 +158,9 @@ const RecognizePage = observer(() => {
     return (
         <div className={`${styles.container} ${hasResult ? styles.containerExpanded : ''}`}>
             <div className={styles.instructionBlock}>
-                <h2 className={styles.pageTitle}>Интеллектуальный сканер</h2>
+                <h2 className={styles.pageTitle}>{t('pages.scanner.title')}</h2>
                 <p className={styles.pageSubtitle}>
-                    Загрузите фотографию для мгновенного распознавания.
+                    {t('pages.scanner.subtitle')}
                 </p>
             </div>
 
@@ -166,7 +173,7 @@ const RecognizePage = observer(() => {
                                 <img src={recognizeStore.preview} alt="Preview" className={styles.imagePreview} />
                             ) : (
                                 <div className={styles.placeholder}>
-                                    <span className={styles.placeholderText}>Нажмите, чтобы выбрать фото</span>
+                                    <span className={styles.placeholderText}>{t('pages.scanner.choose_photo')}</span>
                                 </div>
                             )}
                         </label>
@@ -181,7 +188,7 @@ const RecognizePage = observer(() => {
                                 </div>
 
                                 <div className={styles.details}>
-                                    <p><strong>Русский:</strong> {recognizeStore.result.nameRu}</p>
+                                    <p><strong>{t('pages.scanner.russian')}</strong> {recognizeStore.result.nameRu}</p>
                                     <div
                                         className={`${styles.descriptionWrap} ${isDescriptionExpanded ? styles.descriptionWrapExpanded : ''}`}
                                         role="button"
@@ -195,14 +202,14 @@ const RecognizePage = observer(() => {
                                         }}
                                     >
                                         <div className={styles.descriptionHead}>
-                                            <p className={styles.descriptionLabel}>Описание</p>
+                                            <p className={styles.descriptionLabel}>{t('pages.scanner.description')}</p>
                                             <span className={styles.descriptionToggle}>
-                                                {isDescriptionExpanded ? 'Скрыть' : 'Показать'}
+                                                {isDescriptionExpanded ? t('pages.scanner.hide') : t('pages.scanner.show')}
                                             </span>
                                         </div>
                                         <div className={`${styles.descriptionBody} ${!isDescriptionExpanded ? styles.descriptionBodyCollapsed : ''}`}>
                                             <p className={styles.descriptionText}>
-                                                {recognizeStore.result.description || 'Описание отсутствует'}
+                                                {recognizeStore.result.description || t('pages.scanner.no_description')}
                                             </p>
                                             {!isDescriptionExpanded && <div className={styles.descriptionFade} />}
                                         </div>
@@ -210,7 +217,7 @@ const RecognizePage = observer(() => {
                                     {examplesError && <p className={styles.examplesError}>{examplesError}</p>}
                                     {examplesRequested && usageExamples.length > 0 && (
                                         <div className={styles.usageExamples}>
-                                            <p className={styles.usageTitle}>2 примера предложений:</p>
+                                            <p className={styles.usageTitle}>{t('pages.scanner.examples_count')}</p>
                                             {usageExamples.map((item, idx) => (
                                                 <div key={`${item.textTatar}_${idx}`} className={styles.usageItem}>
                                                     <div className={styles.usageTatRow}>
@@ -219,8 +226,8 @@ const RecognizePage = observer(() => {
                                                             type="button"
                                                             className={styles.usageSpeakBtn}
                                                             onClick={() => onSpeakText(`example_${idx}`, item.textTatar)}
-                                                            title={ttsPlayingKey === `example_${idx}` ? 'Остановить озвучку' : 'Озвучить пример'}
-                                                            aria-label="Озвучить пример"
+                                                            title={ttsPlayingKey === `example_${idx}` ? t('pages.scanner.stop_tts') : t('pages.scanner.speak_example')}
+                                                            aria-label={t('pages.scanner.speak_example')}
                                                             disabled={ttsLoadingKey === `example_${idx}`}
                                                         >
                                                             {ttsLoadingKey === `example_${idx}` ? (
@@ -248,10 +255,10 @@ const RecognizePage = observer(() => {
                                         disabled={examplesLoading}
                                     >
                                         {examplesLoading
-                                            ? 'Генерация примеров...'
+                                            ? t('pages.scanner.examples_loading')
                                             : usageExamples.length > 0
-                                                ? 'Другие примеры предложений'
-                                                : 'Примеры предложений'}
+                                                ? t('pages.scanner.more_examples')
+                                                : t('pages.scanner.examples')}
                                     </button>
 
                                     <button
@@ -261,17 +268,17 @@ const RecognizePage = observer(() => {
                                         type="button"
                                     >
                                         {ttsLoadingKey === 'word'
-                                            ? 'Подготовка озвучки...'
+                                            ? t('pages.scanner.tts_preparing')
                                             : ttsPlayingKey === 'word'
-                                                ? 'Остановить озвучку'
-                                                : 'Озвучить'}
+                                                ? t('pages.scanner.stop_tts')
+                                                : t('pages.scanner.speak')}
                                     </button>
 
                                     {authStore.isAuth ? (
                                         <div className={styles.mainActionRow}>
                                             {isAlreadyInDictionary ? (
                                                 <button className={`${styles.alreadyBtn} ${styles.halfBtn}`} disabled>
-                                                    Уже в словаре
+                                                    {t('pages.scanner.already_saved')}
                                                 </button>
                                             ) : (
                                                 <button
@@ -279,18 +286,18 @@ const RecognizePage = observer(() => {
                                                     className={`${styles.addBtn} ${styles.halfBtn}`}
                                                     disabled={recognizeStore.isSaving}
                                                 >
-                                                    {recognizeStore.isSaving ? "Сохранение..." : "Добавить в словарь"}
+                                                    {recognizeStore.isSaving ? t('pages.scanner.saving') : t('pages.scanner.add_to_dictionary')}
                                                 </button>
                                             )}
                                             <button onClick={() => recognizeStore.reset()} className={`${styles.resetBtn} ${styles.halfBtn}`}>
-                                                Заново
+                                                {t('pages.scanner.retry')}
                                             </button>
                                         </div>
                                     ) : (
                                         <>
-                                            <p className={styles.authAlert}>Войдите, чтобы сохранить слово</p>
+                                            <p className={styles.authAlert}>{t('pages.scanner.login_to_save')}</p>
                                             <button onClick={() => recognizeStore.reset()} className={styles.resetBtn}>
-                                                Заново
+                                                {t('pages.scanner.retry')}
                                             </button>
                                         </>
                                     )}
@@ -300,7 +307,7 @@ const RecognizePage = observer(() => {
                     )}
                 </div>
 
-                {recognizeStore.loading && <div className={styles.loader}>Анализ изображения...</div>}
+                {recognizeStore.loading && <div className={styles.loader}>{t('pages.scanner.analyzing')}</div>}
                 {recognizeStore.error && <div className={styles.error}>{recognizeStore.error}</div>}
             </div>
 

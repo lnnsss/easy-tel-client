@@ -1,8 +1,10 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { CHARACTER_ASSETS, CHARACTER_DEFAULTS, CHARACTER_FILE_ALIASES } from '../../constants/characterAssets';
 import styles from './CharacterPreviewCard.module.css';
 
+// Приводит входные данные к единому безопасному формату.
 const normalizeConfig = (raw = {}) => {
     const safe = { ...CHARACTER_DEFAULTS, ...(raw || {}) };
 
@@ -24,7 +26,9 @@ const normalizeConfig = (raw = {}) => {
     };
 };
 
+// Отрисовывает экран или компонент CharacterPreviewCard и связывает его с данными приложения.
 const CharacterPreviewCard = ({ customization, editable = false }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const config = useMemo(() => normalizeConfig(customization), [customization]);
 
@@ -38,14 +42,14 @@ const CharacterPreviewCard = ({ customization, editable = false }) => {
     return (
         <div className={styles.card}>
             <div className={styles.headRow}>
-                <h3 className={styles.title}>Персонаж</h3>
+                <h3 className={styles.title}>{t('pages.character.title')}</h3>
                 {editable && (
                     <button
                         type="button"
                         className={styles.editBtn}
                         onClick={() => navigate('/character')}
-                        aria-label="Редактировать персонажа"
-                        title="Редактировать персонажа"
+                        aria-label={t('pages.character.edit')}
+                        title={t('pages.character.edit')}
                     >
                         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <path d="M4 20h4l10-10-4-4L4 16v4Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
@@ -56,12 +60,12 @@ const CharacterPreviewCard = ({ customization, editable = false }) => {
             </div>
 
             <div className={styles.previewRect}>
-                {backgroundSrc && <img src={backgroundSrc} alt="Фон" className={styles.backgroundLayer} />}
-                <img src={bodySrc} alt="Тело" className={styles.layer} />
-                <img src={shoesSrc} alt="Обувь" className={styles.layer} />
-                <img src={bottomSrc} alt="Штаны" className={styles.layer} />
-                <img src={topSrc} alt="Верхняя одежда" className={styles.layer} />
-                {config.headdressFile && <img src={headdressSrc} alt="Головной убор" className={styles.layer} />}
+                {backgroundSrc && <img src={backgroundSrc} alt={t('pages.character.background_alt')} className={styles.backgroundLayer} />}
+                <img src={bodySrc} alt={t('pages.character.body_alt')} className={styles.layer} />
+                <img src={shoesSrc} alt={t('pages.character.shoes_alt')} className={styles.layer} />
+                <img src={bottomSrc} alt={t('pages.character.bottom_alt')} className={styles.layer} />
+                <img src={topSrc} alt={t('pages.character.top_alt')} className={styles.layer} />
+                {config.headdressFile && <img src={headdressSrc} alt={t('pages.character.headdress_alt')} className={styles.layer} />}
             </div>
         </div>
     );

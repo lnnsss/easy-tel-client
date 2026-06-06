@@ -225,6 +225,11 @@
     gap: 6px;
 }
 
+.friendsLink,
+.mobileFriendsLink {
+    position: relative;
+}
+
 .chatBadge {
     min-width: 18px;
     height: 18px;
@@ -236,6 +241,25 @@
     display: grid;
     place-items: center;
     padding: 0 5px;
+}
+
+.friendRequestsBadge {
+    position: absolute;
+    top: -7px;
+    right: -10px;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: var(--c-black);
+    font-size: 0.65rem;
+    font-weight: 800;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    padding: 0 5px;
+    box-sizing: border-box;
+    pointer-events: none;
 }
 
 .btnRegister {

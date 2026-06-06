@@ -5,6 +5,7 @@ import {Link, useNavigate} from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import styles from "./Auth.module.css"
 
+// Отрисовывает экран или компонент LoginPage и связывает его с данными приложения.
 const LoginPage = observer(() => {
     const { t } = useTranslation();
     const { authStore } = useStores();
@@ -14,10 +15,12 @@ const LoginPage = observer(() => {
     const [err, setErr] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
+    // Обрабатывает событие интерфейса пользователя.
     const onGoogleLogin = () => {
         window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onLogin = async (e) => {
         e.preventDefault();
         setErr('');

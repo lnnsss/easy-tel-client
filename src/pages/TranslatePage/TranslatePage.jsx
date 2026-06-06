@@ -7,14 +7,15 @@ const HISTORY_KEY = 'easytel:translate:history';
 const MAX_HISTORY = 20;
 
 const DIRECTIONS = [
-    { value: 'rus2tat', label: 'Русский → Татарский' },
-    { value: 'tat2rus', label: 'Татарский → Русский' }
+    { value: 'rus2tat', labelKey: 'pages.translator.rus2tat' },
+    { value: 'tat2rus', labelKey: 'pages.translator.tat2rus' }
 ];
 const SPEAKERS = [
     { value: 'almaz', label: 'Алмаз' },
     { value: 'alsu', label: 'Алсу' }
 ];
 
+// Рисует иконку озвучивания для кнопок воспроизведения.
 const SpeakerIcon = ({ className }) => (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
         <path d="M4 10v4h4l5 4V6l-5 4H4z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
@@ -23,12 +24,14 @@ const SpeakerIcon = ({ className }) => (
     </svg>
 );
 
+// Рисует иконку остановки для активного воспроизведения.
 const StopIcon = ({ className }) => (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
         <rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" />
     </svg>
 );
 
+// Рисует иконку копирования текста в буфер обмена.
 const CopyIcon = ({ className }) => (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
         <rect x="9" y="9" width="10" height="10" rx="2.2" fill="none" stroke="currentColor" strokeWidth="1.7" />
@@ -36,6 +39,7 @@ const CopyIcon = ({ className }) => (
     </svg>
 );
 
+// Читает историю переводов из localStorage и защищается от битых данных.
 const readHistory = () => {
     try {
         const raw = localStorage.getItem(HISTORY_KEY);
@@ -46,12 +50,14 @@ const readHistory = () => {
     }
 };
 
+// Сохраняет изменения пользователя.
 const saveHistory = (items) => {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(items.slice(0, MAX_HISTORY)));
 };
 
+// Отрисовывает экран или компонент TranslatePage и связывает его с данными приложения.
 const TranslatePage = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [direction, setDirection] = useState('rus2tat');
     const [ruText, setRuText] = useState('');
     const [ttText, setTtText] = useState('');
@@ -116,25 +122,28 @@ const TranslatePage = () => {
 
     const leftLang = direction === 'rus2tat' ? 'ru' : 'tt';
     const rightLang = leftLang === 'ru' ? 'tt' : 'ru';
-    const leftTitle = leftLang === 'ru' ? 'Русский' : 'Татарский';
-    const rightTitle = rightLang === 'ru' ? 'Русский' : 'Татарский';
-    const leftPlaceholder = leftLang === 'ru' ? 'Введите текст на русском...' : 'Татарча текстны кертегез...';
-    const rightPlaceholder = rightLang === 'ru' ? 'Здесь появится перевод на русский...' : 'Монда тәрҗемә күренәчәк...';
+    const locale = i18n.language?.startsWith('tt') ? 'tt-RU' : 'ru-RU';
+    const leftTitle = leftLang === 'ru' ? t('pages.translator.ru') : t('pages.translator.tt');
+    const rightTitle = rightLang === 'ru' ? t('pages.translator.ru') : t('pages.translator.tt');
+    const leftPlaceholder = leftLang === 'ru' ? t('pages.translator.left_ru_placeholder') : t('pages.translator.left_tt_placeholder');
+    const rightPlaceholder = rightLang === 'ru' ? t('pages.translator.right_ru_placeholder') : t('pages.translator.right_tt_placeholder');
     const leftValue = leftLang === 'ru' ? ruText : ttText;
     const rightValue = rightLang === 'ru' ? ruText : ttText;
     const leftHasTatarSpeech = leftLang === 'tt';
     const rightHasTatarSpeech = rightLang === 'tt';
 
+    // Обрабатывает событие интерфейса пользователя.
     const onSwapDirection = () => {
         setDirection((prev) => (prev === 'rus2tat' ? 'tat2rus' : 'rus2tat'));
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onTranslate = async () => {
         setError('');
         const sourceText = direction === 'rus2tat' ? ruText : ttText;
 
         if (!sourceText.trim()) {
-            setError('Введите исходный текст');
+            setError(t('pages.translator.source_required'));
             return;
         }
 
@@ -166,12 +175,13 @@ const TranslatePage = () => {
             setHistory(nextHistory);
             saveHistory(nextHistory);
         } catch (e) {
-            setError(e?.response?.data?.message || 'Не удалось выполнить перевод');
+            setError(e?.response?.data?.message || t('pages.translator.translate_failed'));
         } finally {
             setLoading(false);
         }
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onCopy = async (value) => {
         if (!value) return;
         try {
@@ -181,6 +191,7 @@ const TranslatePage = () => {
         }
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onReuseHistory = (item) => {
         setDirection(item.direction || 'rus2tat');
         if ((item.direction || 'rus2tat') === 'rus2tat') {
@@ -194,12 +205,14 @@ const TranslatePage = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onDeleteHistory = (id) => {
         const next = history.filter((item) => item.id !== id);
         setHistory(next);
         saveHistory(next);
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onChangeLeftText = (value) => {
         if (leftLang === 'ru') {
             setRuText(value);
@@ -208,6 +221,7 @@ const TranslatePage = () => {
         }
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onLeftTextareaKeyDown = (e) => {
         if (e.key !== 'Enter' || e.shiftKey || e.nativeEvent?.isComposing) return;
         e.preventDefault();
@@ -216,6 +230,7 @@ const TranslatePage = () => {
         }
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onClearHistory = () => {
         setHistory([]);
         saveHistory([]);
@@ -239,6 +254,7 @@ const TranslatePage = () => {
         return URL.createObjectURL(blob);
     };
 
+    // Загружает данные из внешнего источника или API.
     const fetchAudioUrl = async (textToSpeak, speakerValue) => {
         const audioKey = `${speakerValue}::${textToSpeak}`;
         const cached = audioCacheRef.current.get(audioKey);
@@ -282,7 +298,7 @@ const TranslatePage = () => {
         nextAudio.onended = () => setIsPlaying(false);
         nextAudio.onerror = () => {
             setIsPlaying(false);
-            setError('Не удалось воспроизвести аудио');
+            setError(t('pages.translator.audio_failed'));
         };
         nextAudio.play()
             .then(() => setIsPlaying(true))
@@ -292,16 +308,17 @@ const TranslatePage = () => {
                     return;
                 }
                 setIsPlaying(false);
-                setError('Не удалось воспроизвести аудио');
+                setError(t('pages.translator.audio_failed'));
             });
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onSpeak = async (rawText) => {
         setError('');
         const textToSpeak = String(rawText || '').trim();
 
         if (!textToSpeak) {
-            setError('Сначала введите или получите текст для озвучки');
+            setError(t('pages.translator.speak_required'));
             return;
         }
 
@@ -328,16 +345,16 @@ const TranslatePage = () => {
                     utterance.onend = () => setIsPlaying(false);
                     utterance.onerror = () => {
                         setIsPlaying(false);
-                        setError(e?.response?.data?.message || 'Не удалось озвучить перевод');
+                        setError(e?.response?.data?.message || t('pages.translator.speak_translate_failed'));
                     };
                     window.speechSynthesis.cancel();
                     window.speechSynthesis.speak(utterance);
                     setIsPlaying(true);
                 } else {
-                    setError(e?.response?.data?.message || 'Не удалось озвучить перевод');
+                    setError(e?.response?.data?.message || t('pages.translator.speak_translate_failed'));
                 }
             } catch {
-                setError(e?.response?.data?.message || 'Не удалось озвучить перевод');
+                setError(e?.response?.data?.message || t('pages.translator.speak_translate_failed'));
             }
         } finally {
             setTtsLoading(false);
@@ -363,12 +380,12 @@ const TranslatePage = () => {
             </div>
             <section className={styles.card}>
                 <div className={styles.cardHead}>
-                    <h2>Настройки перевода</h2>
+                    <h2>{t('pages.translator.settings')}</h2>
                     <select
                         className={styles.speakerSelect}
                         value={speaker}
                         onChange={(e) => setSpeaker(e.target.value)}
-                        aria-label="Голос озвучки"
+                        aria-label={t('pages.translator.voice')}
                     >
                         {SPEAKERS.map((item) => (
                             <option key={item.value} value={item.value}>
@@ -384,8 +401,8 @@ const TranslatePage = () => {
                         type="button"
                         className={styles.swapBtn}
                         onClick={onSwapDirection}
-                        title="Поменять направление"
-                        aria-label="Поменять направление"
+                        title={t('pages.translator.swap')}
+                        aria-label={t('pages.translator.swap')}
                     >
                         ⇄
                     </button>
@@ -411,8 +428,8 @@ const TranslatePage = () => {
                                         className={`${styles.copyIconBtn} ${styles.audioIconBtn}`}
                                         onClick={() => onSpeak(leftValue)}
                                         disabled={ttsLoading || (!leftValue.trim() && !isPlaying)}
-                                        aria-label="Озвучить татарский текст"
-                                        title={isPlaying ? 'Остановить озвучку' : 'Озвучить'}
+                                        aria-label={t('pages.translator.speak_tatar_aria')}
+                                        title={isPlaying ? t('pages.translator.stop_speech') : t('pages.translator.speak')}
                                     >
                                         {isPlaying ? (
                                             <StopIcon className={styles.audioIcon} />
@@ -426,8 +443,8 @@ const TranslatePage = () => {
                                     className={`${styles.copyIconBtn} ${styles.audioIconBtn}`}
                                     onClick={() => onCopy(leftValue)}
                                     disabled={!leftValue}
-                                    aria-label="Копировать исходный текст"
-                                    title="Копировать"
+                                    aria-label={t('pages.translator.copy_source_aria')}
+                                    title={t('pages.translator.copy')}
                                 >
                                     <CopyIcon className={styles.audioIcon} />
                                 </button>
@@ -452,8 +469,8 @@ const TranslatePage = () => {
                                         className={`${styles.copyIconBtn} ${styles.audioIconBtn}`}
                                         onClick={() => onSpeak(rightValue)}
                                         disabled={ttsLoading || (!rightValue.trim() && !isPlaying)}
-                                        aria-label="Озвучить татарский текст"
-                                        title={isPlaying ? 'Остановить озвучку' : 'Озвучить'}
+                                        aria-label={t('pages.translator.speak_tatar_aria')}
+                                        title={isPlaying ? t('pages.translator.stop_speech') : t('pages.translator.speak')}
                                     >
                                         {isPlaying ? (
                                             <StopIcon className={styles.audioIcon} />
@@ -467,8 +484,8 @@ const TranslatePage = () => {
                                     className={`${styles.copyIconBtn} ${styles.audioIconBtn}`}
                                     onClick={() => onCopy(rightValue)}
                                     disabled={!rightValue}
-                                    aria-label="Копировать перевод"
-                                    title="Копировать"
+                                    aria-label={t('pages.translator.copy_translation_aria')}
+                                    title={t('pages.translator.copy')}
                                 >
                                     <CopyIcon className={styles.audioIcon} />
                                 </button>
@@ -479,7 +496,7 @@ const TranslatePage = () => {
 
                 <div className={styles.actionsSingle}>
                     <button type="button" className={styles.primaryBtn} onClick={onTranslate} disabled={loading}>
-                        {loading ? 'Переводим...' : 'Перевести'}
+                        {loading ? t('pages.translator.translating') : t('pages.translator.translate')}
                     </button>
                 </div>
 
@@ -488,9 +505,9 @@ const TranslatePage = () => {
 
             <section className={styles.card}>
                 <div className={styles.historyHead}>
-                    <h2>История переводов</h2>
+                    <h2>{t('pages.translator.history')}</h2>
                     <button type="button" className={styles.ghostBtn} onClick={onClearHistory} disabled={!history.length}>
-                        Очистить все
+                        {t('pages.translator.clear_all')}
                     </button>
                 </div>
 
@@ -498,22 +515,22 @@ const TranslatePage = () => {
                     {history.map((item) => (
                         <div key={item.id} className={styles.historyItem}>
                             <div className={styles.historyMeta}>
-                                <strong>{DIRECTIONS.find((x) => x.value === item.direction)?.label || item.direction}</strong>
-                                <span>{new Date(item.ts).toLocaleString('ru-RU')}</span>
+                                <strong>{t(DIRECTIONS.find((x) => x.value === item.direction)?.labelKey || 'pages.translator.rus2tat')}</strong>
+                                <span>{new Date(item.ts).toLocaleString(locale)}</span>
                             </div>
-                            <p className={styles.historyText}><b>Исходный:</b> {item.source}</p>
-                            <p className={styles.historyText}><b>Перевод:</b> {item.translation}</p>
+                            <p className={styles.historyText}><b>{t('pages.translator.source')}</b> {item.source}</p>
+                            <p className={styles.historyText}><b>{t('pages.translator.translation')}</b> {item.translation}</p>
                             <div className={styles.historyActions}>
                                 <button type="button" className={styles.ghostBtn} onClick={() => onReuseHistory(item)}>
-                                    Использовать
+                                    {t('pages.translator.use')}
                                 </button>
                                 <button type="button" className={styles.ghostBtn} onClick={() => onDeleteHistory(item.id)}>
-                                    Удалить
+                                    {t('pages.translator.delete')}
                                 </button>
                             </div>
                         </div>
                     ))}
-                    {!history.length && <p className={styles.empty}>Пусто</p>}
+                    {!history.length && <p className={styles.empty}>{t('pages.translator.empty')}</p>}
                 </div>
             </section>
         </div>

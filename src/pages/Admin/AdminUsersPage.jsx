@@ -4,57 +4,17 @@ import AdminService from '../../services/AdminService';
 import { useStores } from '../../stores/StoreContext';
 import styles from './AdminUsersPage.module.css';
 
-const formatDate = (dateValue) => {
+// Форматирует данные для отображения пользователю.
+const formatDate = (dateValue, locale = 'ru-RU') => {
     if (!dateValue) return '—';
     const date = new Date(dateValue);
     if (Number.isNaN(date.getTime())) return '—';
-    return date.toLocaleDateString('ru-RU');
+    return date.toLocaleDateString(locale);
 };
 
-const requestStatusLabel = (status) => {
-    if (status === 'pending') return 'На рассмотрении';
-    if (status === 'approved') return 'Одобрена';
-    if (status === 'rejected') return 'Отклонена';
-    return '—';
-};
-
-const roleLabel = (role) => {
-    if (role === 'admin') return 'Админ';
-    if (role === 'author') return 'Автор';
-    return 'Пользователь';
-};
-
-const EDUCATION_LEVEL_LABEL = {
-    secondary: 'Среднее образование',
-    college: 'СПО / колледж',
-    bachelor: 'Бакалавр',
-    master_specialist: 'Магистр / специалист',
-    phd: 'Аспирантура / докторская степень',
-    other: 'Другое'
-};
-
-const TATAR_LEVEL_LABEL = {
-    a0: 'A0 (нулевой)',
-    a1: 'A1',
-    a2: 'A2',
-    b1: 'B1',
-    b2: 'B2',
-    c1: 'C1',
-    c2: 'C2',
-    native: 'Носитель'
-};
-
-const TEACHING_LEVEL_LABEL = {
-    epg_phase_1: 'EPG Фаза 1 — начинающий преподаватель',
-    epg_phase_2: 'EPG Фаза 2 — базовая практика преподавания',
-    epg_phase_3: 'EPG Фаза 3 — самостоятельный преподаватель',
-    epg_phase_4: 'EPG Фаза 4 — уверенный практик',
-    epg_phase_5: 'EPG Фаза 5 — продвинутый наставник',
-    epg_phase_6: 'EPG Фаза 6 — эксперт / лидер'
-};
-
+// Отрисовывает экран или компонент AdminUsersPage и связывает его с данными приложения.
 const AdminUsersPage = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { uiStore } = useStores();
     const [users, setUsers] = useState([]);
     const [search, setSearch] = useState('');
@@ -85,6 +45,20 @@ const AdminUsersPage = () => {
         request: null,
         adminComment: ''
     });
+    const currentLocale = i18n.language?.startsWith('tt') ? 'tt-RU' : 'ru-RU';
+    const requestStatusLabel = (status) => (
+        status ? t(`pages.admin.users.request_statuses.${status}`, { defaultValue: '—' }) : '—'
+    );
+    const roleLabel = (role) => t(`pages.admin.users.roles.${role || 'user'}`);
+    const educationLabel = (value) => (
+        value ? t(`pages.courses.education_options.${value}`, { defaultValue: value }) : '—'
+    );
+    const tatarLevelLabel = (value) => (
+        value ? t(`pages.courses.tatar_level_options.${value}`, { defaultValue: value.toUpperCase?.() || value }) : '—'
+    );
+    const teachingLevelLabel = (value) => (
+        value ? t(`pages.courses.teaching_options.${value}`, { defaultValue: value }) : '—'
+    );
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -127,7 +101,7 @@ const AdminUsersPage = () => {
             setTotalPages(data.totalPages || 1);
             setTotalItems(data.totalItems || 0);
         } catch (err) {
-            setError(err.response?.data?.message || 'Ошибка загрузки пользователей');
+            setError(err.response?.data?.message || t('pages.admin.users.load_error'));
         } finally {
             setLoading(false);
         }
@@ -145,24 +119,29 @@ const AdminUsersPage = () => {
         setRequestsPage(1);
     }, [isRequestsOpen]);
 
+    // Обрабатывает пользовательское или системное событие.
     const handleCopyText = async (value) => {
         const normalizedValue = String(value || '').trim();
         if (!normalizedValue) return;
         try {
             await navigator.clipboard.writeText(normalizedValue);
-            uiStore.showCopyToast('Скопировано в буфер обмена');
+            uiStore.showCopyToast(t('pages.admin.users.copy_toast'));
         } catch {
             // Игнорируем ошибки доступа к буферу обмена.
         }
     };
 
+    // Обрабатывает пользовательское или системное событие.
     const handleDeleteUser = (user) => {
         uiStore.showModal({
-            title: 'Удалить пользователя?',
-            message: `Будут удалены пользователь и его слова: ${user.firstName} ${user.lastName} (${user.email})`,
+            title: t('pages.admin.users.delete_title'),
+            message: t('pages.admin.users.delete_message', {
+                name: `${user.firstName} ${user.lastName}`,
+                email: user.email
+            }),
             variant: 'error',
-            primaryLabel: 'Удалить',
-            secondaryLabel: 'Отмена',
+            primaryLabel: t('common.actions.delete'),
+            secondaryLabel: t('modals.cancel'),
             onPrimary: async () => {
                 try {
                     await AdminService.deleteUser(user._id);
@@ -170,22 +149,24 @@ const AdminUsersPage = () => {
                     await fetchUsers();
                 } catch (err) {
                     uiStore.showModal({
-                        title: 'Ошибка',
-                        message: err.response?.data?.message || 'Ошибка удаления пользователя',
+                        title: t('modals.error'),
+                        message: err.response?.data?.message || t('pages.admin.users.delete_error'),
                         variant: 'error',
-                        secondaryLabel: 'Закрыть'
+                        secondaryLabel: t('common.close')
                     });
                 }
             }
         });
     };
 
+    // Обрабатывает пользовательское или системное событие.
     const handleRoleUpdate = async (user, nextRole) => {
         await AdminService.updateUserRole(user._id, nextRole);
         await fetchUsers();
         await fetchAuthorRequests();
     };
 
+    // Обрабатывает пользовательское или системное событие.
     const handleReviewRequest = async (user, decision, adminComment = '') => {
         const requestId = reviewModal.request?._id || user.latestAuthorRequest?.requestId;
         if (!requestId) return;
@@ -194,6 +175,7 @@ const AdminUsersPage = () => {
         await fetchAuthorRequests();
     };
 
+    // Открывает локальное состояние интерфейса или модального окна.
     const openRoleModal = (user) => {
         setRoleModal({
             isOpen: true,
@@ -202,6 +184,7 @@ const AdminUsersPage = () => {
         });
     };
 
+    // Закрывает локальное состояние интерфейса или модального окна.
     const closeRoleModal = () => {
         setRoleModal({
             isOpen: false,
@@ -210,6 +193,7 @@ const AdminUsersPage = () => {
         });
     };
 
+    // Показывает подтверждение перед необратимым действием.
     const confirmRoleUpdate = () => {
         if (!roleModal.user) return;
         const targetUser = roleModal.user;
@@ -217,11 +201,11 @@ const AdminUsersPage = () => {
         const oldRoleLabel = roleLabel(targetUser.role);
         const nextRoleLabel = roleLabel(nextRole);
         uiStore.showModal({
-            title: 'Подтвердить смену роли?',
+            title: t('pages.admin.users.confirm_role_title'),
             message: `${targetUser.firstName} ${targetUser.lastName}: ${oldRoleLabel} → ${nextRoleLabel}`,
             variant: 'info',
-            primaryLabel: 'Подтвердить',
-            secondaryLabel: 'Отмена',
+            primaryLabel: t('modals.yes'),
+            secondaryLabel: t('modals.cancel'),
             onPrimary: async () => {
                 uiStore.closeModal();
                 try {
@@ -229,10 +213,10 @@ const AdminUsersPage = () => {
                     closeRoleModal();
                 } catch (err) {
                     uiStore.showModal({
-                        title: 'Ошибка',
-                        message: err.response?.data?.message || 'Не удалось изменить роль',
+                        title: t('modals.error'),
+                        message: err.response?.data?.message || t('pages.admin.users.role_update_error'),
                         variant: 'error',
-                        secondaryLabel: 'Закрыть'
+                        secondaryLabel: t('common.close')
                     });
                 }
             },
@@ -240,6 +224,7 @@ const AdminUsersPage = () => {
         });
     };
 
+    // Открывает локальное состояние интерфейса или модального окна.
     const openReviewModal = (user, requestFromList = null) => {
         const request = requestFromList
             || authorRequests.find((item) => String(item._id) === String(user.latestAuthorRequest?.requestId))
@@ -252,6 +237,7 @@ const AdminUsersPage = () => {
         });
     };
 
+    // Закрывает локальное состояние интерфейса или модального окна.
     const closeReviewModal = () => {
         setReviewModal({
             isOpen: false,
@@ -261,17 +247,21 @@ const AdminUsersPage = () => {
         });
     };
 
+    // Показывает подтверждение перед необратимым действием.
     const confirmReviewRequest = (decision) => {
         if (!reviewModal.user) return;
         const targetUser = reviewModal.user;
-        const title = decision === 'approved' ? 'Подтвердить одобрение заявки?' : 'Подтвердить отклонение заявки?';
-        const message = `Заявка пользователя ${targetUser.firstName} ${targetUser.lastName} будет ${decision === 'approved' ? 'одобрена' : 'отклонена'}.`;
+        const title = decision === 'approved' ? t('pages.admin.users.confirm_approve_title') : t('pages.admin.users.confirm_reject_title');
+        const message = t('pages.admin.users.confirm_review_message', {
+            name: `${targetUser.firstName} ${targetUser.lastName}`,
+            decision: decision === 'approved' ? t('pages.admin.users.decision_approved') : t('pages.admin.users.decision_rejected')
+        });
         uiStore.showModal({
             title,
             message,
             variant: decision === 'approved' ? 'success' : 'error',
-            primaryLabel: 'Подтвердить',
-            secondaryLabel: 'Отмена',
+            primaryLabel: t('modals.yes'),
+            secondaryLabel: t('modals.cancel'),
             onPrimary: async () => {
                 uiStore.closeModal();
                 try {
@@ -279,10 +269,10 @@ const AdminUsersPage = () => {
                     closeReviewModal();
                 } catch (err) {
                     uiStore.showModal({
-                        title: 'Ошибка',
-                        message: err.response?.data?.message || 'Не удалось рассмотреть заявку',
+                        title: t('modals.error'),
+                        message: err.response?.data?.message || t('pages.admin.users.review_error'),
                         variant: 'error',
-                        secondaryLabel: 'Закрыть'
+                        secondaryLabel: t('common.close')
                     });
                 }
             },
@@ -290,6 +280,7 @@ const AdminUsersPage = () => {
         });
     };
 
+    // Формирует повторяемый фрагмент интерфейса.
     const renderPagination = () => {
         const elements = [];
         const pushPage = (i) => {
@@ -340,6 +331,7 @@ const AdminUsersPage = () => {
         return elements;
     };
 
+    // Формирует повторяемый фрагмент интерфейса.
     const renderRequestsPagination = () => {
         const elements = [];
         const pushPage = (i) => {
@@ -400,7 +392,7 @@ const AdminUsersPage = () => {
                 <input
                     type="text"
                     className={styles.search}
-                    placeholder="Поиск по email, имени, username..."
+                    placeholder={t('pages.admin.users.search_placeholder')}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
@@ -408,19 +400,19 @@ const AdminUsersPage = () => {
 
             <section className={styles.filterPanel}>
                 <select value={filters.role} onChange={(e) => setFilters((prev) => ({ ...prev, role: e.target.value }))}>
-                    <option value="">Все</option>
-                    <option value="admin">Администраторы</option>
-                    <option value="author">Авторы</option>
-                    <option value="user">Пользователи</option>
+                    <option value="">{t('pages.admin.users.all')}</option>
+                    <option value="admin">{t('pages.admin.users.admins')}</option>
+                    <option value="author">{t('pages.admin.users.authors')}</option>
+                    <option value="user">{t('pages.admin.users.users')}</option>
                 </select>
                 <select value={filters.sortBy} onChange={(e) => setFilters((prev) => ({ ...prev, sortBy: e.target.value }))}>
-                    <option value="createdAt">Сортировка: дата регистрации</option>
-                    <option value="totalPoints">Сортировка: очки</option>
-                    <option value="latestRequestAt">Сортировка: обновление заявки</option>
+                    <option value="createdAt">{t('pages.admin.users.sort_created')}</option>
+                    <option value="totalPoints">{t('pages.admin.users.sort_points')}</option>
+                    <option value="latestRequestAt">{t('pages.admin.users.sort_request')}</option>
                 </select>
                 <select value={filters.sortOrder} onChange={(e) => setFilters((prev) => ({ ...prev, sortOrder: e.target.value }))}>
-                    <option value="desc">По убыванию</option>
-                    <option value="asc">По возрастанию</option>
+                    <option value="desc">{t('pages.admin.users.desc')}</option>
+                    <option value="asc">{t('pages.admin.users.asc')}</option>
                 </select>
             </section>
 
@@ -432,7 +424,7 @@ const AdminUsersPage = () => {
                     className={styles.requestsToggle}
                     onClick={() => setIsRequestsOpen((prev) => !prev)}
                 >
-                    <span>Заявки на авторство</span>
+                    <span>{t('pages.admin.users.author_requests')}</span>
                     <span className={`${styles.toggleChevron} ${isRequestsOpen ? styles.toggleChevronOpen : ''}`}>▾</span>
                 </button>
                 {isRequestsOpen && (
@@ -460,7 +452,7 @@ const AdminUsersPage = () => {
                                             {request.userId?.email || '—'}
                                         </button>
                                     </p>
-                                    <p className={styles.requestMeta}>Дата: {formatDate(request.createdAt)}</p>
+                                    <p className={styles.requestMeta}>{t('pages.admin.users.date', { date: formatDate(request.createdAt, currentLocale) })}</p>
                                     {request.status === 'pending' && (
                                         <button
                                             type="button"
@@ -473,13 +465,13 @@ const AdminUsersPage = () => {
                                                 latestAuthorRequest: { requestId: request._id }
                                             }, request)}
                                         >
-                                            Рассмотреть заявку
+                                            {t('pages.admin.users.review_request')}
                                         </button>
                                     )}
                                 </article>
                             ))}
                             {!requestsLoading && authorRequests.length === 0 && (
-                                <div className={styles.empty}>Заявок пока нет</div>
+                                <div className={styles.empty}>{t('pages.admin.users.empty_requests')}</div>
                             )}
                         </div>
                         {requestsTotalPages > 1 && (
@@ -491,12 +483,12 @@ const AdminUsersPage = () => {
 
             <section className={`${styles.card} ${styles.usersCard}`}>
                 <div className={styles.tableHead}>
-                    <span>Пользователь</span>
+                    <span>{t('pages.admin.users.user')}</span>
                     <span>Email</span>
-                    <span>Роль</span>
-                    <span>Очки</span>
-                    <span>Дата</span>
-                    <span className={styles.actionsHead}>Действия</span>
+                    <span>{t('pages.admin.users.role')}</span>
+                    <span>{t('pages.admin.users.points')}</span>
+                    <span>{t('pages.admin.users.date_header')}</span>
+                    <span className={styles.actionsHead}>{t('pages.admin.users.actions')}</span>
                 </div>
 
                 <div className={styles.tableBody}>
@@ -517,14 +509,14 @@ const AdminUsersPage = () => {
                                 <span className={styles.roleText}>{roleLabel(user.role)}</span>
                             </div>
                             <div className={styles.pointsCell}>{user.totalPoints || 0}</div>
-                            <div className={styles.dateCell}>{formatDate(user.createdAt)}</div>
+                            <div className={styles.dateCell}>{formatDate(user.createdAt, currentLocale)}</div>
                             <div className={styles.rowActions}>
                                 <button type="button" className={styles.actionBtn} onClick={() => openRoleModal(user)}>
-                                    Сменить роль
+                                    {t('pages.admin.users.change_role')}
                                 </button>
                                 {user.latestAuthorRequest?.status === 'pending' && (
                                     <button type="button" className={styles.actionBtn} onClick={() => openReviewModal(user)}>
-                                        Рассмотреть заявку
+                                        {t('pages.admin.users.review_request')}
                                     </button>
                                 )}
                                 <button
@@ -532,14 +524,14 @@ const AdminUsersPage = () => {
                                     className={styles.deleteBtn}
                                     onClick={() => handleDeleteUser(user)}
                                 >
-                                    Удалить
+                                    {t('common.actions.delete')}
                                 </button>
                             </div>
                         </div>
                     ))}
 
                     {!loading && users.length === 0 && (
-                        <div className={styles.empty}>Пользователи не найдены</div>
+                        <div className={styles.empty}>{t('pages.admin.users.empty_users')}</div>
                     )}
                 </div>
 
@@ -549,27 +541,27 @@ const AdminUsersPage = () => {
             {roleModal.isOpen && roleModal.user && (
                 <div className={styles.modalOverlay} onClick={closeRoleModal}>
                     <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
-                        <h3 className={styles.modalTitle}>Сменить роль</h3>
+                        <h3 className={styles.modalTitle}>{t('pages.admin.users.change_role')}</h3>
                         <p className={styles.modalDescription}>
                             {roleModal.user.firstName} {roleModal.user.lastName} ({roleModal.user.email})
                         </p>
                         <label className={styles.modalField}>
-                            Новая роль
+                            {t('pages.admin.users.new_role')}
                             <select
                                 value={roleModal.role}
                                 onChange={(e) => setRoleModal((prev) => ({ ...prev, role: e.target.value }))}
                             >
-                                <option value="user">Пользователь</option>
-                                <option value="author">Автор</option>
-                                <option value="admin">Админ</option>
+                                <option value="user">{t('pages.admin.users.roles.user')}</option>
+                                <option value="author">{t('pages.admin.users.roles.author')}</option>
+                                <option value="admin">{t('pages.admin.users.roles.admin')}</option>
                             </select>
                         </label>
                         <div className={styles.modalActions}>
                             <button type="button" className={styles.actionBtn} onClick={confirmRoleUpdate}>
-                                Сохранить
+                                {t('common.actions.save')}
                             </button>
                             <button type="button" className={styles.secondaryBtn} onClick={closeRoleModal}>
-                                Отмена
+                                {t('modals.cancel')}
                             </button>
                         </div>
                     </div>
@@ -579,41 +571,41 @@ const AdminUsersPage = () => {
             {reviewModal.isOpen && reviewModal.user && (
                 <div className={styles.modalOverlay} onClick={closeReviewModal}>
                     <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
-                        <button type="button" className={styles.modalClose} onClick={closeReviewModal} aria-label="Закрыть">
+                        <button type="button" className={styles.modalClose} onClick={closeReviewModal} aria-label={t('common.close')}>
                             ×
                         </button>
-                        <h3 className={styles.modalTitle}>Рассмотреть заявку автора</h3>
+                        <h3 className={styles.modalTitle}>{t('pages.admin.users.review_author_title')}</h3>
                         <p className={styles.modalDescription}>
                             {reviewModal.user.firstName} {reviewModal.user.lastName} ({reviewModal.user.email})
                         </p>
-                        <p className={styles.modalHint}>Статус: {requestStatusLabel(reviewModal.request?.status || reviewModal.user.latestAuthorRequest?.status)}</p>
+                        <p className={styles.modalHint}>{t('pages.admin.users.status')} {requestStatusLabel(reviewModal.request?.status || reviewModal.user.latestAuthorRequest?.status)}</p>
                         <div className={styles.requestDetails}>
-                            <p><strong>Почта для связи:</strong> {reviewModal.request?.contactEmail || reviewModal.user.email || '—'}</p>
-                            <p><strong>Образование:</strong> {EDUCATION_LEVEL_LABEL[reviewModal.request?.educationLevel] || reviewModal.request?.educationLevel || '—'}</p>
-                            <p><strong>Уточнение по образованию:</strong> {reviewModal.request?.educationDetails || '—'}</p>
-                            <p><strong>Уровень татарского:</strong> {TATAR_LEVEL_LABEL[reviewModal.request?.tatarLevel] || reviewModal.request?.tatarLevel || '—'}</p>
-                            <p><strong>Уровень преподавания:</strong> {TEACHING_LEVEL_LABEL[reviewModal.request?.teachingLevel] || reviewModal.request?.teachingLevel || '—'}</p>
-                            <p><strong>Мотивация:</strong> {reviewModal.request?.motivation || '—'}</p>
+                            <p><strong>{t('pages.admin.users.contact_email')}</strong> {reviewModal.request?.contactEmail || reviewModal.user.email || '—'}</p>
+                            <p><strong>{t('pages.admin.users.education')}</strong> {educationLabel(reviewModal.request?.educationLevel)}</p>
+                            <p><strong>{t('pages.admin.users.education_details')}</strong> {reviewModal.request?.educationDetails || '—'}</p>
+                            <p><strong>{t('pages.admin.users.tatar_level')}</strong> {tatarLevelLabel(reviewModal.request?.tatarLevel)}</p>
+                            <p><strong>{t('pages.admin.users.teaching_level')}</strong> {teachingLevelLabel(reviewModal.request?.teachingLevel)}</p>
+                            <p><strong>{t('pages.admin.users.motivation')}</strong> {reviewModal.request?.motivation || '—'}</p>
                         </div>
                         <label className={styles.modalField}>
-                            Ответ админа (необязательно)
+                            {t('pages.admin.users.admin_answer')}
                             <textarea
                                 className={styles.modalTextarea}
                                 value={reviewModal.adminComment}
                                 onChange={(e) => setReviewModal((prev) => ({ ...prev, adminComment: e.target.value }))}
-                                placeholder="Введите комментарий для пользователя"
+                                placeholder={t('pages.admin.users.admin_answer_placeholder')}
                             />
                         </label>
                         <div className={styles.modalActions}>
                             <button type="button" className={styles.actionBtn} onClick={() => confirmReviewRequest('approved')}>
-                                Подтвердить
+                                {t('modals.yes')}
                             </button>
                             <button
                                 type="button"
                                 className={styles.actionBtn}
                                 onClick={() => confirmReviewRequest('rejected')}
                             >
-                                Отклонить
+                                {t('common.actions.decline')}
                             </button>
                         </div>
                     </div>

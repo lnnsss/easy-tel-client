@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import CourseService from '../../services/CourseService';
 import { useStores } from '../../stores/StoreContext';
 import TopicBlocksRenderer from '../../components/TopicBlocksRenderer/TopicBlocksRenderer';
 import styles from './CourseDetailPage.module.css';
 
+// Перемешивает слова для quiz-вопросов без изменения исходного массива.
 const shuffleWords = (words = []) => {
     const next = [...words];
     for (let i = next.length - 1; i > 0; i -= 1) {
@@ -14,7 +16,9 @@ const shuffleWords = (words = []) => {
     return next;
 };
 
+// Отрисовывает экран или компонент CourseDetailPage и связывает его с данными приложения.
 const CourseDetailPage = () => {
+    const { t } = useTranslation();
     const { uiStore, authStore } = useStores();
     const navigate = useNavigate();
     const { courseId } = useParams();
@@ -46,7 +50,7 @@ const CourseDetailPage = () => {
                 const firstUnlocked = (data.topics || []).find((topic) => topic.isUnlocked);
                 setSelectedTopicId(firstUnlocked?._id || '');
             } catch (e) {
-                setError(e.response?.data?.message || 'Ошибка загрузки курса');
+                setError(e.response?.data?.message || t('pages.course.load_error'));
             } finally {
                 setLoading(false);
             }
@@ -67,7 +71,7 @@ const CourseDetailPage = () => {
                 setTopicPayload(data);
             } catch (e) {
                 setTopicPayload(null);
-                setError(e.response?.data?.message || 'Ошибка загрузки темы');
+                setError(e.response?.data?.message || t('pages.course.topic_load_error'));
             }
         };
         loadTopic();
@@ -86,6 +90,7 @@ const CourseDetailPage = () => {
         setDraggingWordMap({});
     }, [isQuizMode, topicPayload]);
 
+    // Принимает отправленные пользователем данные и фиксирует результат.
     const submitQuiz = async (e) => {
         e.preventDefault();
         if (!topicPayload?.quiz?.questions?.length) return;
@@ -109,10 +114,13 @@ const CourseDetailPage = () => {
             if (!data.passed) {
                 setAnswers({});
                 uiStore.showModal({
-                    title: 'Тест не пройден',
-                    message: `Результат: ${data.scorePercent}% (проходной: ${data.passingScore}%). Попробуйте еще раз.`,
+                    title: t('pages.course.modals.quiz_failed_title'),
+                    message: t('pages.course.modals.quiz_failed_message', {
+                        score: data.scorePercent,
+                        passing: data.passingScore
+                    }),
                     variant: 'error',
-                    secondaryLabel: 'Повторить'
+                    secondaryLabel: t('pages.course.modals.retry')
                 });
                 return;
             }
@@ -127,10 +135,10 @@ const CourseDetailPage = () => {
             if (nextUnlocked) {
                 setSelectedTopicId(nextUnlocked._id);
                 uiStore.showModal({
-                    title: 'Тест завершен',
-                    message: `Отлично! ${data.scorePercent}% правильных ответов. Следующая тема открыта.`,
+                    title: t('pages.course.modals.quiz_done_title'),
+                    message: t('pages.course.modals.quiz_done_next_message', { score: data.scorePercent }),
                     variant: 'success',
-                    secondaryLabel: 'Продолжить'
+                    secondaryLabel: t('pages.course.modals.continue')
                 });
                 return;
             }
@@ -138,10 +146,10 @@ const CourseDetailPage = () => {
             const allCompleted = refreshedTopics.length > 0 && refreshedTopics.every((topic) => topic.isCompleted);
             if (allCompleted) {
                 uiStore.showModal({
-                    title: 'Курс завершен',
-                    message: `Результат теста: ${data.scorePercent}%. Поздравляем, достижение начислено.`,
+                    title: t('pages.course.modals.course_done_title'),
+                    message: t('pages.course.modals.course_done_message', { score: data.scorePercent }),
                     variant: 'success',
-                    secondaryLabel: 'В профиль',
+                    secondaryLabel: t('pages.course.modals.to_profile'),
                     onSecondary: () => {
                         uiStore.closeModal();
                         navigate('/profile');
@@ -155,27 +163,27 @@ const CourseDetailPage = () => {
             }
 
             uiStore.showModal({
-                title: 'Тест завершен',
-                message: `Результат: ${data.scorePercent}%`,
+                title: t('pages.course.modals.quiz_done_title'),
+                message: t('pages.course.modals.result_message', { score: data.scorePercent }),
                 variant: 'success',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('common.close')
             });
         } catch (e) {
-            setError(e.response?.data?.message || 'Ошибка отправки теста');
+            setError(e.response?.data?.message || t('pages.course.submit_error'));
         } finally {
             setSubmitting(false);
         }
     };
 
-    if (loading) return <div className={styles.state}>Загрузка...</div>;
+    if (loading) return <div className={styles.state}>{t('pages.course.loading')}</div>;
     if (error && !course) return <div className={styles.stateError}>{error}</div>;
-    if (!course) return <div className={styles.stateError}>Курс не найден</div>;
+    if (!course) return <div className={styles.stateError}>{t('pages.course.not_found')}</div>;
 
     return (
         <div className={`${styles.page} app-page-shell`}>
             <div className="app-page-top">
                 <div>
-                    <Link to="/courses" className={styles.back}>← Назад к материалам</Link>
+                    <Link to="/courses" className={styles.back}>{t('pages.course.back_to_materials')}</Link>
                     <h1 className="app-page-title">{course.title}</h1>
                     <p className="app-page-subtitle">{course.description}</p>
                 </div>
@@ -183,7 +191,7 @@ const CourseDetailPage = () => {
 
             <div className={styles.layout}>
                 <aside className={styles.sidebar}>
-                    <h3>Темы</h3>
+                    <h3>{t('pages.course.topics')}</h3>
                     {(topics || []).map((topic) => (
                         <button
                             key={topic._id}
@@ -194,7 +202,7 @@ const CourseDetailPage = () => {
                         >
                             <span>{topic.title}</span>
                             <span>
-                                {topic.isCompleted ? '✓' : topic.isUnlocked ? 'Открыто' : 'Закрыто'}
+                                {topic.isCompleted ? '✓' : topic.isUnlocked ? t('pages.course.open') : t('pages.course.locked')}
                             </span>
                         </button>
                     ))}
@@ -202,7 +210,7 @@ const CourseDetailPage = () => {
 
                 <main className={styles.content}>
                     {error && <p className={styles.inlineError}>{error}</p>}
-                    {!topicPayload && <p>Выберите тему для просмотра</p>}
+                    {!topicPayload && <p>{t('pages.course.select_topic')}</p>}
 
                     {topicPayload && (
                         <>
@@ -220,7 +228,7 @@ const CourseDetailPage = () => {
                                                     window.scrollTo({ top: 0, behavior: 'smooth' });
                                                 }}
                                             >
-                                                Перейти к тесту
+                                                {t('pages.course.go_to_quiz')}
                                             </button>
                                         ) : null}
                                     </div>
@@ -230,7 +238,7 @@ const CourseDetailPage = () => {
                             {isQuizMode && topicPayload?.quiz && (
                                 <>
                                     <form className={styles.quiz} onSubmit={submitQuiz}>
-                                        <h3 className={styles.quizTitle}>Тест</h3>
+                                        <h3 className={styles.quizTitle}>{t('pages.course.quiz')}</h3>
                                         {(topicPayload.quiz.questions || []).map((question, index) => (
                                             <div key={question._id} className={styles.question}>
                                                 <p>{index + 1}. {question.title}</p>
@@ -256,7 +264,7 @@ const CourseDetailPage = () => {
                                                     </div>
                                                 ) : question.type === 'sentence_order' ? (
                                                     <div className={styles.sentenceBuilder}>
-                                                        <small>Перетащите слова в правильном порядке</small>
+                                                        <small>{t('pages.course.sentence_hint')}</small>
                                                         <div className={styles.sentenceWords}>
                                                             {(sentenceWordsMap[question._id] || []).map((word, wordIndex) => (
                                                                 <button
@@ -294,7 +302,7 @@ const CourseDetailPage = () => {
                                                                 setSentenceWordsMap((prev) => ({ ...prev, [question._id]: shuffleWords(baseWords) }));
                                                             }}
                                                         >
-                                                            Сбросить порядок
+                                                            {t('pages.course.reset_order')}
                                                         </button>
                                                     </div>
                                                 ) : (
@@ -305,17 +313,17 @@ const CourseDetailPage = () => {
                                                             ...prev,
                                                             [question._id]: { selectedOptionIndex: null, answerText: e.target.value }
                                                         }))}
-                                                        placeholder="Введите ваш ответ"
+                                                        placeholder={t('pages.course.answer_placeholder')}
                                                     />
                                                 )}
                                             </div>
                                         ))}
                                         <div className={styles.topicActions}>
                                             <button type="submit" className={styles.primaryBtn} disabled={submitting || !selectedTopicMeta?.isUnlocked}>
-                                                {submitting ? 'Проверяем...' : 'Завершить тест'}
+                                                {submitting ? t('common.actions.checking') : t('common.actions.finish_test')}
                                             </button>
                                             <button type="button" className={styles.secondaryBtn} onClick={() => setIsQuizMode(false)}>
-                                                Вернуться к теме
+                                                {t('pages.course.back_to_topic')}
                                             </button>
                                         </div>
                                     </form>

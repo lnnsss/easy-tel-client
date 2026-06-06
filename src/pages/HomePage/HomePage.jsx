@@ -7,6 +7,7 @@ import { useStores } from '../../stores/StoreContext';
 import AppAvatar from '../../components/AppAvatar/AppAvatar';
 import styles from './HomePage.module.css';
 
+// Отрисовывает экран или компонент HomePage и связывает его с данными приложения.
 const HomePage = observer(() => {
     const { t } = useTranslation();
     const { authStore } = useStores();
@@ -91,6 +92,7 @@ const HomePage = observer(() => {
         setBannerHidden(true);
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onClosePinnedBanner = () => {
         if (!pinnedCourse) return;
 
@@ -106,6 +108,7 @@ const HomePage = observer(() => {
         setShowDismissModal(true);
     };
 
+    // Показывает подтверждение перед необратимым действием.
     const confirmDismissBanner = () => {
         if (dontShowAgain) {
             hidePinnedBannerForever();

@@ -6,6 +6,7 @@ import styles from './Profile.module.css';
 import CharacterPreviewCard from '../../components/CharacterPreviewCard/CharacterPreviewCard';
 import { getAvatarFallbackStyle } from '../../utils/avatarAccentColor';
 
+// Отрисовывает пользовательский профиль с прогрессом и настройками.
 const UserProfile = ({ user }) => {
     const { t } = useTranslation();
     const { authStore, uiStore } = useStores();
@@ -22,13 +23,15 @@ const UserProfile = ({ user }) => {
     });
 
     useEffect(() => {
-        setProfileAccentColor(user.profileAccentColor || '');
+        const timer = setTimeout(() => {
+            setProfileAccentColor(user.profileAccentColor || '');
+        }, 0);
+        return () => clearTimeout(timer);
     }, [user.profileAccentColor]);
 
     const wordsTotal = user.dictionary?.length || 0;
     const totalPoints = Number.isFinite(user.totalPoints) ? user.totalPoints : wordsTotal;
     const coins = Number.isFinite(user.coins) ? user.coins : totalPoints;
-    const analytics = user.analytics || null;
     const level = Math.floor(totalPoints / 10) + 1;
     const currentLevelBasePoints = Math.floor(totalPoints / 10) * 10;
     const pointsToNextLevel = Math.max(0, currentLevelBasePoints + 10 - totalPoints);
@@ -58,6 +61,7 @@ const UserProfile = ({ user }) => {
         getAvatarFallbackStyle(user.avatarAccentColor, `${user.username || ''}${initials}`)
     ), [user.avatarAccentColor, user.username, initials]);
 
+    // Обрабатывает событие интерфейса пользователя.
     const onAvatarChange = async (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -66,24 +70,25 @@ const UserProfile = ({ user }) => {
         if (res.success) {
             setAvatarLoadFailed(false);
             uiStore.showModal({
-                title: 'Готово',
-                message: 'Аватар обновлен',
+                title: t('pages.profile.done'),
+                message: t('pages.profile.avatar_updated'),
                 variant: 'success',
-                primaryLabel: 'Закрыть',
-                secondaryLabel: 'Закрыть'
+                primaryLabel: t('pages.profile.close'),
+                secondaryLabel: t('pages.profile.close')
             });
         } else {
             uiStore.showModal({
-                title: 'Ошибка',
+                title: t('pages.profile.error'),
                 message: res.message,
                 variant: 'error',
-                primaryLabel: 'Закрыть',
-                secondaryLabel: 'Закрыть'
+                primaryLabel: t('pages.profile.close'),
+                secondaryLabel: t('pages.profile.close')
             });
         }
         e.target.value = '';
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onSaveProfile = async (e) => {
         e.preventDefault();
         const payload = {
@@ -98,35 +103,37 @@ const UserProfile = ({ user }) => {
         if (res.success) {
             setIsEditing(false);
             uiStore.showModal({
-                title: 'Готово',
-                message: 'Профиль обновлен',
+                title: t('pages.profile.done'),
+                message: t('pages.profile.profile_updated'),
                 variant: 'success',
-                primaryLabel: 'Закрыть',
-                secondaryLabel: 'Закрыть'
+                primaryLabel: t('pages.profile.close'),
+                secondaryLabel: t('pages.profile.close')
             });
         } else {
             uiStore.showModal({
-                title: 'Ошибка',
+                title: t('pages.profile.error'),
                 message: res.message,
                 variant: 'error',
-                primaryLabel: 'Закрыть',
-                secondaryLabel: 'Закрыть'
+                primaryLabel: t('pages.profile.close'),
+                secondaryLabel: t('pages.profile.close')
             });
         }
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onLogout = () => {
         authStore.logout();
         navigate('/login');
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onCopyUsername = async () => {
         const normalizedUsername = String(user.username || '').trim().replace(/^@+/, '');
         const value = normalizedUsername;
         if (!value) return;
         try {
             await navigator.clipboard.writeText(value);
-            uiStore.showCopyToast('Скопировано в буфер обмена');
+            uiStore.showCopyToast(t('pages.profile.copy_toast'));
         } catch {
             // Игнорируем ошибки доступа к буферу обмена.
         }
@@ -136,32 +143,32 @@ const UserProfile = ({ user }) => {
         {
             key: 'streak',
             displayValue: String(user.streak || 0),
-            label: 'Дней в ударе',
-            description: 'Количество дней подряд, когда вы добавляли хотя бы одно новое слово. Если пропустить день, серия обнуляется.'
+            label: t('pages.profile.stats.streak'),
+            description: t('pages.profile.stats.streak_desc')
         },
         {
             key: 'wordsWeek',
             displayValue: String(wordsWeek),
-            label: 'Слов за неделю',
-            description: 'Сколько новых слов добавлено в словарь за последние 7 дней.'
+            label: t('pages.profile.stats.words_week'),
+            description: t('pages.profile.stats.words_week_desc')
         },
         {
             key: 'wordsTotal',
             displayValue: String(wordsTotal),
-            label: 'Слов за все время',
-            description: 'Общее количество уникальных слов, которые вы добавили в личный словарь.'
+            label: t('pages.profile.stats.words_total'),
+            description: t('pages.profile.stats.words_total_desc')
         },
         {
             key: 'achievementsCount',
             displayValue: String((Array.isArray(user.userAchievements) ? user.userAchievements.filter((item) => item?.unlockedAt).length : 0) || (Array.isArray(user.achievements) ? user.achievements.length : 0)),
-            label: 'Достижений',
-            description: 'Количество открытых достижений.'
+            label: t('pages.profile.stats.achievements'),
+            description: t('pages.profile.stats.achievements_desc')
         },
         {
             key: 'coins',
             displayValue: String(coins),
-            label: 'Монет',
-            description: 'Текущее количество монет, заработанных за учебную активность и достижения.'
+            label: t('pages.profile.stats.coins'),
+            description: t('pages.profile.stats.coins_desc')
         }
     ];
 
@@ -194,14 +201,14 @@ const UserProfile = ({ user }) => {
         const b = num & 255;
         const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
         return luminance > 0.58 ? '#111111' : '#ffffff';
-    }, [headerTopBg]);
+    }, [headerTopBg, profileAccentColor]);
 
     return (
         <>
             {!user.emailVerified && (
                 <div className={styles.verifyNotice}>
-                    <p>Почта не подтверждена. Подтвердите email, чтобы защитить аккаунт и быстро восстанавливать доступ.</p>
-                    <Link to="/verify-email" className={styles.verifyLink}>Подтвердить почту</Link>
+                    <p>{t('pages.profile.email_notice')}</p>
+                    <Link to="/verify-email" className={styles.verifyLink}>{t('pages.profile.verify_email')}</Link>
                 </div>
             )}
 
@@ -219,7 +226,7 @@ const UserProfile = ({ user }) => {
                                 {avatarSrc && !avatarLoadFailed ? (
                                     <img
                                         src={avatarSrc}
-                                        alt="Аватар"
+                                        alt={t('pages.profile.avatar_alt')}
                                         className={styles.avatarImage}
                                         onError={() => setAvatarLoadFailed(true)}
                                     />
@@ -232,12 +239,12 @@ const UserProfile = ({ user }) => {
                         <button type="button" className={styles.usernameBtn} onClick={onCopyUsername}>
                             @{user.username}
                         </button>
-                        <div className={styles.rank}>Уровень: {level}</div>
+                        <div className={styles.rank}>{t('pages.profile.level', { level })}</div>
                     </div>
 
                     <div className={styles.headerBottom}>
                         <div className={styles.levelProgressWrap}>
-                            <div className={styles.levelProgressLabel}>До нового уровня: {pointsToNextLevel} очков</div>
+                            <div className={styles.levelProgressLabel}>{t('pages.profile.next_level', { count: pointsToNextLevel })}</div>
                             <div className={styles.levelProgressBar}>
                                 <div className={styles.levelProgressFill} style={{ width: `${levelProgressPercent}%` }} />
                             </div>
@@ -257,10 +264,10 @@ const UserProfile = ({ user }) => {
                                         });
                                     }}
                                 >
-                                    {isEditing ? 'Отмена' : 'Редактировать профиль'}
+                                    {isEditing ? t('pages.profile.cancel') : t('pages.profile.edit')}
                                 </button>
                                 <button className={styles.logoutBtn} type="button" onClick={onLogout}>
-                                    Выйти
+                                    {t('pages.profile.logout')}
                                 </button>
                             </div>
                         </div>
@@ -270,26 +277,26 @@ const UserProfile = ({ user }) => {
                 {isEditing && (
                     <form className={styles.editForm} onSubmit={onSaveProfile}>
                         <label className={styles.colorPickerBlock}>
-                            <span className={styles.colorPickerText}>Сменить цвет блока профиля</span>
+                            <span className={styles.colorPickerText}>{t('pages.profile.change_color')}</span>
                             <input
                                 type="color"
                                 value={profileAccentColor || '#dff7e8'}
                                 onChange={(e) => setProfileAccentColor(e.target.value)}
                                 className={styles.colorPickerInput}
-                                aria-label="Цвет верхнего блока профиля"
+                                aria-label={t('pages.profile.color_aria')}
                             />
                         </label>
                         <div className={styles.editGrid}>
                             <input
                                 value={form.firstName}
                                 onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                                placeholder="Имя"
+                                placeholder={t('pages.profile.first_name')}
                                 required
                             />
                             <input
                                 value={form.lastName}
                                 onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                                placeholder="Фамилия"
+                                placeholder={t('pages.profile.last_name')}
                                 required
                             />
                         </div>
@@ -301,7 +308,7 @@ const UserProfile = ({ user }) => {
                                 required
                             />
                             <label className={styles.avatarUploadBtn}>
-                                Сменить аватар
+                                {t('pages.profile.change_avatar')}
                                 <input type="file" accept="image/*" hidden onChange={onAvatarChange} />
                             </label>
                         </div>
@@ -350,7 +357,7 @@ const UserProfile = ({ user }) => {
                             type="button"
                             className={styles.statModalClose}
                             onClick={() => setActiveStat(null)}
-                            aria-label="Закрыть"
+                            aria-label={t('pages.profile.modal_close_aria')}
                         >
                             ×
                         </button>

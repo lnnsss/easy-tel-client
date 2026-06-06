@@ -1,9 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './LevelHeader.module.css';
 
 const POINTS_PER_LEVEL = 10;
 
+// Отрисовывает экран или компонент LevelHeader и связывает его с данными приложения.
 const LevelHeader = ({ totalPoints = 0, coins = 0 }) => {
+    const { t } = useTranslation();
     const safePoints = Math.max(0, Number(totalPoints) || 0);
     const safeCoins = Math.max(0, Number(coins) || 0);
 
@@ -18,10 +21,10 @@ const LevelHeader = ({ totalPoints = 0, coins = 0 }) => {
         <div className={styles.wrap}>
             <div className={styles.inner}>
                 <div className={styles.topRow}>
-                    <div className={styles.level}>Уровень {level}</div>
-                    <div className={styles.coins}>Коины: <strong>{safeCoins}</strong></div>
+                    <div className={styles.level}>{t('pages.profile.level', { level })}</div>
+                    <div className={styles.coins}>{t('pages.character.coins', { count: safeCoins })}</div>
                 </div>
-                <div className={styles.meta}>До нового уровня: {remaining} очков</div>
+                <div className={styles.meta}>{t('pages.profile.next_level', { count: remaining })}</div>
                 <div className={styles.progressBar}>
                     <div className={styles.progressFill} style={{ width: `${progressPct}%` }} />
                 </div>

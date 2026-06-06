@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
+import { useTranslation } from 'react-i18next';
 import { useStores } from '../../stores/StoreContext';
 import $api from '../../api/instance';
 import {
@@ -20,6 +21,7 @@ const CATEGORY_FIELD_MAP = {
     background: 'backgroundFile'
 };
 
+// Приводит входные данные к единому безопасному формату.
 const normalizeConfig = (raw = {}, assets = CHARACTER_ASSETS, defaults = CHARACTER_DEFAULTS) => {
     const safe = { ...defaults, ...(raw || {}) };
 
@@ -43,6 +45,7 @@ const normalizeConfig = (raw = {}, assets = CHARACTER_ASSETS, defaults = CHARACT
     };
 };
 
+// Находит следующий элемент списка с зацикливанием по краям.
 const nextInList = (list, current, dir = 1) => {
     if (!Array.isArray(list) || list.length === 0) return current;
     const rawIdx = list.indexOf(current);
@@ -52,7 +55,9 @@ const nextInList = (list, current, dir = 1) => {
     return list[nextIdx];
 };
 
+// Отрисовывает экран или компонент CharacterPage и связывает его с данными приложения.
 const CharacterPage = observer(() => {
+    const { t } = useTranslation();
     const { authStore, uiStore } = useStores();
     const [actionCategory, setActionCategory] = useState('');
     const [runtimeAssets, setRuntimeAssets] = useState(CHARACTER_ASSETS);
@@ -89,7 +94,7 @@ const CharacterPage = observer(() => {
                 if (data?.freeItemsWhitelist) setRuntimeFreeItems(data.freeItemsWhitelist);
                 if (Number.isFinite(Number(data?.itemPriceCoins))) setRuntimePrice(Number(data.itemPriceCoins));
                 if (Array.isArray(data?.paidCategories)) setRuntimePaidCategories(data.paidCategories);
-            } catch (_e) {
+            } catch {
                 // Резервный вариант остается на статических значениях.
             }
         };
@@ -120,6 +125,7 @@ const CharacterPage = observer(() => {
         ? ''
         : `/customize/backgrounds/${config.backgroundFile}`;
 
+    // Обрабатывает событие интерфейса пользователя.
     const onCycle = (field, list, dir) => {
         setConfig((prev) => ({
             ...prev,
@@ -128,6 +134,7 @@ const CharacterPage = observer(() => {
         setLayerKeys((prev) => ({ ...prev, [field]: prev[field] + 1 }));
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onToggleGender = async () => {
         const nextGender = equippedConfig.gender === 'male' ? 'female' : 'male';
         const nextCharacter = runtimeAssets.genderDefaults[nextGender];
@@ -141,6 +148,7 @@ const CharacterPage = observer(() => {
         await authStore.updateCharacterCustomization(nextConfig);
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onPurchase = async (category, file) => {
         setActionCategory(category);
         const result = await authStore.purchaseCharacterItem(category, file);
@@ -148,11 +156,11 @@ const CharacterPage = observer(() => {
 
         if (!result.success) {
             uiStore.showModal({
-                title: 'Ошибка',
+                title: t('modals.error'),
                 message: result.message,
                 variant: 'error',
-                primaryLabel: 'Закрыть',
-                secondaryLabel: 'Закрыть'
+                primaryLabel: t('common.close'),
+                secondaryLabel: t('common.close')
             });
             return;
         }
@@ -170,14 +178,15 @@ const CharacterPage = observer(() => {
         }
 
         uiStore.showModal({
-            title: 'Покупка успешна',
-            message: `Вы купили «${getFileLabel(file)}» за ${runtimePrice} монет`,
+            title: t('pages.character.buy_success'),
+            message: t('pages.character.buy_success_message', { item: getFileLabel(file), price: runtimePrice }),
             variant: 'success',
-            primaryLabel: 'Закрыть',
-            secondaryLabel: 'Закрыть'
+            primaryLabel: t('common.close'),
+            secondaryLabel: t('common.close')
         });
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onWear = async (category) => {
         setActionCategory(category);
         const result = await authStore.updateCharacterCustomization(config);
@@ -186,21 +195,22 @@ const CharacterPage = observer(() => {
         if (result.success) return;
 
         uiStore.showModal({
-            title: 'Ошибка',
+            title: t('modals.error'),
             message: result.message,
             variant: 'error',
-            primaryLabel: 'Закрыть',
-            secondaryLabel: 'Закрыть'
+            primaryLabel: t('common.close'),
+            secondaryLabel: t('common.close')
         });
     };
 
+    // Формирует повторяемый фрагмент интерфейса.
     const renderPaidControl = (category, title, field, list) => {
         const file = config[field];
         const owned = isOwnedOrFree(category, file);
         const isEquipped = equippedConfig[field] === file;
         const busy = actionCategory === category;
 
-        const actionLabel = !owned ? `${runtimePrice} монет` : (isEquipped ? 'Надето' : 'Надеть');
+        const actionLabel = !owned ? t('pages.character.coins', { count: runtimePrice }) : (isEquipped ? t('pages.character.equipped') : t('pages.character.equip'));
         const actionDisabled = busy || (!owned && coins < runtimePrice) || (owned && isEquipped);
         const onAction = !owned
             ? () => onPurchase(category, file)
@@ -209,7 +219,7 @@ const CharacterPage = observer(() => {
         return (
             <div className={styles.group}>
                 <div className={styles.groupLabel}>
-                    {title}: {file ? getFileLabel(file) : (category === 'headdress' ? 'Без головного убора' : '')}
+                    {title}: {file ? getFileLabel(file) : (category === 'headdress' ? t('pages.character.no_headdress') : '')}
                 </div>
                 <div className={styles.controlsRow}>
                     <div className={styles.rowBtns}>
@@ -238,19 +248,19 @@ const CharacterPage = observer(() => {
                             <img
                                 key={`bg-${layerKeys.backgroundFile}-${config.backgroundFile}`}
                                 src={backgroundSrc}
-                                alt="Фон"
+                                alt={t('pages.character.background_alt')}
                                 className={`${styles.backgroundLayer} ${styles.layerFade}`}
                             />
                         )}
-                        <img key={`body-${layerKeys.characterFile}-${config.characterFile}`} src={bodySrc} alt="Тело" className={`${styles.layer} ${styles.layerFade}`} />
-                        <img key={`shoes-${layerKeys.shoesFile}-${config.shoesFile}`} src={shoesSrc} alt="Обувь" className={`${styles.layer} ${styles.layerFade}`} />
-                        <img key={`bottom-${layerKeys.bottomFile}-${config.bottomFile}`} src={bottomSrc} alt="Штаны" className={`${styles.layer} ${styles.layerFade}`} />
-                        <img key={`top-${layerKeys.topFile}-${config.topFile}`} src={topSrc} alt="Верхняя одежда" className={`${styles.layer} ${styles.layerFade}`} />
+                        <img key={`body-${layerKeys.characterFile}-${config.characterFile}`} src={bodySrc} alt={t('pages.character.body_alt')} className={`${styles.layer} ${styles.layerFade}`} />
+                        <img key={`shoes-${layerKeys.shoesFile}-${config.shoesFile}`} src={shoesSrc} alt={t('pages.character.shoes_alt')} className={`${styles.layer} ${styles.layerFade}`} />
+                        <img key={`bottom-${layerKeys.bottomFile}-${config.bottomFile}`} src={bottomSrc} alt={t('pages.character.bottom_alt')} className={`${styles.layer} ${styles.layerFade}`} />
+                        <img key={`top-${layerKeys.topFile}-${config.topFile}`} src={topSrc} alt={t('pages.character.top_alt')} className={`${styles.layer} ${styles.layerFade}`} />
                         {headdressSrc && (
                             <img
                                 key={`head-${layerKeys.headdressFile}-${config.headdressFile}`}
                                 src={headdressSrc}
-                                alt="Головной убор"
+                                alt={t('pages.character.headdress_alt')}
                                 className={`${styles.layer} ${styles.layerFade}`}
                             />
                         )}
@@ -258,18 +268,18 @@ const CharacterPage = observer(() => {
                 </div>
 
                 <div className={styles.controls}>
-                    <div className={styles.coinsLine}>Монеты: <strong>{coins}</strong></div>
+                    <div className={styles.coinsLine}>{t('pages.character.coins', { count: coins })}</div>
 
                     <button type="button" className={styles.genderBtn} onClick={onToggleGender}>
-                        Пол: {config.gender === 'male' ? 'Мужской' : 'Женский'}
+                        {t('pages.character.gender', { value: config.gender === 'male' ? t('pages.character.male') : t('pages.character.female') })}
                     </button>
 
-                    {runtimePaidCategories.includes('background') && renderPaidControl('background', 'Фон', 'backgroundFile', runtimeAssets.backgrounds)}
+                    {runtimePaidCategories.includes('background') && renderPaidControl('background', t('pages.character.background'), 'backgroundFile', runtimeAssets.backgrounds)}
 
-                    {runtimePaidCategories.includes('headdress') && renderPaidControl('headdress', 'Головной убор', 'headdressFile', runtimeAssets.headdress)}
-                    {runtimePaidCategories.includes('top') && renderPaidControl('top', 'Верхняя одежда', 'topFile', runtimeAssets.top)}
-                    {runtimePaidCategories.includes('bottom') && renderPaidControl('bottom', 'Штаны', 'bottomFile', runtimeAssets.bottom)}
-                    {runtimePaidCategories.includes('shoes') && renderPaidControl('shoes', 'Обувь', 'shoesFile', runtimeAssets.shoes)}
+                    {runtimePaidCategories.includes('headdress') && renderPaidControl('headdress', t('pages.character.headdress'), 'headdressFile', runtimeAssets.headdress)}
+                    {runtimePaidCategories.includes('top') && renderPaidControl('top', t('pages.character.top'), 'topFile', runtimeAssets.top)}
+                    {runtimePaidCategories.includes('bottom') && renderPaidControl('bottom', t('pages.character.bottom'), 'bottomFile', runtimeAssets.bottom)}
+                    {runtimePaidCategories.includes('shoes') && renderPaidControl('shoes', t('pages.character.shoes'), 'shoesFile', runtimeAssets.shoes)}
                 </div>
             </div>
         </div>

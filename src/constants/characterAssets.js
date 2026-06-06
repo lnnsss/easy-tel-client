@@ -36,6 +36,7 @@ export const CHARACTER_FILE_ALIASES = {
     'Базовый.png': 'Базовый.png'
 };
 
+// Возвращает нужные данные или вычисленное значение.
 export const getFileLabel = (fileName = '') => (
     String(fileName) === '__theme__'
         ? 'Базовый'

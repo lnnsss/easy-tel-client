@@ -6,19 +6,8 @@ import { useStores } from '../../stores/StoreContext';
 import styles from './ChatsPage.module.css';
 
 const TATAR_SYMBOLS = ['ә', 'ө', 'ү', 'җ', 'ң', 'һ'];
-const CONVERSATION_TOPICS = [
-    'О городах Татарстана и их особенностях',
-    'О национальной татарской кухне и любимых блюдах',
-    'О традициях и семейных праздниках',
-    'О путешествиях по Казани и республике',
-    'О любимых татарских песнях и исполнителях',
-    'О том, как изучение языка помогает в жизни',
-    'О школе, учебе и любимых предметах',
-    'О спорте, тренировках и командных играх',
-    'О фильмах, сериалах и книгах на татарском',
-    'О планах на выходные и интересных хобби'
-];
 
+// Возвращает нужные данные или вычисленное значение.
 const getAbsoluteMediaUrl = (url) => {
     const raw = String(url || '').trim();
     if (!raw) return '';
@@ -28,12 +17,15 @@ const getAbsoluteMediaUrl = (url) => {
     return `${serverBase}${raw}`;
 };
 
+// Отрисовывает плеер голосового сообщения и сообщает о прослушивании.
 const VoiceMessagePlayer = ({ src, messageId, isUnlistened = false, onListened = null, onEndedNext = null }) => {
+    const { t } = useTranslation();
     const audioRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isReady, setIsReady] = useState(false);
     const listenedRef = useRef(false);
 
+    // Переключает состояние выбранной сущности или настройки.
     const togglePlay = async () => {
         if (!audioRef.current || !isReady) return;
         if (isPlaying) {
@@ -73,7 +65,7 @@ const VoiceMessagePlayer = ({ src, messageId, isUnlistened = false, onListened =
                 type="button"
                 className={styles.voicePlayBtn}
                 onClick={togglePlay}
-                aria-label={isPlaying ? 'Пауза' : 'Воспроизвести'}
+                aria-label={isPlaying ? t('pages.chats.pause') : t('pages.chats.play')}
                 disabled={!isReady}
             >
                 {isPlaying ? (
@@ -94,13 +86,14 @@ const VoiceMessagePlayer = ({ src, messageId, isUnlistened = false, onListened =
                 <span />
                 <span />
             </div>
-            {isUnlistened && <span className={styles.voiceUnreadDot} aria-label="Не прослушано" />}
+            {isUnlistened && <span className={styles.voiceUnreadDot} aria-label={t('pages.chats.unlistened')} />}
         </div>
     );
 };
 
+// Отрисовывает экран или компонент ChatsPage и связывает его с данными приложения.
 const ChatsPage = observer(() => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { chatStore, authStore } = useStores();
     const [searchParams] = useSearchParams();
     const [message, setMessage] = useState('');
@@ -181,6 +174,7 @@ const ChatsPage = observer(() => {
         [chatStore.chats, activeConversationId]
     );
 
+    // Обрабатывает событие интерфейса пользователя.
     const onSend = async (e) => {
         e.preventDefault();
         if (!activeConversationId) return;
@@ -188,6 +182,7 @@ const ChatsPage = observer(() => {
         setMessage('');
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onToggleVoiceRecord = async () => {
         if (!activeConversationId || chatStore.isSending) return;
         if (recordingPreview) return;
@@ -269,9 +264,10 @@ const ChatsPage = observer(() => {
                 setRecordingSeconds(Math.max(0, Math.round((Date.now() - recordingStartedAtRef.current) / 1000)));
             }, 250);
         } catch (err) {
-            window.alert(err?.message || 'Не удалось получить доступ к микрофону');
+            window.alert(err?.message || t('pages.chats.mic_error'));
         }
     };
+    // Удаляет связь или сущность по запросу пользователя.
     const removeRecordingPreview = () => {
         if (!recordingPreview) return;
         URL.revokeObjectURL(recordingPreview.url);
@@ -283,7 +279,7 @@ const ChatsPage = observer(() => {
             await chatStore.sendVoiceMessage(activeConversationId, recordingPreview.blob, recordingPreview.durationSec);
             removeRecordingPreview();
         } catch (err) {
-            const msg = err?.response?.data?.message || err?.message || 'Не удалось отправить голосовое сообщение';
+            const msg = err?.response?.data?.message || err?.message || t('pages.chats.voice_send_error');
             window.alert(msg);
         }
     };
@@ -311,15 +307,18 @@ const ChatsPage = observer(() => {
     };
 
     const pickRandomTopic = () => {
-        if (!CONVERSATION_TOPICS.length) return '';
-        if (CONVERSATION_TOPICS.length === 1) return CONVERSATION_TOPICS[0];
-        let next = CONVERSATION_TOPICS[Math.floor(Math.random() * CONVERSATION_TOPICS.length)];
+        const conversationTopics = t('pages.chats.topics', { returnObjects: true });
+        const safeTopics = Array.isArray(conversationTopics) ? conversationTopics : [];
+        if (!safeTopics.length) return '';
+        if (safeTopics.length === 1) return safeTopics[0];
+        let next = safeTopics[Math.floor(Math.random() * safeTopics.length)];
         while (next === topic) {
-            next = CONVERSATION_TOPICS[Math.floor(Math.random() * CONVERSATION_TOPICS.length)];
+            next = safeTopics[Math.floor(Math.random() * safeTopics.length)];
         }
         return next;
     };
 
+    // Открывает локальное состояние интерфейса или модального окна.
     const openTopicModal = () => {
         setTopic(pickRandomTopic());
         setIsTopicModalOpen(true);
@@ -329,7 +328,7 @@ const ChatsPage = observer(() => {
     const formatDateLabel = (value) => {
         const date = new Date(value);
         if (Number.isNaN(date.getTime())) return '';
-        return date.toLocaleDateString('ru-RU', {
+        return date.toLocaleDateString(i18n.language?.startsWith('tt') ? 'tt-RU' : 'ru-RU', {
             day: '2-digit',
             month: 'long'
         });
@@ -337,7 +336,7 @@ const ChatsPage = observer(() => {
     const formatMessageDate = (value) => {
         const date = new Date(value);
         if (Number.isNaN(date.getTime())) return '';
-        return date.toLocaleTimeString('ru-RU', {
+        return date.toLocaleTimeString(i18n.language?.startsWith('tt') ? 'tt-RU' : 'ru-RU', {
             hour: '2-digit',
             minute: '2-digit'
         });
@@ -366,15 +365,17 @@ const ChatsPage = observer(() => {
         const el = document.querySelector(`audio[data-message-id="${String(next._id)}"]`);
         if (el) el.play().catch(() => {});
     };
+    // Обрабатывает событие интерфейса пользователя.
     const onDeleteConversation = async () => {
         if (!activeConversationId) return;
-        const ok = window.confirm('Удалить чат? Это удалит всю переписку для обоих пользователей.');
+        const ok = window.confirm(t('pages.chats.delete_chat_confirm'));
         if (!ok) return;
         await chatStore.deleteConversation(activeConversationId);
     };
+    // Обрабатывает событие интерфейса пользователя.
     const onDeleteMessage = async () => {
         if (!messageMenu?.messageId || !activeConversationId) return;
-        const ok = window.confirm('Удалить это сообщение?');
+        const ok = window.confirm(t('pages.chats.delete_message_confirm'));
         if (!ok) return;
         await chatStore.deleteMessage(activeConversationId, messageMenu.messageId);
         setMessageMenu(null);
@@ -388,7 +389,7 @@ const ChatsPage = observer(() => {
             <div className={styles.container}>
                 <aside className={styles.sidebar}>
                     <div className={styles.sidebarHead}>
-                        <h2>Чаты</h2>
+                        <h2>{t('pages.chats.title')}</h2>
                         <span>{chatStore.unreadTotal}</span>
                     </div>
                     <div className={styles.chatList}>
@@ -402,12 +403,12 @@ const ChatsPage = observer(() => {
                                 <div className={styles.chatTitle}>
                                     {chat.otherUser?.firstName} {chat.otherUser?.lastName}
                                 </div>
-                                <div className={styles.chatPreview}>{chat.lastMessageText || 'Нет сообщений'}</div>
+                                <div className={styles.chatPreview}>{chat.lastMessageText || t('pages.chats.empty_preview')}</div>
                                 {chat.unreadCount > 0 && <span className={styles.unread}>{chat.unreadCount}</span>}
                             </button>
                         ))}
                         {!chatStore.isLoadingChats && !(chatStore.chats || []).length && (
-                            <p className={styles.empty}>Пока нет диалогов</p>
+                            <p className={styles.empty}>{t('pages.chats.empty_dialogs')}</p>
                         )}
                     </div>
                     {chatStore.chatsPagination.totalPages > 1 && (
@@ -448,7 +449,7 @@ const ChatsPage = observer(() => {
                                             e.stopPropagation();
                                             setIsChatMenuOpen((v) => !v);
                                         }}
-                                        aria-label="Меню чата"
+                                        aria-label={t('pages.chats.chat_menu')}
                                     >
                                         ⋯
                                     </button>
@@ -525,7 +526,7 @@ const ChatsPage = observer(() => {
                                         ))}
                                     </div>
                                     <button type="button" className={styles.topicBtn} onClick={openTopicModal}>
-                                        Тема для разговора
+                                        {t('pages.chats.topic_button')}
                                     </button>
                                 </div>
                                 {!recordingPreview && (
@@ -534,7 +535,7 @@ const ChatsPage = observer(() => {
                                             ref={inputRef}
                                             value={message}
                                             onChange={(e) => setMessage(e.target.value)}
-                                            placeholder="Введите сообщение..."
+                                            placeholder={t('pages.chats.message_placeholder')}
                                             maxLength={2000}
                                             disabled={isRecording}
                                         />
@@ -543,8 +544,8 @@ const ChatsPage = observer(() => {
                                             type="button"
                                             className={`${styles.voiceBtn} ${isRecording ? styles.voiceBtnRecording : ''}`}
                                             onClick={onToggleVoiceRecord}
-                                            aria-label={isRecording ? 'Остановить запись' : 'Записать голосовое сообщение'}
-                                            title={isRecording ? 'Остановить запись' : 'Записать голосовое'}
+                                            aria-label={isRecording ? t('pages.chats.stop_recording') : t('pages.chats.record_voice')}
+                                            title={isRecording ? t('pages.chats.stop_recording') : t('pages.chats.record_voice_title')}
                                         >
                                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                                 {isRecording ? (
@@ -553,6 +554,7 @@ const ChatsPage = observer(() => {
                                                     <path d="M12 2.75a3.75 3.75 0 0 1 3.75 3.75v4.6a3.75 3.75 0 1 1-7.5 0V6.5A3.75 3.75 0 0 1 12 2.75Zm-5.25 8.35a.95.95 0 1 1 1.9 0 3.35 3.35 0 1 0 6.7 0 .95.95 0 0 1 1.9 0 5.26 5.26 0 0 1-4.3 5.18V18h2.1a.95.95 0 1 1 0 1.9h-6.1a.95.95 0 1 1 0-1.9H11v-1.72a5.26 5.26 0 0 1-4.25-5.18Z" />
                                                 )}
                                             </svg>
+                                            <span className={styles.voiceBtnText}>{t('pages.chats.voice_message')}</span>
                                         </button>
                                     </div>
                                 )}
@@ -581,21 +583,21 @@ const ChatsPage = observer(() => {
                             </form>
                         </>
                     ) : (
-                        <div className={styles.placeholder}>Выберите чат слева</div>
+                        <div className={styles.placeholder}>{t('pages.chats.select_chat')}</div>
                     )}
                 </section>
             </div>
             {isTopicModalOpen && (
                 <div className={styles.topicModalOverlay} onClick={() => setIsTopicModalOpen(false)}>
                     <div className={styles.topicModal} onClick={(e) => e.stopPropagation()}>
-                        <h4>Случайная тема</h4>
+                        <h4>{t('pages.chats.random_topic')}</h4>
                         <p>{topic}</p>
                         <div className={styles.topicModalActions}>
                             <button type="button" className={styles.topicSecondary} onClick={() => setTopic(pickRandomTopic())}>
-                                Другая тема
+                                {t('pages.chats.another_topic')}
                             </button>
                             <button type="button" className={styles.topicPrimary} onClick={() => setIsTopicModalOpen(false)}>
-                                Отлично
+                                {t('pages.chats.ok')}
                             </button>
                         </div>
                     </div>

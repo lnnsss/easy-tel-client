@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useStores } from '../../stores/StoreContext';
 import styles from './Auth.module.css';
 
+// Отрисовывает экран или компонент VerifyEmailPage и связывает его с данными приложения.
 const VerifyEmailPage = observer(() => {
     const { t } = useTranslation();
     const { authStore } = useStores();
@@ -14,6 +15,7 @@ const VerifyEmailPage = observer(() => {
     const [success, setSuccess] = useState('');
     const [info, setInfo] = useState('');
 
+    // Обрабатывает событие интерфейса пользователя.
     const onSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -29,6 +31,7 @@ const VerifyEmailPage = observer(() => {
         }
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onResend = async () => {
         setError('');
         setSuccess('');

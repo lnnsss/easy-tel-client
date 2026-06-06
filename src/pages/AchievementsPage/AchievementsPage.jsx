@@ -3,12 +3,14 @@ import { useTranslation } from 'react-i18next';
 import $api from '../../api/instance';
 import styles from './AchievementsPage.module.css';
 
+// Сортирует достижения в выбранном режиме отображения.
 const sortItems = (items, mode) => {
     const list = [...items];
     if (mode === 'incomplete') return list.sort((a, b) => Number(a.isUnlocked) - Number(b.isUnlocked));
     return list.sort((a, b) => Number(b.isUnlocked) - Number(a.isUnlocked));
 };
 
+// Отрисовывает экран или компонент AchievementsPage и связывает его с данными приложения.
 const AchievementsPage = () => {
     const { t } = useTranslation();
     const [items, setItems] = useState([]);
@@ -31,7 +33,7 @@ const AchievementsPage = () => {
 
     const sorted = useMemo(() => sortItems(items, sortMode), [items, sortMode]);
 
-    if (loading) return <div className={styles.loader}>Загрузка достижений...</div>;
+    if (loading) return <div className={styles.loader}>{t('pages.achievements.loading')}</div>;
 
     return (
         <div className={`${styles.container} app-page-shell`}>
@@ -43,14 +45,14 @@ const AchievementsPage = () => {
                     className={`${styles.switchBtn} ${sortMode === 'completed' ? styles.switchBtnActive : ''}`}
                     onClick={() => setSortMode('completed')}
                 >
-                    Завершенные
+                    {t('pages.achievements.completed')}
                 </button>
                 <button
                     type="button"
                     className={`${styles.switchBtn} ${sortMode === 'incomplete' ? styles.switchBtnActive : ''}`}
                     onClick={() => setSortMode('incomplete')}
                 >
-                    Незавершенные
+                    {t('pages.achievements.incomplete')}
                 </button>
                 </div>
             </div>
@@ -74,7 +76,7 @@ const AchievementsPage = () => {
                                     </div>
                                 )}
                             </div>
-                            <div className={styles.rewards}>+{item.rewards?.coins || 0} монет · +{item.rewards?.points || 0} очков</div>
+                            <div className={styles.rewards}>{t('pages.achievements.rewards', { coins: item.rewards?.coins || 0, points: item.rewards?.points || 0 })}</div>
                         </div>
                     );
                 })}

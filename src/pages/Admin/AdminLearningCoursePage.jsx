@@ -6,9 +6,10 @@ import { useStores } from '../../stores/StoreContext';
 import { getTopicBlockValidationErrors, hasTopicBlockValidationErrors } from '../../utils/topicContent';
 import styles from './AdminLearningCoursePage.module.css';
 
-const statusLabel = (value) => (value === 'published' ? 'Опубликован' : 'Черновик');
+// Приводит входные данные к единому безопасному формату.
 const normalizedIds = (value) => [...new Set((value || []).map((id) => String(id)))].sort();
 
+// Переставляет элемент списка при ручной сортировке или drag-and-drop.
 const moveItem = (items, fromIndex, toIndex) => {
     if (fromIndex === toIndex) return items;
     const next = [...items];
@@ -17,6 +18,7 @@ const moveItem = (items, fromIndex, toIndex) => {
     return next;
 };
 
+// Отрисовывает экран или компонент AdminLearningCoursePage и связывает его с данными приложения.
 const AdminLearningCoursePage = () => {
     const { t } = useTranslation();
     const { uiStore } = useStores();
@@ -32,7 +34,11 @@ const AdminLearningCoursePage = () => {
     const [savedCourseCategoryIds, setSavedCourseCategoryIds] = useState([]);
     const [isSavingCategories, setIsSavingCategories] = useState(false);
     const [categoriesSaved, setCategoriesSaved] = useState(false);
+    const statusLabel = (value) => (
+        value === 'published' ? t('pages.admin.learning.published') : t('pages.admin.learning.draft')
+    );
 
+    // Загружает данные, необходимые для текущего экрана или сценария.
     const loadData = async () => {
         try {
             const [coursesRes, topicsRes, categoriesRes] = await Promise.all([
@@ -50,7 +56,7 @@ const AdminLearningCoursePage = () => {
             setCourseCategoryIds(loadedCategoryIds);
             setSavedCourseCategoryIds(loadedCategoryIds);
         } catch (e) {
-            setError(e.response?.data?.message || 'Ошибка загрузки курса');
+            setError(e.response?.data?.message || t('pages.course.load_error'));
         }
     };
 
@@ -70,13 +76,14 @@ const AdminLearningCoursePage = () => {
         await Promise.all(updates.map((item) => CourseService.updateAdminTopic(item.id, { order: item.order })));
     };
 
+    // Удаляет связь или сущность по запросу пользователя.
     const removeTopic = async (topicId) => {
         uiStore.showModal({
-            title: 'Удалить тему?',
-            message: 'Тема и связанный тест будут удалены.',
+            title: t('pages.admin.learning.delete_topic_title'),
+            message: t('pages.admin.learning.delete_topic_message'),
             variant: 'error',
-            primaryLabel: 'Удалить',
-            secondaryLabel: 'Отмена',
+            primaryLabel: t('common.actions.delete'),
+            secondaryLabel: t('modals.cancel'),
             onPrimary: async () => {
                 try {
                     await CourseService.deleteAdminTopic(topicId);
@@ -84,32 +91,38 @@ const AdminLearningCoursePage = () => {
                     await loadData();
                 } catch (err) {
                     uiStore.showModal({
-                        title: 'Ошибка',
-                        message: err.response?.data?.message || 'Ошибка удаления темы',
+                        title: t('modals.error'),
+                        message: err.response?.data?.message || t('pages.admin.learning.delete_topic_error'),
                         variant: 'error',
-                        secondaryLabel: 'Закрыть'
+                        secondaryLabel: t('common.close')
                     });
                 }
             }
         });
     };
 
+    // Переключает состояние выбранной сущности или настройки.
     const toggleTopicStatus = async (topic) => {
         const nextStatus = topic.status === 'published' ? 'draft' : 'published';
         if (nextStatus === 'published' && hasTopicBlockValidationErrors(topic)) {
             const errors = getTopicBlockValidationErrors(topic.contentBlocks || []);
-            setError('Чтобы опубликовать тему, заполните обязательные поля в блоках');
+            setError(t('pages.admin.learning.publish_topic_required'));
             if (errors.some(Boolean)) {
                 navigate(`/admin/learning/courses/${courseId}/topics/${topic._id}/edit`);
             }
             return;
         }
         uiStore.showModal({
-            title: 'Изменить статус темы?',
-            message: `Тема "${topic.title}" будет ${nextStatus === 'published' ? 'опубликована' : 'переведена в черновик'}.`,
+            title: t('pages.admin.learning.change_topic_status_title'),
+            message: t('pages.admin.learning.change_topic_status_message', {
+                title: topic.title,
+                status: nextStatus === 'published'
+                    ? t('pages.admin.learning.topic_will_publish')
+                    : t('pages.admin.learning.topic_will_draft')
+            }),
             variant: 'info',
-            primaryLabel: 'Подтвердить',
-            secondaryLabel: 'Отмена',
+            primaryLabel: t('modals.yes'),
+            secondaryLabel: t('modals.cancel'),
             onPrimary: async () => {
                 try {
                     await CourseService.updateAdminTopic(topic._id, { status: nextStatus });
@@ -117,10 +130,10 @@ const AdminLearningCoursePage = () => {
                     await loadData();
                 } catch (err) {
                     uiStore.showModal({
-                        title: 'Ошибка',
-                        message: err.response?.data?.message || 'Ошибка обновления темы',
+                        title: t('modals.error'),
+                        message: err.response?.data?.message || t('pages.admin.learning.update_topic_error'),
                         variant: 'error',
-                        secondaryLabel: 'Закрыть'
+                        secondaryLabel: t('common.close')
                     });
                 }
             },
@@ -128,6 +141,7 @@ const AdminLearningCoursePage = () => {
         });
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onDropTopic = async (dropIndex) => {
         if (topicDragIndex < 0 || dropIndex < 0 || topicDragIndex >= topics.length || dropIndex >= topics.length) {
             setTopicDragIndex(-1);
@@ -143,15 +157,16 @@ const AdminLearningCoursePage = () => {
             await persistTopicOrder(reordered);
             await loadData();
         } catch (err) {
-            setError(err.response?.data?.message || 'Ошибка сохранения порядка тем');
+            setError(err.response?.data?.message || t('pages.admin.learning.save_topics_order_error'));
             await loadData();
         }
     };
 
+    // Сохраняет изменения пользователя.
     const saveCourseCategory = async () => {
         if (!hasCategoryChanges || isSavingCategories) return;
         if (!Array.isArray(courseCategoryIds) || courseCategoryIds.length === 0) {
-            setError('Выберите хотя бы одну категорию');
+            setError(t('pages.admin.learning.select_category_error'));
             return;
         }
         try {
@@ -160,24 +175,25 @@ const AdminLearningCoursePage = () => {
             setSavedCourseCategoryIds(courseCategoryIds);
             setCategoriesSaved(true);
             uiStore.showModal({
-                title: 'Готово',
-                message: 'Категории курса обновлены.',
+                title: t('modals.done'),
+                message: t('pages.admin.learning.categories_updated'),
                 variant: 'success',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('common.close')
             });
             await loadData();
         } catch (err) {
             uiStore.showModal({
-                title: 'Ошибка',
-                message: err.response?.data?.message || 'Не удалось сменить категорию курса',
+                title: t('modals.error'),
+                message: err.response?.data?.message || t('pages.admin.learning.change_categories_error'),
                 variant: 'error',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('common.close')
             });
         } finally {
             setIsSavingCategories(false);
         }
     };
 
+    // Переключает состояние выбранной сущности или настройки.
     const toggleCourseCategory = (categoryId, checked) => {
         setCategoriesSaved(false);
         setCourseCategoryIds((prev) => {
@@ -194,14 +210,14 @@ const AdminLearningCoursePage = () => {
     }, [courseCategoryIds, savedCourseCategoryIds]);
 
     const categorySaveLabel = hasCategoryChanges
-        ? (isSavingCategories ? 'Сохраняем...' : 'Сохранить категории')
-        : (categoriesSaved ? 'Сохранено' : 'Изменений нет');
+        ? (isSavingCategories ? t('pages.admin.learning.saving') : t('pages.admin.learning.save_categories'))
+        : (categoriesSaved ? t('pages.admin.learning.saved') : t('pages.admin.learning.no_changes_saved'));
 
     return (
         <div className={`${styles.page} app-page-shell`}>
             <div className="app-page-top">
                 <div>
-                    <Link to="/admin/learning" className={styles.back}>← К курсам</Link>
+                    <Link to="/admin/learning" className={styles.back}>← {t('pages.admin.learning.courses')}</Link>
                     <h1 className="app-page-title">{course?.title || t('pages.course.fallback_title')}</h1>
                     {course?.description && <p className="app-page-subtitle">{course.description}</p>}
                 </div>
@@ -209,10 +225,10 @@ const AdminLearningCoursePage = () => {
             {error && <p className={styles.error}>{error}</p>}
 
             <section className={styles.card}>
-                <h3>Категория</h3>
+                <h3>{t('pages.admin.learning.category')}</h3>
                 <div className={styles.courseCategoryRow}>
                     <div className={styles.fieldGroup}>
-                        <div className={styles.categoryChecks} role="group" aria-label="Категории курса">
+                        <div className={styles.categoryChecks} role="group" aria-label={t('pages.admin.learning.course_categories')}>
                             {categories.map((category) => (
                                 <label
                                     key={category._id}
@@ -235,7 +251,7 @@ const AdminLearningCoursePage = () => {
             </section>
 
             <section className={styles.card}>
-                <h3>Темы курса</h3>
+                <h3>{t('pages.admin.learning.topics')}</h3>
                 <div className={styles.topicsList}>
                     {topics.map((topic, index) => (
                         <div

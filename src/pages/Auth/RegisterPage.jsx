@@ -12,6 +12,7 @@ const USERNAME_HAS_LETTER_REGEX = /[A-Za-z]/;
 const PASSWORD_ALLOWED_REGEX = /^[A-Za-z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]+$/;
 const PASSWORD_COMPLEXITY_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/;
 
+// Отрисовывает экран или компонент RegisterPage и связывает его с данными приложения.
 const RegisterPage = observer(() => {
     const { t } = useTranslation();
     const { authStore } = useStores();
@@ -29,6 +30,7 @@ const RegisterPage = observer(() => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    // Обрабатывает событие интерфейса пользователя.
     const onSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -92,7 +94,8 @@ const RegisterPage = observer(() => {
         };
         const referralCode = String(searchParams.get('ref') || '').trim();
         if (referralCode) preparedForm.referralCode = referralCode;
-        const { confirmPassword, ...registerData } = preparedForm;
+        const registerData = { ...preparedForm };
+        delete registerData.confirmPassword;
         const res = await authStore.register(registerData);
         if (res.success) navigate('/profile');
         else setError(res.message);

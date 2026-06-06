@@ -8,6 +8,7 @@ import styles from './PublicProfilePage.module.css';
 import CharacterPreviewCard from '../../components/CharacterPreviewCard/CharacterPreviewCard';
 import { getAvatarFallbackStyle } from '../../utils/avatarAccentColor';
 
+// Отрисовывает экран или компонент PublicProfilePage и связывает его с данными приложения.
 const PublicProfilePage = () => {
     const { t } = useTranslation();
     const { chatStore, uiStore, authStore } = useStores();
@@ -36,7 +37,7 @@ const PublicProfilePage = () => {
                 if (e?.response?.status === 404) {
                     setNotFound(true);
                 } else {
-                    setError(e?.response?.data?.message || 'Не удалось загрузить профиль');
+                    setError(e?.response?.data?.message || t('pages.public_profile.load_error'));
                 }
             } finally {
                 setLoading(false);
@@ -63,13 +64,14 @@ const PublicProfilePage = () => {
         getAvatarFallbackStyle(profile?.avatarAccentColor, `${profile?.username || ''}${initials}`)
     ), [profile?.avatarAccentColor, profile?.username, initials]);
 
+    // Обрабатывает событие интерфейса пользователя.
     const onCopyUsername = async () => {
         const normalizedUsername = String(profile?.username || '').trim().replace(/^@+/, '');
         const value = normalizedUsername;
         if (!value) return;
         try {
             await navigator.clipboard.writeText(value);
-            uiStore.showCopyToast('Скопировано в буфер обмена');
+            uiStore.showCopyToast(t('pages.profile.copy_toast'));
         } catch {
             // Игнорируем ошибки доступа к буферу обмена.
         }
@@ -80,6 +82,7 @@ const PublicProfilePage = () => {
         setProfile(data?.profile || null);
     };
 
+    // Выполняет подтвержденное действие после проверки состояния.
     const performFriendAction = async () => {
         if (!profile || isFriendActionLoading) return;
         if (isAdminViewer) return;
@@ -99,10 +102,10 @@ const PublicProfilePage = () => {
             await reloadProfile();
         } catch (e) {
             uiStore.showModal({
-                title: 'Ошибка',
-                message: e?.response?.data?.message || 'Не удалось выполнить действие',
+                title: t('modals.error'),
+                message: e?.response?.data?.message || t('modals.action_failed'),
                 variant: 'error',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('common.close')
             });
         } finally {
             setIsFriendActionLoading(false);
@@ -114,8 +117,8 @@ const PublicProfilePage = () => {
             title,
             message,
             variant: 'info',
-            primaryLabel: 'Да',
-            secondaryLabel: 'Нет',
+            primaryLabel: t('modals.yes'),
+            secondaryLabel: t('modals.no'),
             onPrimary: async () => {
                 uiStore.closeModal();
                 await onConfirm();
@@ -124,59 +127,61 @@ const PublicProfilePage = () => {
         });
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onFriendAction = async () => {
         if (!profile || isFriendActionLoading) return;
         if (isAdminViewer) {
             uiStore.showModal({
-                title: 'Недоступно',
-                message: 'Администратор не может добавлять в друзья.',
+                title: t('pages.public_profile.unavailable'),
+                message: t('pages.public_profile.admin_friend_block'),
                 variant: 'info',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('common.close')
             });
             return;
         }
 
         if (profile.relationStatus === 'none') {
-            showConfirmModal('Отправить заявку?', 'Отправить запрос в друзья этому пользователю?', performFriendAction);
+            showConfirmModal(t('pages.friends.modals.send_request_title'), t('pages.public_profile.send_request_message'), performFriendAction);
             return;
         }
 
         if (profile.relationStatus === 'pending_incoming') {
-            showConfirmModal('Принять заявку?', 'Подтвердить дружбу с этим пользователем?', performFriendAction);
+            showConfirmModal(t('pages.friends.modals.accept_request_title'), t('pages.friends.modals.accept_request_message'), performFriendAction);
             return;
         }
 
         if (profile.relationStatus === 'pending_outgoing') {
-            showConfirmModal('Отменить заявку?', 'Отменить отправленную заявку в друзья?', performFriendAction);
+            showConfirmModal(t('pages.friends.modals.cancel_request_title'), t('pages.public_profile.cancel_request_message'), performFriendAction);
             return;
         }
 
         if (profile.relationStatus === 'friend') {
-            showConfirmModal('Удалить из друзей?', 'Пользователь будет удален из списка друзей.', performFriendAction);
+            showConfirmModal(t('pages.friends.modals.remove_friend_title'), t('pages.friends.modals.remove_friend_message'), performFriendAction);
             return;
         }
 
         await performFriendAction();
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onStartChat = async () => {
         if (!profile?._id || isChatActionLoading) return;
         if (isAdminViewer) {
             uiStore.showModal({
-                title: 'Недоступно',
-                message: 'Администратор не может открывать личные чаты.',
+                title: t('pages.public_profile.unavailable'),
+                message: t('pages.public_profile.admin_chat_block'),
                 variant: 'info',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('common.close')
             });
             return;
         }
 
         if (profile.relationStatus !== 'friend') {
             uiStore.showModal({
-                title: 'Чат недоступен',
-                message: 'Чат можно открыть только после добавления в друзья.',
+                title: t('pages.public_profile.chat_unavailable'),
+                message: t('pages.public_profile.chat_friend_only'),
                 variant: 'info',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('common.close')
             });
             return;
         }
@@ -197,25 +202,25 @@ const PublicProfilePage = () => {
             navigate(`/chats?conversationId=${encodeURIComponent(String(conversation._id))}`);
         } catch (e) {
             uiStore.showModal({
-                title: 'Ошибка',
-                message: e?.response?.data?.message || 'Не удалось открыть чат',
+                title: t('modals.error'),
+                message: e?.response?.data?.message || t('pages.public_profile.open_chat_failed'),
                 variant: 'error',
-                secondaryLabel: 'Закрыть'
+                secondaryLabel: t('common.close')
             });
         } finally {
             setIsChatActionLoading(false);
         }
     };
 
-    if (loading) return <div className={profileStyles.loader}>Загрузка...</div>;
+    if (loading) return <div className={profileStyles.loader}>{t('pages.profile.loading')}</div>;
 
     if (notFound) {
         return (
             <div className={styles.stateWrap}>
-                <h1>Пользователь не найден</h1>
-                <p>Возможно, профиль был удален или username изменился.</p>
+                <h1>{t('pages.public_profile.not_found_title')}</h1>
+                <p>{t('pages.public_profile.not_found_text')}</p>
                 <div className={styles.stateActions}>
-                    <Link to="/" className={styles.primaryBtn}>На главную</Link>
+                    <Link to="/" className={styles.primaryBtn}>{t('pages.public_profile.home')}</Link>
                     <button type="button" className={styles.secondaryBtn} onClick={() => navigate(-1)}>{t('common.actions.back')}</button>
                 </div>
             </div>
@@ -225,10 +230,10 @@ const PublicProfilePage = () => {
     if (error) {
         return (
             <div className={styles.stateWrap}>
-                <h1>Ошибка</h1>
+                <h1>{t('modals.error')}</h1>
                 <p>{error}</p>
                 <div className={styles.stateActions}>
-                    <Link to="/" className={styles.primaryBtn}>На главную</Link>
+                    <Link to="/" className={styles.primaryBtn}>{t('pages.public_profile.home')}</Link>
                     <button type="button" className={styles.secondaryBtn} onClick={() => navigate(-1)}>{t('common.actions.back')}</button>
                 </div>
             </div>
@@ -238,10 +243,10 @@ const PublicProfilePage = () => {
     if (!profile) {
         return (
             <div className={styles.stateWrap}>
-                <h1>Пользователь не найден</h1>
-                <p>Возможно, профиль был удален или username изменился.</p>
+                <h1>{t('pages.public_profile.not_found_title')}</h1>
+                <p>{t('pages.public_profile.not_found_text')}</p>
                 <div className={styles.stateActions}>
-                    <Link to="/" className={styles.primaryBtn}>На главную</Link>
+                    <Link to="/" className={styles.primaryBtn}>{t('pages.public_profile.home')}</Link>
                     <button type="button" className={styles.secondaryBtn} onClick={() => navigate(-1)}>{t('common.actions.back')}</button>
                 </div>
             </div>
@@ -252,32 +257,32 @@ const PublicProfilePage = () => {
         {
             key: 'streak',
             displayValue: String(profile.streak || 0),
-            label: 'Дней в ударе',
-            description: 'Количество дней подряд, когда пользователь добавлял хотя бы одно новое слово. Если пропустить день, серия обнуляется.'
+            label: t('pages.profile.stats.streak'),
+            description: t('pages.profile.stats.streak_desc')
         },
         {
             key: 'wordsWeek',
             displayValue: String(profile.wordsWeek || 0),
-            label: 'Слов за неделю',
-            description: 'Сколько новых слов добавлено в словарь за последние 7 дней.'
+            label: t('pages.profile.stats.words_week'),
+            description: t('pages.profile.stats.words_week_desc')
         },
         {
             key: 'wordsTotal',
             displayValue: String(profile.wordsTotal || 0),
-            label: 'Слов за все время',
-            description: 'Общее количество уникальных слов, добавленных в словарь.'
+            label: t('pages.profile.stats.words_total'),
+            description: t('pages.profile.stats.words_total_desc')
         },
         {
             key: 'achievementsCount',
             displayValue: String(Array.isArray(profile.achievements) ? profile.achievements.length : 0),
-            label: 'Достижений',
-            description: 'Количество открытых достижений.'
+            label: t('pages.profile.stats.achievements'),
+            description: t('pages.profile.stats.achievements_desc')
         },
         {
             key: 'coins',
             displayValue: String(Number.isFinite(profile.coins) ? profile.coins : 0),
-            label: 'Монет',
-            description: 'Текущее количество монет, заработанных за учебную активность и достижения.'
+            label: t('pages.profile.stats.coins'),
+            description: t('pages.profile.stats.coins_desc')
         }
     ];
 
@@ -331,7 +336,7 @@ const PublicProfilePage = () => {
                                 {avatarSrc && !avatarLoadFailed ? (
                                     <img
                                         src={avatarSrc}
-                                        alt="Аватар"
+                                        alt={t('pages.profile.avatar_alt')}
                                         className={profileStyles.avatarImage}
                                         onError={() => setAvatarLoadFailed(true)}
                                     />
@@ -345,7 +350,7 @@ const PublicProfilePage = () => {
                         <button type="button" className={profileStyles.usernameBtn} onClick={onCopyUsername}>
                             @{profile.username}
                         </button>
-                        <div className={profileStyles.rank}>Уровень: {level}</div>
+                        <div className={profileStyles.rank}>{t('pages.profile.level', { level })}</div>
                     </div>
 
                     <div className={profileStyles.headerBottom}>
@@ -357,7 +362,7 @@ const PublicProfilePage = () => {
                                     onClick={onStartChat}
                                     disabled={isChatActionLoading}
                                 >
-                                    {isChatActionLoading ? '...' : 'Чат'}
+                                    {isChatActionLoading ? '...' : t('pages.friends.chat')}
                                 </button>
                                 <button
                                     type="button"
@@ -366,10 +371,10 @@ const PublicProfilePage = () => {
                                     disabled={isFriendActionLoading}
                                 >
                                     {isFriendActionLoading && '...'}
-                                    {!isFriendActionLoading && profile.relationStatus === 'none' && 'Добавить в друзья'}
-                                    {!isFriendActionLoading && profile.relationStatus === 'pending_outgoing' && 'Отменить заявку'}
-                                    {!isFriendActionLoading && profile.relationStatus === 'pending_incoming' && 'Принять заявку'}
-                                    {!isFriendActionLoading && profile.relationStatus === 'friend' && 'Удалить из друзей'}
+                                    {!isFriendActionLoading && profile.relationStatus === 'none' && t('pages.public_profile.add_friend')}
+                                    {!isFriendActionLoading && profile.relationStatus === 'pending_outgoing' && t('pages.public_profile.cancel_request')}
+                                    {!isFriendActionLoading && profile.relationStatus === 'pending_incoming' && t('pages.public_profile.accept_request')}
+                                    {!isFriendActionLoading && profile.relationStatus === 'friend' && t('pages.public_profile.remove_friend')}
                                 </button>
                             </div>
                         )}
@@ -417,7 +422,7 @@ const PublicProfilePage = () => {
                             type="button"
                             className={profileStyles.statModalClose}
                             onClick={() => setActiveStat(null)}
-                            aria-label="Закрыть"
+                            aria-label={t('common.close')}
                         >
                             ×
                         </button>

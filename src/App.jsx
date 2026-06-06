@@ -10,6 +10,7 @@ import Footer from './components/Footer/Footer';
 import AchievementToast from './components/AchievementToast/AchievementToast';
 import CourseService from './services/CourseService';
 
+// Инициализирует клиентское приложение, сессию пользователя, тему и глобальные модальные сценарии.
 const App = observer(() => {
     const { t } = useTranslation();
     const { authStore, uiStore } = useStores();

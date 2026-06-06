@@ -5,6 +5,7 @@ import $api from '../../api/instance';
 import { useStores } from '../../stores/StoreContext';
 import styles from './DictionaryAssessmentPage.module.css';
 
+// Отрисовывает экран или компонент DictionaryAssessmentPage и связывает его с данными приложения.
 const DictionaryAssessmentPage = () => {
     const { t } = useTranslation();
     const { uiStore } = useStores();
@@ -28,7 +29,7 @@ const DictionaryAssessmentPage = () => {
                     questions: Array.isArray(data?.questions) ? data.questions : []
                 });
             } catch (e) {
-                const message = e?.response?.data?.message || 'Не удалось начать тест';
+                const message = e?.response?.data?.message || t('pages.dictionary.assessment.start_error');
                 if (String(message).includes('уже пройден')) {
                     uiStore.showModal({
                         title: t('pages.dictionary.modals.weekly_locked_title'),
@@ -54,10 +55,12 @@ const DictionaryAssessmentPage = () => {
     const isLast = step >= (session.questions.length - 1);
     const progressLabel = useMemo(() => `${Math.min(step + 1, session.questions.length)}/${session.questions.length || 20}`, [step, session.questions.length]);
 
+    // Обрабатывает событие интерфейса пользователя.
     const onSelect = (idx) => {
         setAnswers((prev) => ({ ...prev, [step]: idx }));
     };
 
+    // Обрабатывает событие интерфейса пользователя.
     const onNext = async () => {
         if (selectedOption === undefined || selectedOption === null) return;
         if (!isLast) {
@@ -76,14 +79,14 @@ const DictionaryAssessmentPage = () => {
             const { data } = await $api.post('/dictionary/weekly-assessment/submit', payload);
             setResult(data?.result || null);
         } catch (e) {
-            setError(e?.response?.data?.message || 'Не удалось завершить тест');
+            setError(e?.response?.data?.message || t('pages.dictionary.assessment.submit_error'));
         } finally {
             setSubmitting(false);
         }
     };
 
     if (loading) {
-        return <div className={styles.center}>Загрузка теста...</div>;
+        return <div className={styles.center}>{t('pages.dictionary.assessment.loading')}</div>;
     }
 
     if (error && !session.questions.length && !result) {
@@ -99,9 +102,9 @@ const DictionaryAssessmentPage = () => {
         return (
             <div className={styles.page}>
                 <div className={`${styles.card} ${styles.resultCard}`}>
-                    <h1>Тест завершен</h1>
-                    <p>Правильных ответов: <strong>{result.correctAnswers}/{result.totalQuestions}</strong></p>
-                    <p>Ваш уровень на неделю: <strong>{result.level}</strong></p>
+                    <h1>{t('pages.dictionary.assessment.done_title')}</h1>
+                    <p>{t('pages.dictionary.assessment.correct')} <strong>{result.correctAnswers}/{result.totalQuestions}</strong></p>
+                    <p>{t('pages.dictionary.assessment.weekly_level')} <strong>{result.level}</strong></p>
                     <button type="button" className={styles.actionBtn} onClick={() => navigate('/dictionary')}>{t('common.actions.return_to_dictionary')}</button>
                 </div>
             </div>
@@ -112,7 +115,7 @@ const DictionaryAssessmentPage = () => {
         <div className={styles.page}>
             <div className={styles.card}>
                 <div className={styles.topRow}>
-                    <h1>Тест по словарю</h1>
+                    <h1>{t('pages.dictionary.assessment.title')}</h1>
                     <span>{progressLabel}</span>
                 </div>
                 {error && <p className={styles.error}>{error}</p>}
